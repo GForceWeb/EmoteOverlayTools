@@ -22,6 +22,36 @@ body,
   position: absolute;
   background-size: 100% 100%;
 }
+
+.rising-element {
+  width: 5px;
+  height: 5px;
+  position: absolute;
+  background-size: 100% 100%;
+  opacity: 0.1;
+}
+
+.explosion-element {
+  width: 75px;
+  height: 75px;
+  position: absolute;
+  background-size: 100% 100%;
+}
+
+.firework-element {
+  width: 75px;
+  height: 75px;
+  position: absolute;
+  background-size: 100% 100%;
+}
+
+.volcano-element {
+  width: 75px;
+  height: 75px;
+  position: absolute;
+  background-size: 100% 100%;
+}
+
 .lurking-element {
   width: 400px;
   height: 400px;
