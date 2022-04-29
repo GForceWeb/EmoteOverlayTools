@@ -10,12 +10,9 @@ Inspiration to work on this came from the lack of Twitch Animated emote support 
 ## Installation
 
  - Ensure you have Streamer.Bot installed and running with the WebSocket server enabled (Servers/Clients -> WebSocket Server -> Start Server)
- - Download the repository from GitHub (Code -> Download Zip) and extract the content to your local machine.
- - Open the `index.html` file in your browser and copy its path
- ```
-    example: file:///C:/Users/gforce/OBS_Assets/EmoteOverlayTools/index.html
- ```
--  Append the options you wish to use to the end of the URL as parameters (start with a ? then use & to separate options)
+ - Assuming you're not doing anything custom with Streamer.Bot websockets, or planning to write your own customizations to the code you can use the GitHub hosted page as your browser source: [https://gforceweb.github.io/EmoteOverlayTools/](https://gforceweb.github.io/EmoteOverlayTools/)
+ - If you need a custom websocket server or want to make your own changes you can download the source code from GitHub (Code -> Download Zip) and use the local files as your browser source in OBS.
+ -  Append the options you wish to use to the end of the URL as parameters (start with a ? then use & to separate options)
 ```
     welcome
     lurk
@@ -27,13 +24,13 @@ Inspiration to work on this came from the lack of Twitch Animated emote support 
 ```
  - So if we wanted to turn on lurk and kappagen with a maximum number of emotes of 300 we'd end up with:
  ```
-    file:///C:/Users/gforce/OBS_Assets/EmoteOverlayTools/index.html?lurk&kappagen&maxemotes=300
+    https://gforceweb.github.io/EmoteOverlayTools/?lurk&kappagen&maxemotes=300
  ```
  - If you want to turn on all features you can just use the all option
  ```
-    file:///C:/Users/gforce/OBS_Assets/EmoteOverlayTools/index.html?all
+    https://gforceweb.github.io/EmoteOverlayTools/?all
  ```
- - With your full URL you can simply add this to OBS as a browser source
+ - Add your full URL as a browser source to OBS and away you go.
 
 # Features
 
