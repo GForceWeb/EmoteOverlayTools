@@ -78,62 +78,26 @@ function connectws() {
           }
         ));
       };
-    }
-    else if (!(welcomeonly === null) ) {
-      console.log("Only first words enabled");
-      ws.onopen = function () {
-        ws.send(JSON.stringify(
-          {
-            "request": "Subscribe",
-            "events": {
-              "Twitch": [
-                "FirstWord"
-              ],
-              "Raw": [
-                "Action"
-              ]
-            },
-            "id": "123"
-          }
-        ));
-      };
-    }
-    else {
-      //no first words / welcome support
 
-      ws.onopen = function () {
-        ws.send(JSON.stringify(
-          {
-            "request": "Subscribe",
-            "events": {
-              "Twitch": [
-                "ChatMessage"
-              ]
-              ,
-              "Raw": [
-                "Action"
-              ]
-            },
-            "id": "123"
-          }
-        ));
-      };
 
-    }
+
 
     ws.onmessage = function (event) {
       // grab message and parse JSON
       const msg = event.data;
       const wsdata = JSON.parse(msg);
 
-      //check for lurk command
+      console.log(wsdata);
 
+
+      //check for lurk command
+      if(lurk || all){
       if (typeof wsdata.event != "undefined") {
         if (typeof wsdata.event.type != "undefined") {
-          if (typeof wsdata.data.name != "undefined") {
-            if (wsdata.data.name == "VisualLurk") {
-
-              var username = wsdata.data.user.login;
+            if(wsdata.data.message.message) {
+              var lowermessage = wsdata.data.message.message.toLowerCase();
+              if (lowermessage.includes("!lurk")) {
+                var username = wsdata.data.message.username;
               console.log("starting xmlhttp");
               var xhttp = new XMLHttpRequest();
               console.log("created xmlhttp object");
@@ -144,24 +108,21 @@ function connectws() {
                   //save this to cache between sessions too.
                   var no_of_elements = 50;
 
-                  //visualLurk = createVisualLurk(xhttp.responseText);
-                  lurkInterval = setInterval(function() { createVisualLurk(xhttp.responseText); }, 5000);
-                  setTimeout(function() { clearInterval(lurkInterval); }, 15000);
+                    VisualLurk(xhttp.responseText, 3);
                 }
               };
               console.log(username);
               xhttp.open("GET", "https://decapi.me/twitch/avatar/" + username, true);
               xhttp.send();
-
-
-
             }
-
           }
         }
       }
+      }
+    
 
       // check for events to trigger
+
       // check for first words
 
       if (typeof wsdata.event != "undefined") {
