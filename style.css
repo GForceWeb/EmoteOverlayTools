@@ -58,3 +58,28 @@ body,
   position: absolute;
   background-size: 100%;
 }
+.rightwave-element {
+  width: 75px;
+  height: 75px;
+  position: absolute;
+  background-size: 100% 100%;
+}
+
+.carousel-element {
+  width: 75px;
+  height: 75px;
+  position: absolute;
+  background-size: 100% 100%;
+}
+.spiral-element {
+  width: 75px;
+  height: 75px;
+  position: absolute;
+  background-size: 100% 100%;
+}
+.bounce-element {
+  width: 75px;
+  height: 75px;
+  position: absolute;
+  background-size: 100% 100%;
+}
