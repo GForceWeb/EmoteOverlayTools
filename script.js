@@ -124,7 +124,7 @@ function connectws() {
       // check for events to trigger
 
       // check for first words
-
+      if(welcome || all){
       if (typeof wsdata.event != "undefined") {
         if (typeof wsdata.event.type != "undefined") {
           if (wsdata.event.type == "FirstWord") {
@@ -137,31 +137,11 @@ function connectws() {
             xhttp.onreadystatechange = function () {
               if (this.readyState == 4 && this.status == 200) {
                 // get display image for the user
-                console.log("got a response back");
-                //save this to cache between sessions too.
-                var no_of_elements = 50;
+                  console.log("got a user image response back");
 
-                var warp = document.getElementById("confetti-container"),
-                  innerWidth = window.innerWidth,
-                  innerHeight = window.innerHeight;
+                  avatar = [xhttp.responseText];
+                  emoteRain(avatar, defaultemotes, 50);
 
-                // Load into page
-                for (i = 0; i < no_of_elements; i++) {
-                  var Div = document.createElement('div');
-                  Div.id = divnumber;
-                  divnumber++;
-
-                  TweenLite.set(Div, { className: 'falling-element', x: Randomizer(0, innerWidth), y: Randomizer(-500, -450), z: Randomizer(-200, 200) });
-                  Div.style.background = 'url(' + xhttp.responseText + ')';
-                  Div.style.backgroundSize = '100% 100%';
-
-                  warp.appendChild(Div);
-
-                  // Run animation
-                  falling_animation(Div);
-
-                  setTimeout("removeelement(" + Div.id + ")", 15000);
-                }
               }
             };
             console.log(username);
@@ -171,7 +151,40 @@ function connectws() {
           }
         }
       }
+      }
 
+      //shoutout
+      if(welcome || all){
+        if (typeof wsdata.event != "undefined") {
+          if (typeof wsdata.event.type != "undefined") {
+            if(wsdata.data.message.message) {
+              var lowermessage = wsdata.data.message.message.toLowerCase();
+              if (lowermessage.includes("!so")) {
+                const regexp = /\@(.*)/;
+                const matches = lowermessage.match(regexp);
+                const sousername = matches[1];
+                console.log(sousername);
+                var xhttp = new XMLHttpRequest();
+                console.log("created xmlhttp object");
+                xhttp.onreadystatechange = function () {
+                  if (this.readyState == 4 && this.status == 200) {
+                    // get display image for the user
+                    console.log("got a user image response back");
+                    // console.log(xhttp.responseText);
+                    
+                    avatar = [xhttp.responseText];
+                    emoteRain(avatar, defaultemotes, 50);
+
+                  }
+                };
+                
+                xhttp.open("GET", "https://decapi.me/twitch/avatar/" + sousername, true);
+                xhttp.send();
+              }
+            }
+          }
+        }
+      }
 
       //if emotes exist in message check for command conditions and if not found, do standard rain
       if (typeof wsdata.event != "undefined") {
