@@ -1,8 +1,9 @@
 //update here to allow more than 10 emotes per chat message
 // This may be pretty intensive on the system under heavy load so please use with care.
-var maxemotes = 200;
+//var maxemotes = 2000;
 var divnumber = 0;
 var defaultemotes = 50;
+var maxemotes = 200;
 
 gsap.registerPlugin(MotionPathPlugin);
 
@@ -29,34 +30,38 @@ function connectws() {
       setTimeout(connectws, 10000);
     };
 
-    
-    const rain = urlParams.get('rain');
-    const welcome = urlParams.get('welcome');
-    const welcomeonly = urlParams.get('welcomeonly');
-    const all = urlParams.get('all');
-    const lurkonly = urlParams.get('lurkonly');
-    console.log(rain);
-    console.log(welcome);
-    console.log(all);
-    //check options - if we have first words:
-    if (!(lurkonly === null)) {
-      console.log("running code with lurk only support");
-      ws.onopen = function () {
-        ws.send(JSON.stringify(
-          {
-            "request": "Subscribe",
-            "events": {
-              "Raw": [
-                "Action"
-              ]
-            },
-            "id": "123"
-          }
-        ));
-      };
+    if(urlParams.get('maxemotes')){
+      maxemotes = urlParams.get('maxemotes');
+    } else {
+      maxemotes = 200;
     }
-    else if (!(welcome === null) || !(all === null)) {
-      console.log("First words Enabled");
+    // const maxemotes = urlParams.get('maxemotes');
+    let subonly = urlParams.get('subonly');
+    let emoterain = urlParams.get('emoterain');
+    let welcome = urlParams.get('welcome');
+    let all = urlParams.get('all');
+    let lurk = urlParams.get('lurk');
+    let kappagen = urlParams.get('kappagen');
+    
+    //let lurk = urlParams.get('lurk');
+    if(!(lurk === null )){lurk = true;} else {lurk = null;}
+    if(!(kappagen === null )){kappagen = true;} else {kappagen = null;}
+    if(!(all === null )){all = true;} else {all = null;}
+    if(!(subonly === null )){subonly = true;} else {subonly = null;}
+    if(!(emoterain === null )){emoterain = true;} else {emoterain = null;}
+    if(!(welcome === null )){welcome = true;} else {welcome = null;}
+
+
+    // console.log(subonly);
+    // console.log(emoterain);
+    // console.log(welcome);
+    // console.log(all);
+    // console.log(lurk);
+    // console.log(kappagen);
+    
+    
+
+    //Enable all Events
       ws.onopen = function () {
         ws.send(JSON.stringify(
           {
