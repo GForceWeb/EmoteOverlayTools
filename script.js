@@ -187,6 +187,7 @@ function connectws() {
       }
 
       //if emotes exist in message check for command conditions and if not found, do standard rain
+      if(emoterain || kappagen || all){
       if (typeof wsdata.event != "undefined") {
         if (typeof wsdata.event.type != "undefined") {
           if (typeof wsdata.data.message.emotes != "undefined") {
@@ -204,9 +205,12 @@ function connectws() {
               var sub = wsdata.data.message.subscriber;
 
               //TODO: add a way to specify custom interval in chat message
-              var eInterval;
-              var eCount = getNumberAtEnd(lowermessage);
-              if(eCount){
+                var eInterval = getCommandValue(lowermessage, "interval");
+                var eCount = getCommandValue(lowermessage, "count");
+
+                console.log(eCount);
+                console.log(eInterval);
+                if(eCount != null) {
                 if(eCount > maxemotes){
                   eCount = maxemotes;
                 }
@@ -214,75 +218,70 @@ function connectws() {
 
               console.log(sub);
               console.log(wsdata.data.message);
-              //console.log(sub);
 
-              if(lowermessage.includes("!er rain") && userrole > 1 && (!(rain === null) || !(all === null))) {
-                //set default values
-                if(!eCount){eCount = 50;}
-                if(!eInterval){eInterval = 50;}
-                emoteRain(images, eCount, eInterval);
-              }
-              if(lowermessage.includes("!er rise") && userrole > 1 && (!(rain === null) || !(all === null))) {
-                if(!eCount){eCount = 100;}
-                if(!eInterval){eInterval = 50;}
-                emoteRise(images, eCount, eInterval);
-              }
-              if(lowermessage.includes("!er explode") && userrole > 1 && (!(rain === null) || !(all === null))) {
-                if(!eCount){eCount = 100;}
-                if(!eInterval){eInterval = 20;}
-                emoteExplode(images, eCount, eInterval);
-              }
-              if(lowermessage.includes("!er firework") && userrole > 1 && (!(rain === null) || !(all === null))) {
-                if(!eCount){eCount = 100;}
-                if(!eInterval){eInterval = 20;}
-                emoteFirework(images, eCount, eInterval);
-              }
-              if(lowermessage.includes("!er volcano") && userrole > 1 && (!(rain === null) || !(all === null))) {
-                if(!eCount){eCount = 100;}
-                if(!eInterval){eInterval = 20;}
-                emoteVolcano(images, eCount, eInterval);
-              }
-              if(lowermessage.includes("!k ") && sub && (!(rain === null) || !(all === null))) {
-                if(!eCount){eCount = 100;}
-                if(!eInterval){eInterval = 20;}
+                //TestCommand: 
+                //emoteVolcano(['https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_2758558107d148c9b1e73c56cb2d9e06/default/dark/2.0', 'https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_dcaf0a56231d4443a91546b869b96a25/default/dark/2.0'], 100, 20);
 
-                randomAnimation = Math.round(Randomizer(1,5));
-                switch(randomAnimation)
-                {
+
+                var animations = [
+                  ['!er rain', 'emoteRain', 50, 50],
+                  ['!er rise', 'emoteRise', 100, 50],
+                  ['!er explode', 'emoteExplode', 100, 20],
+                  ['!er volcano', 'emoteVolcano', 100, 20],
+                  ['!er firework', 'emoteFirework', 100, 20],
+                  ['!er rightwave', 'emoteRightWave', 100, 20],
+                  ['!er carousel', 'emotecarousel', 100, 150],
+                  ['!er spiral', 'emoteSpiral', 100, 170],
+                ];
+
+                //Specific Animation Commands
+                if (emoterain || all){
+                  if (subonly & sub || subonly === null) {
+                    animations.forEach(function (animation) {
+                      if (lowermessage.includes(animation[0])) {
+                        if(!eCount){eCount = animation[2];}
+                        if(!eInterval){eInterval = animation[3]}
+
+                        window[animation[1]](images, eCount, eInterval);
+                        console.log("running " + animation[1] + " with " + eCount + " emote(s)" + " and interval " + eInterval);
+              }
+                    });
+              }
+              }
+
+                //Kappagen Animations
+                if (kappagen || all){
+                  if (subonly & sub || subonly === null) {
+                    if(lowermessage.includes("!k ")) {
+                      rAnimation = Math.round(Randomizer(0,animations.length));
+                      if(!eCount){eCount = animations[rAnimation][2];}
+                      if(!eInterval){eInterval = animations[rAnimation][3];}
+
+                      window[animations[rAnimation][1]](images, eCount, eInterval);
+                      console.log("running " + animations[rAnimation][1] + " with " + eCount + " emote(s)" + " and interval " + eInterval);
+              }
+              }
+                }
+
+                //Normal emotes animations
+                else {
+                  randomAnimation = Math.round(Randomizer(1,2));
+                    switch(randomAnimation) {
                     case 1:
-                    if(!eCount){eCount = 100;}
-                    if(!eInterval){eInterval = 20;}
-                    emoteVolcano(images, eCount, eInterval);
+                        emoteRain(images, emotecount);
                     break;
 
                     case 2:
-                    if(!eCount){eCount = 100;}
-                    if(!eInterval){eInterval = 20;}
-                    emoteFirework(images, eCount, eInterval);
+                        emoteBounce(images, emotecount);
                     break;
-
-                    case 3:
-                    if(!eCount){eCount = 100;}
-                    if(!eInterval){eInterval = 20;}
-                    emoteExplode(images, eCount, eInterval);
-                    break;
-
-                    case 4:
-                    if(!eCount){eCount = 100;}
-                    if(!eInterval){eInterval = 50;}
-                    emoteRise(images, eCount, eInterval);
-                    break;
-
-                    case 5:
-                    if(!eCount){eCount = 50;}
-                    if(!eInterval){eInterval = 50;}
-                    emoteRain(images, eCount, eInterval);
-                    break;
+                    }
                 }
-                
               }
-              else {
-                emoteRain(images, emotecount);
+            }
+          }
+        }
+                }
+              }
               }
             }
           }
