@@ -264,7 +264,6 @@ function connectws() {
                 }
 
                 //Normal emotes animations
-                else {
                   randomAnimation = Math.round(Randomizer(1,2));
                     switch(randomAnimation) {
                       case 1:
@@ -275,7 +274,7 @@ function connectws() {
                         emoteBounce(images, emotecount);
                         break;
                     }
-                }
+                
               }
             }
           }
