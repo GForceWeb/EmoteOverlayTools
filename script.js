@@ -230,6 +230,7 @@ function connectws() {
                   ['!er volcano', 'emoteVolcano', 100, 20],
                   ['!er firework', 'emoteFirework', 100, 20],
                   ['!er rightwave', 'emoteRightWave', 100, 20],
+                  ['!er leftwave', 'emoteLeftWave', 100, 20],
                   ['!er carousel', 'emotecarousel', 100, 150],
                   ['!er spiral', 'emoteSpiral', 100, 170],
                 ];
@@ -402,6 +403,17 @@ function emoteRightWave(images, count=100, interval=20) {
   }
 }
 
+function emoteLeftWave(images, count=100, interval=20) {
+  imgcount = images.length;
+
+  for (j = 0; j < count; j++) {
+    // split the count amounst the different emote images
+    imagenum = j % imgcount;
+    var createcommand = 'createLeftWave("' + images[imagenum] + '")';
+    setTimeout(createcommand, (j * interval));
+  }
+}
+
 function createRightWave(image){
   var Div = document.createElement('div');
   Div.id = divnumber;
@@ -418,9 +430,35 @@ function createRightWave(image){
   setTimeout("removeelement(" + Div.id + ")", 15000);
 }
 
+function createLeftWave(image){
+  var Div = document.createElement('div');
+  Div.id = divnumber;
+  divnumber++;
+
+  //create at random Y height at left edge of screen
+  gsap.set(Div, { className: 'rightwave-element', x: innerWidth + 100, y: Randomizer(100, innerHeight - 100), z: Randomizer(-200, 200), backgroundImage: 'url(' + image + ')' });
+
+  warp.appendChild(Div);
+
+  // Run animation
+  leftwave_animation(Div);
+  //Destroy element after X seconds so we don't eat up resources over time!
+  setTimeout("removeelement(" + Div.id + ")", 15000);
+}
+
 function rightwave_animation(element) {
   //Travel left to right
   gsap.to(element, { x: innerWidth + 100, duration: Randomizer(6, 11), ease: Sine.easeInOut});
+  //sway up and down a bit
+  gsap.to(element, { y: function() {
+    return Randomizer(-350, 350) + gsap.getProperty(element, "y");
+  }, duration: Randomizer(1, 2), ease: Sine.easeInOut, yoyo: true, repeat: -1});
+
+}
+
+function leftwave_animation(element) {
+  //Travel right to left
+  gsap.to(element, { x: -100, duration: Randomizer(6, 11), ease: Sine.easeInOut});
   //sway up and down a bit
   gsap.to(element, { y: function() {
     return Randomizer(-350, 350) + gsap.getProperty(element, "y");
