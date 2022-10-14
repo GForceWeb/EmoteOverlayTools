@@ -234,7 +234,7 @@ function connectws() {
                   ['!er carousel', 'emotecarousel', 100, 150],
                   ['!er spiral', 'emoteSpiral', 100, 170],
                   ['!er comets', 'emoteComets', 100, 50],
-                  ['!er dvd', 'emoteDVD', 1, 50],
+                  //['!er dvd', 'emoteDVD', 1, 50],
                 ];
 
                 //Specific Animation Commands

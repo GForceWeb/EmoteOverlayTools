@@ -83,3 +83,15 @@ body,
   position: absolute;
   background-size: 100% 100%;
 }
+.comet-element {
+  width: 75px;
+  height: 75px;
+  position: absolute;
+  background-size: 100% 100%;
+}
+.dvd-element {
+  width: 75px;
+  height: 75px;
+  position: absolute;
+  background-size: 100% 100%;
+}
