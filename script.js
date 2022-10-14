@@ -130,7 +130,7 @@ function connectws() {
             if (wsdata.event.type == "FirstWord") {
 
 
-              var username = wsdata.data.user.login;
+              var username = wsdata.data.user.name;
               console.log("starting xmlhttp");
               var xhttp = new XMLHttpRequest();
               console.log("created xmlhttp object");
@@ -233,6 +233,8 @@ function connectws() {
                   ['!er leftwave', 'emoteLeftWave', 100, 20],
                   ['!er carousel', 'emotecarousel', 100, 150],
                   ['!er spiral', 'emoteSpiral', 100, 170],
+                  ['!er comets', 'emoteComets', 100, 50],
+                  ['!er dvd', 'emoteDVD', 1, 50],
                 ];
 
                 //Specific Animation Commands
@@ -284,6 +286,157 @@ function connectws() {
     }
   }
 }
+
+function emoteDVD (images, count=1, interval=50) {
+  imgcount = images.length;
+
+  for (j = 0; j < count; j++) {
+    // split the count amounst the different emote images
+    imagenum = j % imgcount;
+    var createcommand = 'createEmoteDVD("' + images[imagenum] + '")';
+    setTimeout(createcommand, (j * interval));
+  }
+}
+
+function createEmoteDVD(image) {
+  var Div = document.createElement('div');
+  Div.id = divnumber;
+  divnumber++;
+
+  //create at random Y height at left edge of screen
+  gsap.set(Div, { className: 'dvd-element', x: Randomizer(0, innerWidth), y: Randomizer(0, innerHeight), z: Randomizer(-200, 200), backgroundImage: 'url(' + image + ')' });
+
+  warp.appendChild(Div);
+
+  // Run animation
+  dvd_animation(Div);
+  //Destroy element after X seconds so we don't eat up resources over time!
+  setTimeout("removeelement(" + Div.id + ")", 15000);
+}
+
+function dvd_animation(element) {
+  var DVDStartX = gsap.getProperty(element, "x");
+  var DVDStartY = gsap.getProperty(element, "y");
+  var DVDStartDirection = Randomizer(0,360);
+  var DVDFirstX = Randomizer(0, innerWidth);
+  var DVDFirstY = Randomizer(0, innerWidth);
+
+  var DVDFirstX = Math.sin(DVDStartDirection) * 2000;
+  var DVDFirstY = Math.cos(DVDStartDirection) * 2000;
+
+  console.log(DVDFirstX);
+  console.log(DVDFirstY);
+
+  //TopBox Intersection
+  intersection = intersect(0, 0, innerWidth, 0, DVDStartX, DVDStartY, DVDFirstX, DVDFirstY);
+  if(intersection){
+    console.log(intersection);
+    var DVDSecondX = intersection.x;
+    var DVDSecondY = intersection.y;
+  }
+  //LeftBox Intersection
+  intersection = intersect(0, 0, 0, innerHeight, DVDStartX, DVDStartY, DVDFirstX, DVDFirstY);
+  if(intersection){
+    console.log(intersection);
+    var DVDSecondX = intersection.x;
+    var DVDSecondY = intersection.y;
+  }
+  //BottomBox Intersection
+  intersection = intersect(0, innerHeight, innerWidth, innerHeight, DVDStartX, DVDStartY, DVDFirstX, DVDFirstY);
+  if(intersection){
+    console.log(intersection);
+    var DVDSecondX = intersection.x;
+    var DVDSecondY = intersection.y;
+  }
+  //RightBox Intersection
+  intersection = intersect(innerWidth, 0, innerWidth, innerHeight, DVDStartX, DVDStartY, DVDFirstX, DVDFirstY);
+  if(intersection){
+    console.log(intersection);
+    var DVDSecondX = intersection.x;
+    var DVDSecondY = intersection.y;
+  }
+
+  //console.log(intersection);
+
+  gsap.to(element, {duration: 3, x: DVDSecondX, y: DVDSecondY});
+
+}
+
+function intersect(x1, y1, x2, y2, x3, y3, x4, y4) {
+
+  // Check if none of the lines are of length 0
+  if ((x1 === x2 && y1 === y2) || (x3 === x4 && y3 === y4)) {
+    return false
+  }
+
+  denominator = ((y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1))
+
+  // Lines are parallel
+  if (denominator === 0) {
+    return false
+  }
+
+  let ua = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / denominator
+  let ub = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)) / denominator
+
+  // is the intersection along the segments
+  if (ua < 0 || ua > 1 || ub < 0 || ub > 1) {
+    return false
+  }
+
+  // Return a object with the x and y coordinates of the intersection
+  let x = x1 + ua * (x2 - x1)
+  let y = y1 + ua * (y2 - y1)
+
+  return {x, y}
+}
+
+function emoteComets(images, count=170, interval=50) {
+  imgcount = images.length;
+
+  for (j = 0; j < count; j++) {
+    // split the count amounst the different emote images
+    imagenum = j % imgcount;
+    var createcommand = 'createEmoteComets("' + images[imagenum] + '")';
+    setTimeout(createcommand, (j * interval));
+  }
+}
+
+function createEmoteComets(image) {
+  var Div = document.createElement('div');
+  Div.id = divnumber;
+  divnumber++;
+
+  //create at random Y height at left edge of screen
+  gsap.set(Div, { className: 'comet-element', x: Randomizer(-500, innerWidth + 500), y: Randomizer(-200, -75), z: Randomizer(-200, 200), backgroundImage: 'url(' + image + ')' });
+
+  warp.appendChild(Div);
+
+  // Run animation
+  comet_animation(Div);
+  //Destroy element after X seconds so we don't eat up resources over time!
+  setTimeout("removeelement(" + Div.id + ")", 15000);
+}
+
+function comet_animation(element) {
+  var cometDuration =  Randomizer(4,8);
+  var cometSize = Randomizer(25,100);
+  var cometX = gsap.getProperty(element, "x");
+  console.log(cometX);
+  if(cometX > 920){
+    cometX = cometX - Randomizer(1150,1500);
+  }
+  else if(cometX < 920){
+    cometX = cometX + Randomizer(1150,1500);
+  }
+  console.log(cometX);
+  gsap.to(element, {duration: cometDuration, x: cometX, ease: "sine.out" });
+  gsap.to(element, {duration: cometDuration, y: Randomizer(800, 1080), ease: "power3.in" });
+  gsap.to(element, {duration: cometDuration, width: cometSize, height: cometSize, ease: "sine.out" });
+  gsap.to(element, {duration: 1, opacity: 0, ease: "sine.inOut", delay: cometDuration });
+  gsap.to(element, {duration: 1, height: 0, ease: "power3.out", delay: cometDuration});
+}
+
 
 function emoteBounce(images, count=100, interval=20) {
   imgcount = images.length;
