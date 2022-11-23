@@ -537,70 +537,68 @@ function dvd_animation(element) {
 
   console.log(DVDFirstX);
   console.log(DVDFirstY);
+  
+  gsap.to(element, {
+    duration: 15,
+    x: Randomizer(4000, 8000) * randomSign(), 
+    y: Randomizer(4000, 8000) * randomSign(),    
+    modifiers: { x: modX, y: modY }
+  }); 
 
-  //TopBox Intersection
-  intersection = intersect(0, 0, innerWidth, 0, DVDStartX, DVDStartY, DVDFirstX, DVDFirstY);
-  if(intersection){
-    console.log(intersection);
-    var DVDSecondX = intersection.x;
-    var DVDSecondY = intersection.y;
-  }
-  //LeftBox Intersection
-  intersection = intersect(0, 0, 0, innerHeight, DVDStartX, DVDStartY, DVDFirstX, DVDFirstY);
-  if(intersection){
-    console.log(intersection);
-    var DVDSecondX = intersection.x;
-    var DVDSecondY = intersection.y;
-  }
-  //BottomBox Intersection
-  intersection = intersect(0, innerHeight, innerWidth, innerHeight, DVDStartX, DVDStartY, DVDFirstX, DVDFirstY);
-  if(intersection){
-    console.log(intersection);
-    var DVDSecondX = intersection.x;
-    var DVDSecondY = intersection.y;
-  }
-  //RightBox Intersection
-  intersection = intersect(innerWidth, 0, innerWidth, innerHeight, DVDStartX, DVDStartY, DVDFirstX, DVDFirstY);
-  if(intersection){
-    console.log(intersection);
-    var DVDSecondX = intersection.x;
-    var DVDSecondY = intersection.y;
+  gsap.to(element, {duration: 1, opacity: 0, delay: 14});
+
   }
 
-  //console.log(intersection);
 
-  gsap.to(element, {duration: 3, x: DVDSecondX, y: DVDSecondY});
+function modX(x) {
+
+  var minX = 0;
+  var size = 75;
+  var maxX = innerWidth  - size;
+  x = parseInt(x);
+    
+  if (x > maxX || x < minX) {
+    
+    var delta = ((x % maxX) + maxX) % maxX;
+    var start = x > maxX ? 1 : 0;
+    var ratio = x / maxX + start;
+    var even  = !(ratio & 1);
+
+    x = even ? maxX - delta : minX + delta;
 
 }
 
-function intersect(x1, y1, x2, y2, x3, y3, x4, y4) {
+  // console.log(x);
 
-  // Check if none of the lines are of length 0
-  if ((x1 === x2 && y1 === y2) || (x3 === x4 && y3 === y4)) {
-    return false
+  return x + 'px';
   }
 
-  denominator = ((y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1))
+function modY(y) {
+    
+  var minY = 0;
+  var size = 75;
+  var maxY = innerHeight - size;
+  y = parseInt(y);
 
-  // Lines are parallel
-  if (denominator === 0) {
-    return false
+  if (y > maxY || y < minY) {
+    
+    var delta = ((y % maxY) + maxY) % maxY;
+    var start = y > maxY ? 1 : 0;
+    var ratio = y / maxY + start;
+    var even  = !(ratio & 1);
+
+    y = even ? maxY - delta : minY + delta;
   }
 
-  let ua = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / denominator
-  let ub = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)) / denominator
+  // console.log(y);
 
-  // is the intersection along the segments
-  if (ua < 0 || ua > 1 || ub < 0 || ub > 1) {
-    return false
+  return y + 'px';
   }
 
-  // Return a object with the x and y coordinates of the intersection
-  let x = x1 + ua * (x2 - x1)
-  let y = y1 + ua * (y2 - y1)
-
-  return {x, y}
+function randomSign() {
+  return Math.random() < 0.5 ? -1 : 1;
 }
+
 
 function emoteComets(images, count=170, interval=50) {
   imgcount = images.length;
