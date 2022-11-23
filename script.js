@@ -5,6 +5,9 @@ var divnumber = 0;
 var defaultemotes = 50;
 var maxemotes = 200;
 
+//Checks for SB Actions
+var BotChat;
+
 gsap.registerPlugin(MotionPathPlugin);
 
 var warp = document.getElementById("confetti-container"),
@@ -69,6 +72,14 @@ function connectws() {
           "id": "123"
         }
       ));
+
+      ws.send(JSON.stringify(
+        {
+          "request": "GetActions",
+          "id": "ActionList"
+        }
+      ));
+    
     };
   
 
@@ -82,10 +93,22 @@ function connectws() {
       console.log(wsdata);
 
 
+      //SetupChecks
+      if(typeof wsdata.actions != "undefined" && typeof wsdata.id != "undefined") {
+        if(wsdata.id == "ActionList") {
+          let ChatAction = wsdata.actions.filter(function (SBAction) { return SBAction.name == "ERTwitchBotChat" });
+          console.log(ChatAction);
+          if(ChatAction.length >= 1){
+            console.log("True");
+            Botchat = true;
+          }
+        }
+      }
       //check for lurk command
       if(lurk || all){
         if (typeof wsdata.event != "undefined") {
           if (typeof wsdata.event.type != "undefined") {
+            if (wsdata.event.type == "ChatMessage") {
             if(wsdata.data.message.message) {
               var lowermessage = wsdata.data.message.message.toLowerCase();
               if (lowermessage.includes("!lurk")) {
@@ -110,6 +133,7 @@ function connectws() {
             }
           }
         }
+      }
       }
     
 
@@ -149,9 +173,13 @@ function connectws() {
       if(welcome || all){
         if (typeof wsdata.event != "undefined") {
           if (typeof wsdata.event.type != "undefined") {
+            if (wsdata.event.type == "ChatMessage") {
             if(wsdata.data.message.message) {
+                if (wsdata.event.type == "ChatMessage") {
               var lowermessage = wsdata.data.message.message.toLowerCase();
               if (lowermessage.includes("!so")) {
+                    
+                    // ALLOW - And other word symbols
                 const regexp = /\@(.*)/;
                 const matches = lowermessage.match(regexp);
                 const sousername = matches[1];
@@ -172,6 +200,8 @@ function connectws() {
                 
                 xhttp.open("GET", "https://decapi.me/twitch/avatar/" + sousername, true);
                 xhttp.send();
+                  }
+                }
               }
             }
           }
@@ -182,7 +212,7 @@ function connectws() {
       if(emoterain || kappagen || all){
         if (typeof wsdata.event != "undefined") {
           if (typeof wsdata.event.type != "undefined") {
-            if (typeof wsdata.data.message.emotes != "undefined") {
+            if (wsdata.event.type == "ChatMessage") {
               if (typeof wsdata.data.message.emotes != "undefined") {
 
                 emotecount = wsdata.data.message.emotes.length;
@@ -234,7 +264,7 @@ function connectws() {
                 if (emoterain || all){
                   if (subonly & sub || subonly === null) {
                     animations.forEach(function (animation) {
-                      if (lowermessage.includes(animation[0])) {
+                      if (lowermessage.startsWith(animation[0])) {
                         if(!eCount){eCount = animation[2];}
                         if(!eInterval){eInterval = animation[3]}
 
