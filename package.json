@@ -1,0 +1,14 @@
+{
+    "type": "module",
+    "start": "nodemon",
+    "devDependencies": {
+        "copy-webpack-plugin": "^11.0.0",
+        "cypress": "^13.6.0",
+        "cypress-wait-until": "^2.0.1",
+        "webpack": "^5.75.0",
+        "webpack-cli": "^5.0.1"
+    },
+    "scripts": {
+        "cypress:open": "cypress open"
+    }
+}
