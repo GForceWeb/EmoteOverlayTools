@@ -2309,7 +2309,7 @@ const { globalVars: choon_globalVars, globalConst: choon_globalConst} = config;
 //globalConst.warp
 //globalVarsdivnumber
 
-function choon_createAvatarChoon(image) {
+function createAvatarChoon(image) {
     var Div = document.createElement('div');
     Div.id = choon_globalVars.divnumber;
     choon_globalVars.divnumber++;
@@ -2821,7 +2821,7 @@ const animations_hypetrainfinish = hypetrainfinish;
 const animations_hypetrainprogression = hypetrain_hypetrainprogression;
 const animations_hypetrainlevelup = hypetrainlevelup;
 const animations_createAvatarCheers = createAvatarCheers;
-const animations_createAvatarChoon = choon_createAvatarChoon;
+const animations_createAvatarChoon = createAvatarChoon;
 const animations_emoteInvaders = emoteInvaders;
 const animations_incomingRaid = incomingRaid;
 ;// CONCATENATED MODULE: ./src/handlers.js
@@ -2949,7 +2949,7 @@ function emoteMessageHandler(wsdata){
   ['!er spiral', 'emoteSpiral', 100, 170],
   ['!er comets', 'emoteComets', 100, 50],
   ['!er dvd', 'emoteDVD', 8, 50],
-  ['!er text', 'emoteText', 8, 25],
+  ['!er text', 'emoteText', 'HYPE', 25],
   //['!er cube', 'emoteCube', 8, 50],
   ];
 
@@ -3012,12 +3012,13 @@ function emoteMessageHandler(wsdata){
   }
 
   if(lowermessage.includes("!k ")) {
-      rAnimation = Math.round(src_helpers.Randomizer(0,animations.length));
-      if(!eCount){eCount = animations[rAnimation][2];}
-      if(!eInterval){eInterval = animations[rAnimation][3];}
+      let rAnimation = Math.round(src_helpers.Randomizer(0,animationMap.length));
+      if(!eCount){eCount = animationMap[rAnimation][2];}
+      if(!eInterval){eInterval = animationMap[rAnimation][3];}
 
-      window[animations[rAnimation][1]](images, eCount, eInterval);
-      console.log("running " + animations[rAnimation][1] + " with " + eCount + " emote(s)" + " and interval " + eInterval);
+      animations.runAnimation(animationMap[rAnimation][1],images, eCount, eInterval);
+      // window[animationMap[rAnimation][1]](images, eCount, eInterval);
+      console.log("running " + animationMap[rAnimation][1] + " with " + eCount + " emote(s)" + " and interval " + eInterval);
   }
 
 }
@@ -3086,7 +3087,7 @@ xhttp.onreadystatechange = function () {
     
     let avatar = [xhttp.responseText];
     //Disabled While Live
-    createAvatarChoon(avatar);
+    animations.runAnimation('createAvatarChoon', avatar);
 
     }
 };
