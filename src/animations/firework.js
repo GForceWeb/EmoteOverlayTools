@@ -65,12 +65,12 @@ function createFireworkExplode(image, explodeX, explodeY, travelTime) {
 }
 
 // Explosion Animation
-export function firework_travel_animation(element, targetX, targety, duration=5) {
+function firework_travel_animation(element, targetX, targety, duration=5) {
     gsap.to(element, { x: targetX, y: targety, ease: Sine.easeOut, duration: duration });
 }
     
 // Explosion Animation
-export function firework_explode_animation(element, delay=5) {
+function firework_explode_animation(element, delay=5) {
     //Fire off in a random direction
     var angle = Math.random()*Math.PI*2;
     let animatex = Math.cos(angle)*innerWidth*1.5;

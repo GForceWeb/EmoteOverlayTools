@@ -1,6 +1,7 @@
 import websocketFunctions from './websocket.js';
 import Variables from './config.js';
-import * as animations from './animations.js';
+//import * as animations from './animations.js';
+import animations from './animations.js';
 
 const { globalVars, globalConst} = Variables;
 
@@ -16,7 +17,6 @@ function init() {
     gsap.registerPlugin(MotionPathPlugin);
     connectws();
 
-    //setTimeout(animations.emoteFirework(["https://static-cdn.jtvnw.net/emoticons/v2/425618/default/dark/2.0"], 200, 20));
     window.animations = animations;
 }
 

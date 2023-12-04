@@ -35,35 +35,156 @@
 /************************************************************************/
 var __webpack_exports__ = {};
 
-// NAMESPACE OBJECT: ./src/animations.js
-var animations_namespaceObject = {};
-__webpack_require__.r(animations_namespaceObject);
-__webpack_require__.d(animations_namespaceObject, {
-  "VisualLurk": () => (animations_VisualLurk),
-  "createAvatarCheers": () => (animations_createAvatarCheers),
-  "createAvatarChoon": () => (animations_createAvatarChoon),
-  "createCoins": () => (animations_createCoins),
-  "default": () => (animations),
-  "emoteBounce": () => (animations_emoteBounce),
-  "emoteCarousel": () => (animations_emoteCarousel),
-  "emoteComets": () => (animations_emoteComets),
-  "emoteCube": () => (animations_emoteCube),
-  "emoteDVD": () => (animations_emoteDVD),
-  "emoteExplode": () => (animations_emoteExplode),
-  "emoteFirework": () => (animations_emoteFirework),
-  "emoteInvaders": () => (animations_emoteInvaders),
-  "emoteLeftWave": () => (animations_emoteLeftWave),
-  "emoteRain": () => (animations_emoteRain),
-  "emoteRightWave": () => (animations_emoteRightWave),
-  "emoteRise": () => (animations_emoteRise),
-  "emoteSpiral": () => (animations_emoteSpiral),
-  "emoteText": () => (animations_emoteText),
-  "emoteVolcano": () => (animations_emoteVolcano),
-  "hypetrainfinish": () => (animations_hypetrainfinish),
-  "hypetrainlevelup": () => (animations_hypetrainlevelup),
-  "hypetrainprogression": () => (animations_hypetrainprogression),
-  "hypetrainstart": () => (animations_hypetrainstart),
-  "incomingRaid": () => (animations_incomingRaid)
+// NAMESPACE OBJECT: ./src/animations/firework.js
+var firework_namespaceObject = {};
+__webpack_require__.r(firework_namespaceObject);
+__webpack_require__.d(firework_namespaceObject, {
+  "emoteFirework": () => (emoteFirework)
+});
+
+// NAMESPACE OBJECT: ./src/animations/rain.js
+var rain_namespaceObject = {};
+__webpack_require__.r(rain_namespaceObject);
+__webpack_require__.d(rain_namespaceObject, {
+  "emoteRain": () => (rain_emoteRain)
+});
+
+// NAMESPACE OBJECT: ./src/animations/explode.js
+var explode_namespaceObject = {};
+__webpack_require__.r(explode_namespaceObject);
+__webpack_require__.d(explode_namespaceObject, {
+  "emoteExplode": () => (emoteExplode)
+});
+
+// NAMESPACE OBJECT: ./src/animations/rise.js
+var rise_namespaceObject = {};
+__webpack_require__.r(rise_namespaceObject);
+__webpack_require__.d(rise_namespaceObject, {
+  "emoteRise": () => (emoteRise)
+});
+
+// NAMESPACE OBJECT: ./src/animations/lurking.js
+var lurking_namespaceObject = {};
+__webpack_require__.r(lurking_namespaceObject);
+__webpack_require__.d(lurking_namespaceObject, {
+  "VisualLurk": () => (lurking_VisualLurk)
+});
+
+// NAMESPACE OBJECT: ./src/animations/comets.js
+var comets_namespaceObject = {};
+__webpack_require__.r(comets_namespaceObject);
+__webpack_require__.d(comets_namespaceObject, {
+  "emoteComets": () => (emoteComets)
+});
+
+// NAMESPACE OBJECT: ./src/animations/bounce.js
+var bounce_namespaceObject = {};
+__webpack_require__.r(bounce_namespaceObject);
+__webpack_require__.d(bounce_namespaceObject, {
+  "emoteBounce": () => (emoteBounce)
+});
+
+// NAMESPACE OBJECT: ./src/animations/spiral.js
+var spiral_namespaceObject = {};
+__webpack_require__.r(spiral_namespaceObject);
+__webpack_require__.d(spiral_namespaceObject, {
+  "emoteSpiral": () => (emoteSpiral)
+});
+
+// NAMESPACE OBJECT: ./src/animations/waves.js
+var waves_namespaceObject = {};
+__webpack_require__.r(waves_namespaceObject);
+__webpack_require__.d(waves_namespaceObject, {
+  "emoteLeftWave": () => (emoteLeftWave),
+  "emoteRightWave": () => (emoteRightWave)
+});
+
+// NAMESPACE OBJECT: ./src/animations/carousel.js
+var carousel_namespaceObject = {};
+__webpack_require__.r(carousel_namespaceObject);
+__webpack_require__.d(carousel_namespaceObject, {
+  "emoteCarousel": () => (emoteCarousel)
+});
+
+// NAMESPACE OBJECT: ./src/animations/volcano.js
+var volcano_namespaceObject = {};
+__webpack_require__.r(volcano_namespaceObject);
+__webpack_require__.d(volcano_namespaceObject, {
+  "emoteVolcano": () => (emoteVolcano)
+});
+
+// NAMESPACE OBJECT: ./src/animations/text.js
+var text_namespaceObject = {};
+__webpack_require__.r(text_namespaceObject);
+__webpack_require__.d(text_namespaceObject, {
+  "emoteText": () => (emoteText)
+});
+
+// NAMESPACE OBJECT: ./src/animations/dvd.js
+var dvd_namespaceObject = {};
+__webpack_require__.r(dvd_namespaceObject);
+__webpack_require__.d(dvd_namespaceObject, {
+  "emoteDVD": () => (emoteDVD)
+});
+
+// NAMESPACE OBJECT: ./src/animations/coinflip.js
+var coinflip_namespaceObject = {};
+__webpack_require__.r(coinflip_namespaceObject);
+__webpack_require__.d(coinflip_namespaceObject, {
+  "createCoins": () => (createCoins)
+});
+
+// NAMESPACE OBJECT: ./src/animations/cube.js
+var cube_namespaceObject = {};
+__webpack_require__.r(cube_namespaceObject);
+__webpack_require__.d(cube_namespaceObject, {
+  "emoteCube": () => (emoteCube)
+});
+
+// NAMESPACE OBJECT: ./src/animations/hypetrain.js
+var hypetrain_namespaceObject = {};
+__webpack_require__.r(hypetrain_namespaceObject);
+__webpack_require__.d(hypetrain_namespaceObject, {
+  "hypetrainfinish": () => (hypetrainfinish),
+  "hypetrainlevelup": () => (hypetrainlevelup),
+  "hypetrainprogression": () => (hypetrain_hypetrainprogression),
+  "hypetrainstart": () => (hypetrainstart)
+});
+
+// NAMESPACE OBJECT: ./src/animations/choon.js
+var choon_namespaceObject = {};
+__webpack_require__.r(choon_namespaceObject);
+__webpack_require__.d(choon_namespaceObject, {
+  "createAvatarChoon": () => (createAvatarChoon)
+});
+
+// NAMESPACE OBJECT: ./src/animations/cheers.js
+var cheers_namespaceObject = {};
+__webpack_require__.r(cheers_namespaceObject);
+__webpack_require__.d(cheers_namespaceObject, {
+  "create": () => (create)
+});
+
+// NAMESPACE OBJECT: ./src/animations/invaders.js
+var invaders_namespaceObject = {};
+__webpack_require__.r(invaders_namespaceObject);
+__webpack_require__.d(invaders_namespaceObject, {
+  "emoteInvaders": () => (emoteInvaders)
+});
+
+// NAMESPACE OBJECT: ./src/animations/raiders.js
+var raiders_namespaceObject = {};
+__webpack_require__.r(raiders_namespaceObject);
+__webpack_require__.d(raiders_namespaceObject, {
+  "createRaider": () => (createRaider),
+  "incomingRaid": () => (incomingRaid)
+});
+
+// NAMESPACE OBJECT: ./src/animations/fade.js
+var fade_namespaceObject = {};
+__webpack_require__.r(fade_namespaceObject);
+__webpack_require__.d(fade_namespaceObject, {
+  "create": () => (fade_create)
 });
 
 ;// CONCATENATED MODULE: ./src/config.js
@@ -201,6 +322,27 @@ function countvalues(str) {
     return str.match(/\s[0-9]+/g);
 }
 
+let lastExecutionTime = 0;
+
+function executeWithInterval(func, interval) {
+    
+    return function (...args) {
+        const currentTime = Date.now();
+
+        if (currentTime - lastExecutionTime >= interval) {
+        // Sufficient time has passed, execute the function
+        func(...args);
+        lastExecutionTime = currentTime;
+        } else {
+        // Not enough time has passed, wait for the remaining time
+        setTimeout(() => {
+            func(...args);
+            lastExecutionTime = Date.now();
+        }, interval - (currentTime - lastExecutionTime));
+        }
+    };
+}
+
 async function getTwitchAvatar(user, id=false){
 
 
@@ -230,7 +372,6 @@ async function getTwitchAvatar(user, id=false){
 
     return avatar;
 }
-
 
 function makeRequest(url) {
     return new Promise(function(resolve, reject) {
@@ -299,7 +440,7 @@ function removeelement(div) {
     document.getElementById(div).remove();
 }
 
-/* harmony default export */ const src_helpers = ({
+/* harmony default export */ const helpers = ({
     delay: helpers_delay,
     randomSign,
     removeelement,
@@ -307,6 +448,7 @@ function removeelement(div) {
     Randomizer: helpers_Randomizer,
     TopOrBottom,
     getTwitchAvatar,
+    executeWithInterval,
 });
 ;// CONCATENATED MODULE: ./src/animations/firework.js
 
@@ -321,9 +463,9 @@ function emoteFirework(images, count=100, interval=1) {
     //separate firework for each image
     for (let i = 0; i < imgcount; i++) {
     
-        let explodeX = src_helpers.Randomizer(200, innerWidth - 200);
-        let explodeY = src_helpers.Randomizer(200, innerHeight - 200);
-        let travelTime = src_helpers.Randomizer(2, 5);
+        let explodeX = helpers.Randomizer(200, innerWidth - 200);
+        let explodeY = helpers.Randomizer(200, innerHeight - 200);
+        let travelTime = helpers.Randomizer(2, 5);
 
         setTimeout(() => {
             createFireworkTravel(images[i], explodeX, explodeY, travelTime);
@@ -343,7 +485,7 @@ function createFireworkTravel(image, explodeX, explodeY, travelTime) {
     Div.id = firework_globalVars.divnumber;
     firework_globalVars.divnumber++;
 
-    gsap.set(Div, { className: 'firework-element', x: innerWidth/2, y: innerHeight, z: src_helpers.Randomizer(-200, 200), backgroundImage: 'url(' + image + ')' });
+    gsap.set(Div, { className: 'firework-element', x: innerWidth/2, y: innerHeight, z: helpers.Randomizer(-200, 200), backgroundImage: 'url(' + image + ')' });
 
     firework_globalConst.warp.appendChild(Div);
 
@@ -351,7 +493,7 @@ function createFireworkTravel(image, explodeX, explodeY, travelTime) {
     firework_travel_animation(Div, explodeX, explodeY, travelTime);
     //Destroy element after X seconds so we don't eat up resources over time!
     setTimeout(() => {
-        src_helpers.removeelement(Div.id);
+        helpers.removeelement(Div.id);
       }, 5000);
 
 }
@@ -362,7 +504,7 @@ function createFireworkExplode(image, explodeX, explodeY, travelTime) {
     Div.id = firework_globalVars.divnumber;
     firework_globalVars.divnumber++;
 
-    gsap.set(Div, { className: 'firework-element', x: explodeX, y: explodeY, z: src_helpers.Randomizer(-200, 200), backgroundImage: 'url(' + image + ')', opacity: 0});
+    gsap.set(Div, { className: 'firework-element', x: explodeX, y: explodeY, z: helpers.Randomizer(-200, 200), backgroundImage: 'url(' + image + ')', opacity: 0});
 
     firework_globalConst.warp.appendChild(Div);
 
@@ -370,7 +512,7 @@ function createFireworkExplode(image, explodeX, explodeY, travelTime) {
     firework_explode_animation(Div, travelTime);
     //Destroy element after X seconds so we don't eat up resources over time!
     setTimeout(() => {
-        src_helpers.removeelement(Div.id);
+        helpers.removeelement(Div.id);
       }, 15000);
 
 }
@@ -388,8 +530,8 @@ function firework_explode_animation(element, delay=5) {
     let animatey = Math.sin(angle)*innerHeight*1.5;
 
     gsap.set(element, { opacity: 1, delay: delay});
-    gsap.to(element, src_helpers.Randomizer(5, 10), { x: animatex, y: animatey, ease: Sine.easeOut, delay: delay });
-    gsap.to(element, src_helpers.Randomizer(5, 10), { opacity: 0, ease: Sine.easeIn, delay: delay });
+    gsap.to(element, helpers.Randomizer(5, 10), { x: animatex, y: animatey, ease: Sine.easeOut, delay: delay });
+    gsap.to(element, helpers.Randomizer(5, 10), { opacity: 0, ease: Sine.easeIn, delay: delay });
 }
 ;// CONCATENATED MODULE: ./src/animations/rain.js
 
@@ -417,7 +559,7 @@ function createEmoteRain(image) {
     Div.id = rain_globalVars.divnumber;
     rain_globalVars.divnumber++;
 
-    gsap.set(Div, { className: 'falling-element', x: src_helpers.Randomizer(0, innerWidth), y: src_helpers.Randomizer(-500, -450), z: src_helpers.Randomizer(-200, 200), backgroundImage: 'url(' + image + ')' });
+    gsap.set(Div, { className: 'falling-element', x: helpers.Randomizer(0, innerWidth), y: helpers.Randomizer(-500, -450), z: helpers.Randomizer(-200, 200), backgroundImage: 'url(' + image + ')' });
 
     rain_globalConst.warp.appendChild(Div);
 
@@ -425,7 +567,7 @@ function createEmoteRain(image) {
     falling_animation(Div);
     //Destroy element after X seconds so we don't eat up resources over time!
     setTimeout(() => {
-        src_helpers.removeelement(Div.id);
+        helpers.removeelement(Div.id);
       }, 15000);
 }
 
@@ -435,9 +577,9 @@ function falling_animation(element) {
     //TweenMax.to(e, Randomizer(4, 8), {x:'+=100',rotationZ:Randomizer(0, 180), repeat:-1, yoyo:true, ease:Sine.easeInOut});
     //TweenMax.to(e,Randomizer(2, 8), {rotationX:Randomizer(0,360),rotationY:Randomizer(0,360),repeat:-1,yoyo:true,ease:Sine.easeInOut,delay:-5});
 
-    TweenMax.to(element, src_helpers.Randomizer(6, 16), { y: innerHeight + 1400, ease: Linear.easeNone, repeat: 0, delay: -1 });
-    TweenMax.to(element, src_helpers.Randomizer(4, 8), { x: '+=100', rotationZ: src_helpers.Randomizer(0, 180), repeat: 4, yoyo: true, ease: Sine.easeInOut });
-    TweenMax.to(element, src_helpers.Randomizer(2, 8), { rotationX: src_helpers.Randomizer(0, 360), rotationY: src_helpers.Randomizer(0, 360), repeat: 8, yoyo: true, ease: Sine.easeInOut, delay: -5 });
+    TweenMax.to(element, helpers.Randomizer(6, 16), { y: innerHeight + 1400, ease: Linear.easeNone, repeat: 0, delay: -1 });
+    TweenMax.to(element, helpers.Randomizer(4, 8), { x: '+=100', rotationZ: helpers.Randomizer(0, 180), repeat: 4, yoyo: true, ease: Sine.easeInOut });
+    TweenMax.to(element, helpers.Randomizer(2, 8), { rotationX: helpers.Randomizer(0, 360), rotationY: helpers.Randomizer(0, 360), repeat: 8, yoyo: true, ease: Sine.easeInOut, delay: -5 });
 
 }
 ;// CONCATENATED MODULE: ./src/animations/explode.js
@@ -447,8 +589,8 @@ const { globalVars: explode_globalVars, globalConst: explode_globalConst} = conf
 
 function emoteExplode(images, count=100, interval=10) {
     
-    let explodeX = src_helpers.Randomizer(200, innerWidth - 200);
-    let explodeY = src_helpers.Randomizer(200, innerHeight - 200);
+    let explodeX = helpers.Randomizer(200, innerWidth - 200);
+    let explodeY = helpers.Randomizer(200, innerHeight - 200);
 
     let imgcount = images.length;
 
@@ -466,7 +608,7 @@ function createEmoteExplode(image, explodeX, explodeY) {
     Div.id = explode_globalVars.divnumber;
     explode_globalVars.divnumber++;
 
-    gsap.set(Div, { className: 'explosion-element', x: explodeX, y: explodeY, z: src_helpers.Randomizer(-200, 200), backgroundImage: 'url(' + image + ')' });
+    gsap.set(Div, { className: 'explosion-element', x: explodeX, y: explodeY, z: helpers.Randomizer(-200, 200), backgroundImage: 'url(' + image + ')' });
 
     explode_globalConst.warp.appendChild(Div);
 
@@ -474,7 +616,7 @@ function createEmoteExplode(image, explodeX, explodeY) {
     explosion_animation(Div);
     //Destroy element after X seconds so we don't eat up resources over time!
     setTimeout(() => {
-        src_helpers.removeelement(Div.id);
+        helpers.removeelement(Div.id);
       }, 15000);
 }
 
@@ -485,7 +627,7 @@ function explosion_animation(element) {
     let animatex = Math.cos(angle)*innerWidth*1.5;
     let animatey = Math.sin(angle)*innerHeight*1.5;
 
-    gsap.to(element, src_helpers.Randomizer(5, 10), { x: animatex, y: animatey, ease: Sine.easeOut });
+    gsap.to(element, helpers.Randomizer(5, 10), { x: animatex, y: animatey, ease: Sine.easeOut });
 }
     
 
@@ -514,7 +656,7 @@ function createEmoteRise(image) {
     Div.id = rise_globalVars.divnumber;
     rise_globalVars.divnumber++;
 
-    gsap.set(Div, { className: 'rising-element', x: src_helpers.Randomizer(0, innerWidth), y: innerHeight - 75, z: src_helpers.Randomizer(-200, 200), backgroundImage: 'url(' + image + ')' });
+    gsap.set(Div, { className: 'rising-element', x: helpers.Randomizer(0, innerWidth), y: innerHeight - 75, z: helpers.Randomizer(-200, 200), backgroundImage: 'url(' + image + ')' });
 
     rise_globalConst.warp.appendChild(Div);
 
@@ -522,7 +664,7 @@ function createEmoteRise(image) {
     rising_animation(Div);
     //Destroy element after 8 seconds so we don't eat up resources over time!
     setTimeout(() => {
-        src_helpers.removeelement(Div.id);
+        helpers.removeelement(Div.id);
     }, 15000);
 }
 
@@ -534,11 +676,11 @@ function rising_animation(element) {
     //Fade In
     TweenMax.to(element, 3, { opacity: 1, width: "75px", height: "75px", ease: Linear.easeNone, repeat: 0, delay: -1 });
     //Vertical Movement
-    TweenMax.to(element, src_helpers.Randomizer(10, 20), { y: -100, x: function() {
-    return src_helpers.Randomizer(-250, 250) + gsap.getProperty(element, "x");
+    TweenMax.to(element, helpers.Randomizer(10, 20), { y: -100, x: function() {
+    return helpers.Randomizer(-250, 250) + gsap.getProperty(element, "x");
     }, ease: Linear.easeNone, repeat: 0, delay: -1 });
     //Fade Out
-    TweenMax.to(element, 4, { opacity: 0, ease: Linear.easeNone, repeat: 0, delay: src_helpers.Randomizer(9, 11) });
+    TweenMax.to(element, 4, { opacity: 0, ease: Linear.easeNone, repeat: 0, delay: helpers.Randomizer(9, 11) });
 }
 ;// CONCATENATED MODULE: ./src/animations/lurking.js
 
@@ -605,30 +747,30 @@ function createVisualLurk(image) {
     switch (random) {
     case 1:
         // left - TweenLite.set(Div, { className: 'lurking-element', x: -600, y: helpers.Randomizer(0, innerHeight-600 ), z:0 });
-        TweenLite.set(Div, { className: 'lurking-element', x: -400, y: src_helpers.Randomizer(0, innerHeight-400 ), z:0 });
+        TweenLite.set(Div, { className: 'lurking-element', x: -400, y: helpers.Randomizer(0, innerHeight-400 ), z:0 });
         lurking_animation_left(Div);                        
         break;
     case 2:
         // right
-        TweenLite.set(Div, { className: 'lurking-element', x: innerWidth, y: src_helpers.Randomizer(0, innerHeight-400 ), z:0  });
+        TweenLite.set(Div, { className: 'lurking-element', x: innerWidth, y: helpers.Randomizer(0, innerHeight-400 ), z:0  });
         lurking_animation_right(Div); 
     
         break;
     case 3:
         // top
-        TweenLite.set(Div, { className: 'lurking-element', x: src_helpers.Randomizer(0, innerWidth-400), y: -400, z: 0,rotationX:180 });
+        TweenLite.set(Div, { className: 'lurking-element', x: helpers.Randomizer(0, innerWidth-400), y: -400, z: 0,rotationX:180 });
         lurking_animation_top(Div); 
         break;
     default:
         // bottom
-        TweenLite.set(Div, { className: 'lurking-element', x: src_helpers.Randomizer(0, innerWidth-400), y:innerHeight, z:0 });
+        TweenLite.set(Div, { className: 'lurking-element', x: helpers.Randomizer(0, innerWidth-400), y:innerHeight, z:0 });
         lurking_animation_bottom(Div); 
     }
     lurking_globalConst.warp.appendChild(Div);
 
     // Run animation
     setTimeout(() => {
-        src_helpers.removeelement(Div.id);
+        helpers.removeelement(Div.id);
     }, 15000);
 }
 ;// CONCATENATED MODULE: ./src/animations/comets.js
@@ -655,7 +797,7 @@ function createEmoteComets(image) {
     comets_globalVars.divnumber++;
 
     //create at random Y height at left edge of screen
-    gsap.set(Div, { className: 'comet-element', x: src_helpers.Randomizer(-500, innerWidth + 500), y: src_helpers.Randomizer(-200, -75), z: src_helpers.Randomizer(-200, 200), backgroundImage: 'url(' + image + ')' });
+    gsap.set(Div, { className: 'comet-element', x: helpers.Randomizer(-500, innerWidth + 500), y: helpers.Randomizer(-200, -75), z: helpers.Randomizer(-200, 200), backgroundImage: 'url(' + image + ')' });
 
     comets_globalConst.warp.appendChild(Div);
 
@@ -663,25 +805,25 @@ function createEmoteComets(image) {
     comet_animation(Div);
     //Destroy element after X seconds so we don't eat up resources over time!
     setTimeout(() => {
-        src_helpers.removeelement(Div.id);
+        helpers.removeelement(Div.id);
     }, 15000);
 
 }
 
 function comet_animation(element) {
-    var cometDuration =  src_helpers.Randomizer(4,8);
-    var cometSize = src_helpers.Randomizer(25,100);
+    var cometDuration =  helpers.Randomizer(4,8);
+    var cometSize = helpers.Randomizer(25,100);
     var cometX = gsap.getProperty(element, "x");
     //console.log(cometX);
     if(cometX > 920){
-    cometX = cometX - src_helpers.Randomizer(1150,1500);
+    cometX = cometX - helpers.Randomizer(1150,1500);
     }
     else if(cometX < 920){
-    cometX = cometX + src_helpers.Randomizer(1150,1500);
+    cometX = cometX + helpers.Randomizer(1150,1500);
     }
     //console.log(cometX);
     gsap.to(element, {duration: cometDuration, x: cometX, ease: "sine.out" });
-    gsap.to(element, {duration: cometDuration, y: src_helpers.Randomizer(800, 1080), ease: "power3.in" });
+    gsap.to(element, {duration: cometDuration, y: helpers.Randomizer(800, 1080), ease: "power3.in" });
     gsap.to(element, {duration: cometDuration, width: cometSize, height: cometSize, ease: "sine.out" });
     gsap.to(element, {duration: 1, opacity: 0, ease: "sine.inOut", delay: cometDuration });
     gsap.to(element, {duration: 1, height: 0, ease: "power3.out", delay: cometDuration});
@@ -710,7 +852,7 @@ function createEmoteBounce(image){
     bounce_globalVars.divnumber++;
 
     //create at random Y height at left edge of screen
-    gsap.set(Div, { className: 'bounce-element', x: src_helpers.Randomizer(0, innerWidth), y: src_helpers.Randomizer(0, 200), z: src_helpers.Randomizer(-200, 200), backgroundImage: 'url(' + image + ')' });
+    gsap.set(Div, { className: 'bounce-element', x: helpers.Randomizer(0, innerWidth), y: helpers.Randomizer(0, 200), z: helpers.Randomizer(-200, 200), backgroundImage: 'url(' + image + ')' });
 
     bounce_globalConst.warp.appendChild(Div);
 
@@ -718,7 +860,7 @@ function createEmoteBounce(image){
     bounce_animation(Div);
     //Destroy element after X seconds so we don't eat up resources over time!
     setTimeout(() => {
-        src_helpers.removeelement(Div.id);
+        helpers.removeelement(Div.id);
     }, 15000);
 }
 
@@ -726,7 +868,7 @@ function bounce_animation(element) {
 
     gsap.to(element, {
     x: function() {
-        return src_helpers.Randomizer(0, 250) + gsap.getProperty(element, "x");
+        return helpers.Randomizer(0, 250) + gsap.getProperty(element, "x");
     },
     y: innerHeight-75,
     duration: 3,
@@ -779,7 +921,7 @@ function createSpiral(image){
     spiral_globalVars.divnumber++;
 
     //create at random Y height at left edge of screen
-    gsap.set(Div, { className: 'spiral-element', x: innerWidth/2, y: innerHeight/2, z: src_helpers.Randomizer(-200, 200), backgroundImage: 'url(' + image + ')' });
+    gsap.set(Div, { className: 'spiral-element', x: innerWidth/2, y: innerHeight/2, z: helpers.Randomizer(-200, 200), backgroundImage: 'url(' + image + ')' });
 
     spiral_globalConst.warp.appendChild(Div);
 
@@ -787,7 +929,7 @@ function createSpiral(image){
     spiral_animation(Div);
     //Destroy element after X seconds so we don't eat up resources over time!
     setTimeout(() => {
-        src_helpers.removeelement(Div.id);
+        helpers.removeelement(Div.id);
     }, 15000);
 }
 
@@ -860,7 +1002,7 @@ function createRightWave(image){
     waves_globalVars.divnumber++;
 
     //create at random Y height at left edge of screen
-    gsap.set(Div, { className: 'rightwave-element', x: -100, y: src_helpers.Randomizer(100, innerHeight - 100), z: src_helpers.Randomizer(-200, 200), backgroundImage: 'url(' + image + ')' });
+    gsap.set(Div, { className: 'rightwave-element', x: -100, y: helpers.Randomizer(100, innerHeight - 100), z: helpers.Randomizer(-200, 200), backgroundImage: 'url(' + image + ')' });
 
     waves_globalConst.warp.appendChild(Div);
 
@@ -868,7 +1010,7 @@ function createRightWave(image){
     rightwave_animation(Div);
     //Destroy element after X seconds so we don't eat up resources over time!
     setTimeout(() => {
-        src_helpers.removeelement(Div.id);
+        helpers.removeelement(Div.id);
     }, 15000);
 }
 
@@ -878,7 +1020,7 @@ function createLeftWave(image){
     waves_globalVars.divnumber++;
 
     //create at random Y height at left edge of screen
-    gsap.set(Div, { className: 'rightwave-element', x: innerWidth + 100, y: src_helpers.Randomizer(100, innerHeight - 100), z: src_helpers.Randomizer(-200, 200), backgroundImage: 'url(' + image + ')' });
+    gsap.set(Div, { className: 'rightwave-element', x: innerWidth + 100, y: helpers.Randomizer(100, innerHeight - 100), z: helpers.Randomizer(-200, 200), backgroundImage: 'url(' + image + ')' });
 
     waves_globalConst.warp.appendChild(Div);
 
@@ -886,27 +1028,27 @@ function createLeftWave(image){
     leftwave_animation(Div);
     //Destroy element after X seconds so we don't eat up resources over time!
     setTimeout(() => {
-        src_helpers.removeelement(Div.id);
+        helpers.removeelement(Div.id);
     }, 15000);
 }
 
 function rightwave_animation(element) {
     //Travel left to right
-    gsap.to(element, { x: innerWidth + 100, duration: src_helpers.Randomizer(6, 11), ease: Sine.easeInOut});
+    gsap.to(element, { x: innerWidth + 100, duration: helpers.Randomizer(6, 11), ease: Sine.easeInOut});
     //sway up and down a bit
     gsap.to(element, { y: function() {
-    return src_helpers.Randomizer(-350, 350) + gsap.getProperty(element, "y");
-    }, duration: src_helpers.Randomizer(1, 2), ease: Sine.easeInOut, yoyo: true, repeat: -1});
+    return helpers.Randomizer(-350, 350) + gsap.getProperty(element, "y");
+    }, duration: helpers.Randomizer(1, 2), ease: Sine.easeInOut, yoyo: true, repeat: -1});
 
 }
 
 function leftwave_animation(element) {
     //Travel right to left
-    gsap.to(element, { x: -100, duration: src_helpers.Randomizer(6, 11), ease: Sine.easeInOut});
+    gsap.to(element, { x: -100, duration: helpers.Randomizer(6, 11), ease: Sine.easeInOut});
     //sway up and down a bit
     gsap.to(element, { y: function() {
-    return src_helpers.Randomizer(-350, 350) + gsap.getProperty(element, "y");
-    }, duration: src_helpers.Randomizer(1, 2), ease: Sine.easeInOut, yoyo: true, repeat: -1});
+    return helpers.Randomizer(-350, 350) + gsap.getProperty(element, "y");
+    }, duration: helpers.Randomizer(1, 2), ease: Sine.easeInOut, yoyo: true, repeat: -1});
 
 }
 ;// CONCATENATED MODULE: ./src/animations/carousel.js
@@ -932,7 +1074,7 @@ function createCarousel(image){
     carousel_globalVars.divnumber++;
 
     //create at random Y height at left edge of screen
-    gsap.set(Div, { className: 'carousel-element', x: -100, y: innerHeight/2, z: src_helpers.Randomizer(-200, 200), backgroundImage: 'url(' + image + ')' });
+    gsap.set(Div, { className: 'carousel-element', x: -100, y: innerHeight/2, z: helpers.Randomizer(-200, 200), backgroundImage: 'url(' + image + ')' });
 
     carousel_globalConst.warp.appendChild(Div);
 
@@ -940,7 +1082,7 @@ function createCarousel(image){
     carousel_animation(Div);
     //Destroy element after X seconds so we don't eat up resources over time!
     setTimeout(() => {
-        src_helpers.removeelement(Div.id);
+        helpers.removeelement(Div.id);
     }, 15000);
 }
 
@@ -975,7 +1117,7 @@ function createEmoteVolcano(image) {
     Div.id = volcano_globalVars.divnumber;
     volcano_globalVars.divnumber++;
 
-    gsap.set(Div, { className: 'volcano-element', x: innerWidth/2, y: innerHeight, z: src_helpers.Randomizer(-200, 200), backgroundImage: 'url(' + image + ')' });
+    gsap.set(Div, { className: 'volcano-element', x: innerWidth/2, y: innerHeight, z: helpers.Randomizer(-200, 200), backgroundImage: 'url(' + image + ')' });
 
     volcano_globalConst.warp.appendChild(Div);
 
@@ -983,7 +1125,7 @@ function createEmoteVolcano(image) {
     volcano_animation(Div);
     //Destroy element after X seconds so we don't eat up resources over time!
     setTimeout(() => {
-        src_helpers.removeelement(Div.id);
+        helpers.removeelement(Div.id);
     }, 15000);
 
 }
@@ -992,17 +1134,17 @@ function createEmoteVolcano(image) {
 function volcano_animation(element) {
 
     //Set a base intensity value, then use that to derive the motion path
-    let intensity = src_helpers.Randomizer(5, 100);
+    let intensity = helpers.Randomizer(5, 100);
 
     let verticalStrengthx = 0;
     let verticalStrengthy = -200 * Math.ceil(intensity/20);
     let horizontalStrengthx = 20 * Math.ceil(intensity/5) 
     let horizontalStrengthy = -400 * Math.ceil(intensity/30);
-    let finalLocationx = src_helpers.Randomizer(300, innerWidth/2);
-    let finalLocationy = src_helpers.Randomizer(-50, -350);
+    let finalLocationx = helpers.Randomizer(300, innerWidth/2);
+    let finalLocationy = helpers.Randomizer(-50, -350);
     
     //Flip half to the other side
-    let direction = src_helpers.Randomizer(0, 1);
+    let direction = helpers.Randomizer(0, 1);
     if(Math.round(direction) == 1) {
     verticalStrengthx = -(verticalStrengthx);
     horizontalStrengthx = -(horizontalStrengthx);
@@ -1015,7 +1157,7 @@ function volcano_animation(element) {
     //console.log(motionPath);
 
     gsap.to(element, { 
-    duration: src_helpers.Randomizer(4, 8),
+    duration: helpers.Randomizer(4, 8),
     ease: "power2.out",
     delay: 0.5,
     motionPath: {
@@ -1023,7 +1165,7 @@ function volcano_animation(element) {
         
     }
     });
-    gsap.to(element, src_helpers.Randomizer(3, 5), { opacity: 0, ease: Sine.easeIn, delay: 4 });
+    gsap.to(element, helpers.Randomizer(3, 5), { opacity: 0, ease: Sine.easeIn, delay: 4 });
 }
 
 ;// CONCATENATED MODULE: ./src/lib/emotetext.js
@@ -1649,7 +1791,7 @@ function createEmoteText(image, length, character, x, y) {
     let startY = pixelY;
 
     //Randomize offscreen start point
-    let random = Math.round(src_helpers.Randomizer(1,4));
+    let random = Math.round(helpers.Randomizer(1,4));
     switch(random) {
     case 1:
         // Left Offscreen
@@ -1672,7 +1814,7 @@ function createEmoteText(image, length, character, x, y) {
 
 
     //create at random X/Y within screen bounds
-    gsap.set(Div, { className: 'text-element', x: startX, y: startY, z: src_helpers.Randomizer(-200, 200), opacity: 0, width: pixelsize, height: pixelsize, backgroundImage: 'url(' + image + ')' });
+    gsap.set(Div, { className: 'text-element', x: startX, y: startY, z: helpers.Randomizer(-200, 200), opacity: 0, width: pixelsize, height: pixelsize, backgroundImage: 'url(' + image + ')' });
 
     text_globalConst.warp.appendChild(Div);
 
@@ -1680,7 +1822,7 @@ function createEmoteText(image, length, character, x, y) {
     text_animation(Div, pixelX, pixelY);
     //Destroy element after X seconds so we don't eat up resources over time!
     setTimeout(() => {
-        src_helpers.removeelement(Div.id);
+        helpers.removeelement(Div.id);
     }, 15000);
 }
 
@@ -1688,7 +1830,7 @@ function text_animation(element, pixelX, pixelY) {
     
 
     gsap.to(element, {duration: 2, opacity: 1, delay: 0});
-    gsap.to(element, {duration: src_helpers.Randomizer(3, 5), x: pixelX, y: pixelY, delay: 0});
+    gsap.to(element, {duration: helpers.Randomizer(3, 5), x: pixelX, y: pixelY, delay: 0});
     gsap.to(element, {duration: 2, opacity: 0, delay: 13});
 
     gsap.to(element, {duration: 0.7, rotation: 30, repeat: -1, repeatDelay: 3});
@@ -1720,7 +1862,7 @@ function createEmoteDVD(image) {
     dvd_globalVars.divnumber++;
 
     //create at random X/Y within screen bounds
-    gsap.set(Div, { className: 'dvd-element', x: src_helpers.Randomizer(0, innerWidth), y: src_helpers.Randomizer(0, innerHeight), z: src_helpers.Randomizer(-200, 200), backgroundImage: 'url(' + image + ')' });
+    gsap.set(Div, { className: 'dvd-element', x: helpers.Randomizer(0, innerWidth), y: helpers.Randomizer(0, innerHeight), z: helpers.Randomizer(-200, 200), backgroundImage: 'url(' + image + ')' });
 
     dvd_globalConst.warp.appendChild(Div);
 
@@ -1728,16 +1870,16 @@ function createEmoteDVD(image) {
     dvd_animation(Div);
     //Destroy element after X seconds so we don't eat up resources over time!
     setTimeout(() => {
-        src_helpers.removeelement(Div.id);
+        helpers.removeelement(Div.id);
     }, 15000);
 }
 
 function dvd_animation(element) {
     let DVDStartX = gsap.getProperty(element, "x");
     let DVDStartY = gsap.getProperty(element, "y");
-    let DVDStartDirection = src_helpers.Randomizer(0,360);
-    let DVDFirstX = src_helpers.Randomizer(0, innerWidth);
-    let DVDFirstY = src_helpers.Randomizer(0, innerWidth);
+    let DVDStartDirection = helpers.Randomizer(0,360);
+    let DVDFirstX = helpers.Randomizer(0, innerWidth);
+    let DVDFirstY = helpers.Randomizer(0, innerWidth);
 
     DVDFirstX = Math.sin(DVDStartDirection) * 2000;
     DVDFirstY = Math.cos(DVDStartDirection) * 2000;
@@ -1747,8 +1889,8 @@ function dvd_animation(element) {
     
     gsap.to(element, {
     duration: 15,
-    x: src_helpers.Randomizer(4000, 8000) * src_helpers.randomSign(), 
-    y: src_helpers.Randomizer(4000, 8000) * src_helpers.randomSign(),    
+    x: helpers.Randomizer(4000, 8000) * helpers.randomSign(), 
+    y: helpers.Randomizer(4000, 8000) * helpers.randomSign(),    
     modifiers: { x: modX, y: modY }
     }); 
 
@@ -1826,7 +1968,7 @@ function createCoins(count, side) {
 
 
         setTimeout(() => {
-            src_helpers.removeelement(clone.id);
+            helpers.removeelement(clone.id);
         }, 60000);
         
         // Finds the images inside the clone
@@ -2130,7 +2272,7 @@ function createEmoteCube(image) {
     cube_animation(Div);
     //Destroy element after X seconds so we don't eat up resources over time!
     setTimeout(() => {
-        src_helpers.removeelement(Div.id);
+        helpers.removeelement(Div.id);
     }, 15000);
 }
 
@@ -2197,7 +2339,7 @@ function hypetrainfinish(){
 
     //hypetimer = setTimeout("removeelement(" + HypeTrainWrapper.id + ")", 5000);
     setTimeout(() => {
-        src_helpers.removeelement(HypeWrapper);
+        helpers.removeelement(HypeWrapper);
     }, 5000);
 
 }
@@ -2207,7 +2349,7 @@ function hypetrainstart(){
     let image = "../img/trainhead.png";
     let HypeTrainWrapper = document.createElement('div');
     HypeTrainWrapper.id = setTimeout(() => {
-        src_helpers.removeelement(HypeTrainWrapper.id);
+        helpers.removeelement(HypeTrainWrapper.id);
     }, 360000);
 
     let HypeTrainHead = document.createElement('div');
@@ -2219,9 +2361,9 @@ function hypetrainstart(){
 
     //HypeTrainWrapper.dataset = hypetimer; 
 
-    gsap.set(HypeTrainWrapper, { className: 'train-wrapper', x: 0 - innerWidth, y: 0, z: src_helpers.Randomizer(-200, 200), });
+    gsap.set(HypeTrainWrapper, { className: 'train-wrapper', x: 0 - innerWidth, y: 0, z: helpers.Randomizer(-200, 200), });
     //gsap.set(HypeTrainWrapper, { className: 'train-wrapper', x: 0, y: 0, z: helpers.Randomizer(-200, 200), });
-    gsap.set(HypeTrainHead, { className: 'train-head', float: "right", z: src_helpers.Randomizer(-200, 200), width: "225px", height: "225px", backgroundImage: 'url(' + image + ')' });
+    gsap.set(HypeTrainHead, { className: 'train-head', float: "right", z: helpers.Randomizer(-200, 200), width: "225px", height: "225px", backgroundImage: 'url(' + image + ')' });
 
     hypetrain_globalConst.warp.appendChild(HypeTrainWrapper);
     HypeTrainWrapper.appendChild(HypeTrainHead); 
@@ -2252,10 +2394,10 @@ function hypetrainlevelup(){
     console.log(trainWrapper.id);
     clearTimeout(trainWrapper.id);
     trainWrapper.id = setTimeout(() => {
-        src_helpers.removeelement(trainWrapper.id);
+        helpers.removeelement(trainWrapper.id);
     }, 360000);
 
-    let cartNum = Math.round(src_helpers.Randomizer(1,2));
+    let cartNum = Math.round(helpers.Randomizer(1,2));
     let image;
     if(cartNum == 1){
         image = "../img/cart1.png";
@@ -2271,7 +2413,7 @@ function hypetrainlevelup(){
     // HypeCart.id = divnumber;
     // divnumber++;
 
-    gsap.set(HypeCart, { className: 'train-cart', float: "right", z: src_helpers.Randomizer(-200, 200), width: "225px", height: "225px" });
+    gsap.set(HypeCart, { className: 'train-cart', float: "right", z: helpers.Randomizer(-200, 200), width: "225px", height: "225px" });
 
 
     let CartImage = document.createElement('img');
@@ -2318,26 +2460,27 @@ function createAvatarChoon(image) {
 
 
     //randomise side to peep from
-    var random = Math.floor(Math.random() * 2) + 1;
-    random = 1;
+    var random = Math.floor(helpers.Randomizer(1,2.99));
+    //random = 1;
+    console.log(random);
 
     //var Note = createNote("img/music1.png");
 
+    let height = helpers.Randomizer(0, innerHeight-400 );
+    let times = 5;
+    let Notes = [];
+
     switch (random) {
     case 1:
-        // left - TweenLite.set(Div, { className: 'lurking-element', x: -600, y: helpers.Randomizer(0, innerHeight-600 ), z:0 });
-        let height = src_helpers.Randomizer(0, innerHeight-400 );
-        TweenLite.set(Div, { className: 'choon-element', x: -400, y: height, z:100 });
+        // left        
+        gsap.set(Div, { className: 'choon-element', x: -400, y: height, z:100 });
 
-        let times = 5;
-        let Notes = [];
+        
         for(var i = 0; i < times; i++){
-        Notes[i] = createNote("img/music1.png");
-        TweenLite.set(Notes[i], { className: 'note-element', x: src_helpers.Randomizer(0, 250), y: height+400, z:10, opacity: 0 });
-        note_animation(Notes[i]);
-        console.log(Notes[i]);
-        let delayms = Math.round(src_helpers.Randomizer(0,3000));
-        //delay(delayms).then(() => note_animation(Notes[i]));
+            Notes[i] = createNote("img/music1.png");
+            gsap.set(Notes[i], { className: 'note-element', x: helpers.Randomizer(0, 250), y: height+helpers.Randomizer(-200, 200), z:10, opacity: 0, scale: 0.01 });
+            note_animation(Notes[i]);
+            console.log(Notes[i]);
         }
 
         choon_animation_left(Div);
@@ -2345,7 +2488,15 @@ function createAvatarChoon(image) {
         break;
     case 2:
         // right
-        TweenLite.set(Div, { className: 'choon-element', x: innerWidth, y: height, z:0  });
+        gsap.set(Div, { className: 'choon-element', x: innerWidth+400, y: height, z:0  });
+
+        for(var i = 0; i < times; i++){
+            Notes[i] = createNote("img/music1.png");
+            gsap.set(Notes[i], { className: 'note-element', x: helpers.Randomizer(innerWidth, innerWidth-350), y: height+helpers.Randomizer(-200, 200), z:10, opacity: 0, scale: 0.01 });
+            note_animation(Notes[i]);
+            console.log(Notes[i]);
+        }
+
         choon_animation_right(Div); 
     
         break;
@@ -2353,7 +2504,7 @@ function createAvatarChoon(image) {
     choon_globalConst.warp.appendChild(Div);
 
     setTimeout(() => {
-        src_helpers.removeelement(Div.id);
+        helpers.removeelement(Div.id);
     }, 15000);
     
     
@@ -2370,7 +2521,7 @@ function createNote(image) {
 
     choon_globalConst.warp.appendChild(MNoteDiv);
     setTimeout(() => {
-        src_helpers.removeelement(MNoteDiv.id);
+        helpers.removeelement(MNoteDiv.id);
     }, 15000);
 
     return MNoteDiv
@@ -2378,27 +2529,65 @@ function createNote(image) {
 
 function note_animation(element){
 
-    gsap.to(element, {duration: 2, opacity: 1, yoyo: false, repeat: 0, delay: 3, })
-    gsap.to(element, {duration: 1, rotationZ:'-=40', yoyo: false, repeat: 0, delay: 5})
+    //gsap.to(element, {duration: 2, opacity: 1, yoyo: false, repeat: 0, delay: 3, })
+    //gsap.to(element, {duration: 1, rotationZ:'-=40', yoyo: false, repeat: 0, delay: 5})
 
     let verticalTravel = innerHeight / 2;
-
+    let delay = helpers.Randomizer(3,6);
     //Fade In
-    gsap.to(element, { opacity: 1, ease: Linear.easeNone, repeat: 0, delay: -1, duration: 3 });
+    gsap.to(element, { opacity: 1, ease: Linear.easeNone, repeat: 0, delay: delay, duration: 4 });
+    gsap.to(element, { scale: 1, ease: Linear.easeNone, repeat: 0, delay: delay, duration: 4 });
     //Vertical Movement
-    gsap.to(element, { y: `-=${verticalTravel}`, x: function() {
-        return src_helpers.Randomizer(-250, 250) + gsap.getProperty(element, "x");
-    }, ease: Linear.easeNone, repeat: 0, delay: -1, duration: src_helpers.Randomizer(10, 20) });
+    // gsap.to(element, { y: `-=${verticalTravel}`, x: function() {
+    //     return helpers.Randomizer(-250, 250) + gsap.getProperty(element, "x");
+    // }, ease: Linear.easeNone, repeat: 0, delay: -1, duration: helpers.Randomizer(10, 20) });
+    gsap.to(element, {
+        duration: 5, // Duration of the animation in seconds
+        delay: 3,
+        ease: Linear.easeNone, // Easing function (you can choose a different one)
+        "--hue-rotate": helpers.Randomizer(180,360), // Custom property to control hue rotation
+        onUpdate: () => {
+          // Update the filter property during the animation
+          element.style.filter = `invert(44%) sepia(61%) saturate(1001%) brightness(99%) contrast(101%) hue-rotate(${gsap.getProperty(element, "--hue-rotate")}deg)`;
+        }
+      });
+
     //Fade Out
-    gsap.to(element, { opacity: 0, ease: Linear.easeNone, repeat: 0, delay: src_helpers.Randomizer(9, 11) , duration: 4});
+    gsap.to(element, {
+        duration: 1, // Duration of the animation in seconds
+        delay: delay + 4,
+        ease: "power2.out", // Easing function (you can choose a different one)
+        scale: 1.5, // Scale up the element
+        opacity: 0, // Make the element disappear
+        rotation: 360, // Rotate the element
+        onComplete: () => {
+          // Callback function when the animation is complete (optional)
+          element.style.display = "none"; // Hide the element
+        }
+      });
+    //gsap.to(element, { opacity: 0, ease: Linear.easeNone, repeat: 0, delay: helpers.Randomizer(9, 11) , duration: 4});
 
 }
 
 function choon_animation_left(element) {
     
     gsap.to(element, {duration: 6, x: '+=450'})
-    gsap.to(element, {duration: 1, y: '-=50', yoyo: true, ease: Sine.easeInOut, repeat: 6})
-    gsap.to(element, { opacity: 0, ease: Linear.easeNone, repeat: 0, delay: src_helpers.Randomizer(8, 10) , duration: 4});
+    gsap.to(element, {duration: 1, y: '-=50', yoyo: true, ease: Sine.easeInOut, repeat: 8})
+    gsap.to(element, { opacity: 0, ease: Linear.easeNone, repeat: 0, delay: helpers.Randomizer(8, 10) , duration: 4});
+
+
+    gsap.to(element, {
+        duration: 1, // Duration of the animation in seconds
+        delay: 10,
+        ease: "power2.out", // Easing function (you can choose a different one)
+        scale: 1.5, // Scale up the element
+        opacity: 0, // Make the element disappear
+        rotation: 360, // Rotate the element
+        onComplete: () => {
+          // Callback function when the animation is complete (optional)
+          element.style.display = "none"; // Hide the element
+        }
+      });
     //gsap.to(element, {duration: 0.2, rotationZ:'-=20', yoyo: true, repeat: 23, repeatDelay: 0, delay: 0.2})
     //gsap.to(element, {duration: 0.2, rotationZ: 0, yoyo: false, repeat: 0, delay: 4.8})
 
@@ -2411,6 +2600,23 @@ function choon_animation_left(element) {
 
 function choon_animation_right(element){
 
+    gsap.to(element, {duration: 6, x: '-=650'})
+    gsap.to(element, {duration: 1, y: '-=50', yoyo: true, ease: Sine.easeInOut, repeat: 8})
+    gsap.to(element, { opacity: 0, ease: Linear.easeNone, repeat: 0, delay: helpers.Randomizer(8, 10) , duration: 4});
+
+
+    gsap.to(element, {
+        duration: 1, // Duration of the animation in seconds
+        delay: 10,
+        ease: "power2.out", // Easing function (you can choose a different one)
+        scale: 1.5, // Scale up the element
+        opacity: 0, // Make the element disappear
+        rotation: 360, // Rotate the element
+        onComplete: () => {
+          // Callback function when the animation is complete (optional)
+          element.style.display = "none"; // Hide the element
+        }
+      });
 }
 ;// CONCATENATED MODULE: ./src/animations/cheers.js
 
@@ -2418,80 +2624,143 @@ const { globalVars: cheers_globalVars, globalConst: cheers_globalConst} = config
 
 
 
-function createAvatarCheers(image) {
+/*
+Large Beer image fade in
+Drops sender and target (or me) into the beer.
+Floats/bounces around then all fade out
+*/
+
+function create(images) {
+
+    let imgcount = images.length;
+    let interval = 250;
+    let basewidth = helpers.Randomizer(innerWidth/2-50, innerWidth/2+50, );
+    let xPos = [basewidth, basewidth-175];
+    let drop = [innerHeight-500, innerHeight-600];
+
+    for (let j = 0; j < images.length; j++) {
+        // split the count amounst the images
+        let imagenum = j % imgcount;
+        setTimeout(() => {
+            createAvatarDivs(images[imagenum], xPos[imagenum], drop[imagenum]);
+        }, j * interval);
+    }
+
+    var BeerDiv = document.createElement('div');
+    BeerDiv.id = cheers_globalVars.divnumber;
+    cheers_globalVars.divnumber++;
+    //BeerDiv.style.background = 'url(' + 'img/beer.jpg' + ')';
+    BeerDiv.style.backgroundSize = '100% 100%';
+    gsap.set(BeerDiv, {className: 'beer-glass', x: innerWidth/2 , y: 0, z:0, opacity: 0, transformOrigin:"center", xPercent: -50});
     
+
+    cheers_globalConst.warp.appendChild(BeerDiv);
+
+    beer_animation(BeerDiv);
+
+
+    const video = document.createElement('video');
+    video.src = 'img/beerpourV2_VP9.webm'; // Replace with your video URL
+    video.autoplay = true;
+    video.muted = true; // Autoplay requires muted for some browsers
+    video.loop = true;
+    video.controls = false;
+
+    video.style.width = '100%';
+    video.style.height = '100%';
+
+    BeerDiv.appendChild(video);
+
+    // Run animation
+    
+    setTimeout(() => {
+        helpers.removeelement(BeerDiv.id);
+    }, 15000);
+
+}
+
+function createAvatarDivs(image, xPos, drop){
+
     var Div = document.createElement('div');
     Div.id = cheers_globalVars.divnumber;
     cheers_globalVars.divnumber++;
     Div.style.background = 'url(' + image + ')';
     Div.style.backgroundSize = '100% 100%';
 
-    var BeerDiv = document.createElement('div');
-    BeerDiv.id = cheers_globalVars.divnumber;
-    cheers_globalVars.divnumber++;
-    BeerDiv.style.background = 'url(' + 'https://static-cdn.jtvnw.net/emoticons/v2/444572/default/dark/3.0' + ')';
-    BeerDiv.style.backgroundSize = '100% 100%';
+    gsap.set(Div, {className: 'beer-avatar', x: xPos, y: -250, z:10, scale: 0.8, transformOrigin:"50% 50%" });
 
-    console.log("Creating a Cheers Element");
-
-    //randomise side to peep from
-    var random = Math.floor(Math.random() * 2) + 1;
-                        
-    switch (random) {
-    case 1:
-        // left - TweenLite.set(Div, { className: 'lurking-element', x: -600, y: helpers.Randomizer(0, innerHeight-600 ), z:0 });
-        var height = src_helpers.Randomizer(0, innerHeight-400 );
-        TweenLite.set(Div, { className: 'cheers-element', x: -400, y: height, z:0 });
-        TweenLite.set(BeerDiv, { className: 'beer-element', x: 100, y: height, z:0, opacity: 0 });
-        cheers_animation_left(Div, BeerDiv);                        
-        break;
-    case 2:
-        // right
-        TweenLite.set(Div, { className: 'cheers-element', x: innerWidth, y: height, z:0  });
-        cheers_animation_right(Div); 
-    
-        break;
-    }
     cheers_globalConst.warp.appendChild(Div);
-    cheers_globalConst.warp.appendChild(BeerDiv);
 
-    // Run animation
+    drop_animation(Div, drop);
+
     setTimeout(() => {
-        src_helpers.removeelement(Div.id);
+        helpers.removeelement(Div.id);
     }, 15000);
-    setTimeout(() => {
-        src_helpers.removeelement(BeerDiv.id);
-    }, 15000);
-
 }
 
-function cheers_animation_left(element, beerElement) {
-    
-    gsap.to(element, {duration: 5, x: '+=250'})
-    gsap.to(element, {duration: 0.2, rotationZ:'+=10', yoyo: false, repeat: 0})
-    gsap.to(element, {duration: 0.2, rotationZ:'-=20', yoyo: true, repeat: 23, repeatDelay: 0, delay: 0.2})
-    gsap.to(element, {duration: 0.2, rotationZ: 0, yoyo: false, repeat: 0, delay: 4.8})
+function drop_animation(element, drop) {
 
-    
-    gsap.to(beerElement, {duration: 2, opacity: 1, yoyo: false, repeat: 0, delay: 3, })
-    gsap.to(beerElement, {duration: 1, rotationZ:'-=40', yoyo: false, repeat: 0, delay: 5})
-    // TweenMax.to(element, 1, { rotationZ:'+=40', yoyo:true,repeat: 0,  ease: Sine.easeInOut, delay: 0 });
-    // TweenMax.to(element, 1, { x:'+=200', yoyo:true,repeat: 0,  ease: Sine.easeInOut, delay: 0 });
-    // TweenMax.to(element, 1, { rotationZ:'-=40' , yoyo:true,repeat: 0,  ease: Sine.easeInOut, delay: 1.5 });
-    // TweenMax.to(element, 1, { x:'-=200' , yoyo:true,repeat: 0,  ease: Sine.easeInOut, delay: 1.5 });
+    gsap.to(element, {
+        rotation: helpers.Randomizer(-15,15),
+        delay: 1,
+        duration: 4,
+        ease: "sine.inOut",
+    });
+
+    gsap.to(element, {
+        duration: 1.5, // Duration of the fall
+        delay: 3,
+        y: drop, // Fall to 75% of the container's height
+        
+        ease: "power1.out", // Easing function (you can choose a different one)
+        onComplete: () => {
+          // Callback when the drop reaches the bottom
+          gsap.to(element, {
+            duration: 1.45, // Duration of the bobble
+            y: drop-175, // Bobble up to 60% of the container's height
+            yoyo: true, // Yoyo effect for bouncing
+            repeat: 1, // Repeat indefinitely
+            ease: "sine.inOut", // Easing function for the bobble
+            onComplete: () => {
+                gsap.to(element, {
+                    duration: 1.55, // Duration of the bobble
+                    y: drop-125, // Bobble up to 60% of the container's height
+                    yoyo: true, // Yoyo effect for bouncing
+                    repeat: 1, // Repeat indefinitely
+                    ease: "sine.inOut", // Easing function for the bobble
+                    onComplete: () => {
+                        fadeout(element);
+                        gsap.to(element, {
+                            duration: 1.65, // Duration of the bobble
+                            y: drop-100, // Bobble up to 60% of the container's height
+                            yoyo: true, // Yoyo effect for bouncing
+                            repeat: 1, // Repeat indefinitely
+                            ease: "sine.inOut", // Easing function for the bobble
+                        });
+                    }
+                });
+            }
+          });
+        }
+      });
 }
 
-function cheers_animation_right(element) {
-    //TweenMax.to(e, helpers.Randomizer(6, 16), {y:innerHeight+100, ease:Linear.easeNone, repeat:-1, delay:-15});
-    //TweenMax.to(e, helpers.Randomizer(4, 8), {x:'+=100',rotationZ:helpers.Randomizer(0, 180), repeat:-1, yoyo:true, ease:Sine.easeInOut});
-    //TweenMax.to(e,helpers.Randomizer(2, 8), {rotationX:helpers.Randomizer(0,360),rotationY:helpers.Randomizer(0,360),repeat:-1,yoyo:true,ease:Sine.easeInOut,delay:-5});
-
-    TweenMax.to(element, 1, { rotationZ:'-=40', yoyo:true,repeat: 0,  ease: Sine.easeInOut, delay: 0 });
-    TweenMax.to(element, 1, { x:'-=200', yoyo:true,repeat: 0,  ease: Sine.easeInOut, delay: 0 });
-    TweenMax.to(element, 1, { rotationZ:'+=40' , yoyo:true,repeat: 0,  ease: Sine.easeInOut, delay: 1.5 });
-    TweenMax.to(element, 1, { x:'+=200' , yoyo:true,repeat: 0,  ease: Sine.easeInOut, delay: 1.5 });
-
+function fadeout(element){
+    gsap.to(element, {
+        duration: 4, // Duration of the bobble
+        opacity: 0,
+        yoyo: false, // Yoyo effect for bouncing
+        repeat: 0, // Repeat indefinitely
+        ease: "sine.inOut", // Easing function for the bobble
+    });
 }
+
+function beer_animation(element){
+
+    gsap.to(element, {opacity: 1, duration: 2, delay: 0})
+    gsap.to(element, {opacity: 0, duration: 2, delay: 13})
+}
+
 ;// CONCATENATED MODULE: ./src/animations/invaders.js
 
 const { globalVars: invaders_globalVars, globalConst: invaders_globalConst} = config;
@@ -2538,7 +2807,7 @@ function emoteInvaders (images, count=56, interval=50) {
       //var createcommand = 'createemoteInvaders("' + images[imagenum] + '")';
       //setTimeout(createcommand, (j * interval));
       setTimeout(() => {
-        src_helpers.removeelement(Div.id);
+        helpers.removeelement(Div.id);
       }, 70000);
     }
   
@@ -2602,7 +2871,7 @@ async function incomingRaid(userId, displayName, viewers){
     let avatar;
 
     try {
-        avatar = await src_helpers.getTwitchAvatar(userId, true);
+        avatar = await helpers.getTwitchAvatar(userId, true);
     } catch (error) {
         console.error(error);
         throw error;
@@ -2614,9 +2883,9 @@ async function incomingRaid(userId, displayName, viewers){
     //Setup the raid wrapper
     let raidWrapper = document.createElement('div');
     raidWrapper.id = setTimeout(() => {
-        src_helpers.removeelement(raidWrapper.id);
+        helpers.removeelement(raidWrapper.id);
     }, 600000);
-    gsap.set(raidWrapper, { className: 'raid-wrapper', position: "absolute", height: innerHeight, width: innerWidth, x: 0, y: 0, z: src_helpers.Randomizer(-200, 200), });
+    gsap.set(raidWrapper, { className: 'raid-wrapper', position: "absolute", height: innerHeight, width: innerWidth, x: 0, y: 0, z: helpers.Randomizer(-200, 200), });
     raiders_globalConst.warp.appendChild(raidWrapper);
 
 
@@ -2740,6 +3009,54 @@ function raiderAnimation(element){
 
     //tl2.resume();
 }
+;// CONCATENATED MODULE: ./src/animations/fade.js
+
+const { globalVars: fade_globalVars, globalConst: fade_globalConst} = config;
+
+
+
+function fade_create(images, count=10, interval=150) {
+    
+    let imgcount = images.length;
+
+    for (let j = 0; j < count; j++) {
+        // split the count amounst the images
+        let imagenum = j % imgcount;
+        setTimeout(() => {
+            createDivs(images[imagenum]);
+        }, j * interval);
+    }
+}
+
+
+function createDivs(image) {
+    var Div = document.createElement('div');
+    Div.id = fade_globalVars.divnumber;
+    fade_globalVars.divnumber++;
+
+    gsap.set(Div, { className: 'fade-element', x: helpers.Randomizer(0, innerWidth), y: helpers.Randomizer(0, innerHeight), z: helpers.Randomizer(-200, 200), scale: 0.1 , opacity: 0, backgroundImage: 'url(' + image + ')' });
+
+    fade_globalConst.warp.appendChild(Div);
+
+    // Run animation
+    animation(Div);
+    //Destroy element after 8 seconds so we don't eat up resources over time!
+    setTimeout(() => {
+        helpers.removeelement(Div.id);
+    }, 15000);
+}
+
+
+
+
+// Rising animation
+function animation(element) {
+    //Fade In
+    gsap.to(element, { opacity: 1, ease: Linear.easeNone, repeat: 0, delay: 1, duration: 3 });
+    gsap.to(element, { scale: 2.5, ease: Linear.easeNone, repeat: 0, delay: 1, duration: 6 });
+    gsap.to(element, { opacity: 0, ease: Linear.easeNone, repeat: 0, delay: 4, duration: 4 });
+    
+}
 ;// CONCATENATED MODULE: ./src/animations.js
 
 const { globalVars: animations_globalVars, globalConst: animations_globalConst} = config;
@@ -2766,64 +3083,44 @@ const { globalVars: animations_globalVars, globalConst: animations_globalConst} 
 
 
 
-const animationFunctions = {
-    emoteRain: rain_emoteRain,
-    emoteRise: emoteRise,
-    emoteExplode: emoteExplode,
-    emoteVolcano: emoteVolcano,
-    emoteFirework: emoteFirework,
-    emoteRightWave: emoteRightWave,
-    emoteLeftWave: emoteLeftWave,
-    emoteCarousel: emoteCarousel,
-    emoteSpiral: emoteSpiral,
-    emoteComets: emoteComets,
-    emoteDVD: emoteDVD,
-    emoteText: emoteText,
-    emoteBounce: emoteBounce,
-    emoteInvaders: emoteInvaders,
-    //IN PROGRESS
-    //emoteCube: cube.emoteCube,
-};
+const animations = {
+  firework: firework_namespaceObject,
+  rain: rain_namespaceObject,
+  explode: explode_namespaceObject,
+  rise: rise_namespaceObject,
+  lurking: lurking_namespaceObject,
+  comets: comets_namespaceObject,
+  bounce: bounce_namespaceObject,
+  spiral: spiral_namespaceObject,
+  waves: waves_namespaceObject,
+  carousel: carousel_namespaceObject,
+  volcano: volcano_namespaceObject,
+  text: text_namespaceObject,
+  dvd: dvd_namespaceObject,
+  coinflip: coinflip_namespaceObject,
+  cube: cube_namespaceObject,
+  hypetrain: hypetrain_namespaceObject,
+  choon: choon_namespaceObject,
+  cheers: cheers_namespaceObject,
+  invaders: invaders_namespaceObject,
+  raiders: raiders_namespaceObject,
+  fade: fade_namespaceObject,
+}
 
-function runAnimation(functionName, images, eCount, eInterval) {
-    // Execute the function dynamically using the mapping object
-    const animationFunction = animationFunctions[functionName];
-    if (typeof animationFunction === 'function') {
-      animationFunction(images, eCount, eInterval);
-    } else {
-      console.error(`Function '${functionName}' does not exist.`);
-    }
-  }
 
-  
-/* harmony default export */ const animations = ({
-    runAnimation,
-});
+// function runAnimation(functionName, images, eCount, eInterval) {
+//     // Execute the function dynamically using the mapping object
+//     const animationFunction = animationFunctions[functionName];
+//     if (typeof animationFunction === 'function') {
+//       animationFunction(images, eCount, eInterval);
+//     } else {
+//       console.error(`Function '${functionName}' does not exist.`);
+//     }
+//   }
 
-const animations_emoteFirework = emoteFirework;
-const animations_emoteRain = rain_emoteRain;
-const animations_emoteExplode = emoteExplode;
-const animations_emoteRise = emoteRise;
-const animations_VisualLurk = lurking_VisualLurk;
-const animations_emoteComets = emoteComets;
-const animations_emoteBounce = emoteBounce;
-const animations_emoteSpiral = emoteSpiral;
-const animations_emoteRightWave = emoteRightWave;
-const animations_emoteLeftWave = emoteLeftWave;
-const animations_emoteCarousel = emoteCarousel;
-const animations_emoteVolcano = emoteVolcano;
-const animations_emoteText = emoteText;
-const animations_emoteDVD = emoteDVD;
-const animations_createCoins = createCoins;
-const animations_emoteCube = emoteCube;
-const animations_hypetrainstart = hypetrainstart;
-const animations_hypetrainfinish = hypetrainfinish;
-const animations_hypetrainprogression = hypetrain_hypetrainprogression;
-const animations_hypetrainlevelup = hypetrainlevelup;
-const animations_createAvatarCheers = createAvatarCheers;
-const animations_createAvatarChoon = createAvatarChoon;
-const animations_emoteInvaders = emoteInvaders;
-const animations_incomingRaid = incomingRaid;
+
+/* harmony default export */ const src_animations = (animations);
+
 ;// CONCATENATED MODULE: ./src/handlers.js
 
 const { globalVars: handlers_globalVars, globalConst: handlers_globalConst} = config;
@@ -2870,7 +3167,15 @@ function chatMessageHandler(wsdata) {
         console.log("Cheers Command Not Enabled");
         return
       }
-      cheersCommand(username);
+
+      let targetuser;
+
+      if(lowermessage.includes("@")){
+        let split = lowermessage.split('@');
+        targetuser = split[1];
+
+      }
+      cheersCommand(username, targetuser);
     }
 
     //Join Hype Train Command for Testing
@@ -2882,7 +3187,6 @@ function chatMessageHandler(wsdata) {
       hypetrainprogression(userId);
     }
 
-    //Emotes
     //TestCommand: 
     //emoteVolcano(['https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_2758558107d148c9b1e73c56cb2d9e06/default/dark/2.0', 'https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_dcaf0a56231d4443a91546b869b96a25/default/dark/2.0'], 100, 20);
 
@@ -2912,7 +3216,6 @@ function actionsHandler(wsdata){
 
 }
 
-
 function emoteMessageHandler(wsdata){
   var message = wsdata.data.message.message
   var lowermessage = wsdata.data.message.message.toLowerCase();
@@ -2927,8 +3230,8 @@ function emoteMessageHandler(wsdata){
   }
 
 
-  var eInterval = src_helpers.getCommandValue(lowermessage, "interval");
-  var eCount = src_helpers.getCommandValue(lowermessage, "count");
+  var eInterval = helpers.getCommandValue(lowermessage, "interval");
+  var eCount = helpers.getCommandValue(lowermessage, "count");
 
   if(eCount != null) {
   if(eCount > maxemotes){
@@ -2938,18 +3241,18 @@ function emoteMessageHandler(wsdata){
 
   //TextCommand, FunctionName, DefaultEmotes, DefaultInterval
   let animationMap = [
-  ['!er rain','emoteRain', 50, 50],
-  ['!er rise', 'emoteRise', 100, 50],
-  ['!er explode', 'emoteExplode', 100, 20],
-  ['!er volcano', 'emoteVolcano', 100, 20],
-  ['!er firework', 'emoteFirework', 100, 20],
-  ['!er rightwave', 'emoteRightWave', 100, 20],
-  ['!er leftwave', 'emoteLeftWave', 100, 20],
-  ['!er carousel', 'emoteCarousel', 100, 150],
-  ['!er spiral', 'emoteSpiral', 100, 170],
-  ['!er comets', 'emoteComets', 100, 50],
-  ['!er dvd', 'emoteDVD', 8, 50],
-  ['!er text', 'emoteText', 'HYPE', 25],
+  ['!er rain','emoteRain', 50, 50, 'rain'],
+  ['!er rise', 'emoteRise', 100, 50, 'rise'],
+  ['!er explode', 'emoteExplode', 100, 20, 'explode'],
+  ['!er volcano', 'emoteVolcano', 100, 20, 'volcano'],
+  ['!er firework', 'emoteFirework', 100, 20, 'firework'],
+  ['!er rightwave', 'emoteRightWave', 100, 20, 'waves'],
+  ['!er leftwave', 'emoteLeftWave', 100, 20, 'waves'],
+  ['!er carousel', 'emoteCarousel', 100, 150, 'carousel'],
+  ['!er spiral', 'emoteSpiral', 100, 170, 'spiral'],
+  ['!er comets', 'emoteComets', 100, 50, 'comets'],
+  ['!er dvd', 'emoteDVD', 8, 50, 'dvd'],
+  ['!er text', 'emoteText', 'HYPE', 25, 'text'],
   //['!er cube', 'emoteCube', 8, 50],
   ];
 
@@ -2995,12 +3298,15 @@ function emoteMessageHandler(wsdata){
     }
 
     
-    console.log("running " + animation[1] + " with " + eCount + " emote(s)" + " and interval " + eInterval);
-    animations.runAnimation(animation[1], images, eCount, eInterval);
-    // let animationFunction = animationFunctions[animation[1]];
+    console.log("running " + animation[1] + " with " + eCount + " emote(s)" + " and interval " + eInterval + ". module: " + animation[4]);
+    if (src_animations.hasOwnProperty(animation[4]) && src_animations[animation[4]].hasOwnProperty(animation[1]) && typeof src_animations[animation[4]][animation[1]] === 'function'){
+      src_animations[animation[4]][animation[1]](images, eCount, eInterval);
+    } else {
+      console.log("Animation Function Mapping Failed");
+    }
 
       
-    });
+  });
   
 
 
@@ -3012,27 +3318,35 @@ function emoteMessageHandler(wsdata){
   }
 
   if(lowermessage.includes("!k ")) {
-      let rAnimation = Math.round(src_helpers.Randomizer(0,animationMap.length));
+      let rAnimation = Math.round(helpers.Randomizer(0,animationMap.length - 1 ));
       if(!eCount){eCount = animationMap[rAnimation][2];}
       if(!eInterval){eInterval = animationMap[rAnimation][3];}
 
-      animations.runAnimation(animationMap[rAnimation][1],images, eCount, eInterval);
-      // window[animationMap[rAnimation][1]](images, eCount, eInterval);
-      console.log("running " + animationMap[rAnimation][1] + " with " + eCount + " emote(s)" + " and interval " + eInterval);
+      let aniModule = animationMap[rAnimation][4];
+      let aniFunction = animationMap[rAnimation][1];
+      
+      console.log("Rolled: " + rAnimation + ". Running: " + aniModule + " : " + aniFunction + " with " + eCount + " emote(s)" + " and interval " + eInterval);
+      if (src_animations.hasOwnProperty(aniModule) && src_animations[aniModule].hasOwnProperty(aniFunction) && typeof src_animations[aniModule][aniFunction] === 'function'){
+        src_animations[aniModule][aniFunction](images, eCount, eInterval);
+      } else {
+        console.log("Animation Function Mapping Failed");
+      }
   }
 
 }
 
   //Normal emotes animations
-  let randomAnimation = Math.round(src_helpers.Randomizer(1,2));
+  let randomAnimation = Math.round(helpers.Randomizer(1,3));
     switch(randomAnimation) {
     case 1:
-        animations.runAnimation('emoteRain', images, emotecount);
+        src_animations.rain.emoteRain(images, emotecount);
         break;
 
     case 2:  
-        animations.runAnimation('emoteBounce', images, emotecount);
+        src_animations.bounce.emoteBounce(images, emotecount);
         break;
+    case 3:
+        src_animations.fade.create(images, emotecount);
   };
 }
 
@@ -3052,7 +3366,7 @@ function firstWordsHander(wsdata){
         
         avatar = [xhttp.responseText];
         //Trigger Animation
-        animations.runAnimation('emoteRain', avatar, defaultemotes, 50);
+        src_animations.rain.emoteRain(avatar, defaultemotes, 50);
 
     }
     };
@@ -3061,33 +3375,50 @@ function firstWordsHander(wsdata){
     xhttp.send();          
 }
 
-function cheersCommand(username){
-    var xhttp = new XMLHttpRequest();
-    xhttp.onreadystatechange = function () {
-      if (this.readyState == 4 && this.status == 200) {
-        // get display image for the user
-        console.log("got a user image response back");
-        // console.log(xhttp.responseText);
-      
-        let avatar = [xhttp.responseText];
-        //createAvatarCheers(avatar);
-      }
-      xhttp.open("GET", "https://decapi.me/twitch/avatar/" + username, true);
-      xhttp.send();
+
+async function cheersCommand(username, targetuser){
+
+  console.log("Cheers: " + username + targetuser);
+  let images = [];
+
+    try {
+        images.push(await helpers.getTwitchAvatar(username));
+    } catch (error) {
+        console.error(error);
+        throw error;
     }
-}
   
+    if(targetuser){
+      try {
+          images.push(await helpers.getTwitchAvatar(targetuser));
+      } catch (error) {
+          console.error(error);
+          throw error;
+      }
+        //images.push(helpers.getTwitchAvatar(targetuser));
+    } else {
+      images.push("https://static-cdn.jtvnw.net/jtv_user_pictures/8e051a26-051f-4abe-bcfa-e13a5d13fad0-profile_image-300x300.png");
+    }
+
+    const delayedFunction = helpers.executeWithInterval(function () {
+      src_animations.cheers.create(images);
+    }, 15000); 
+
+    delayedFunction();
+}
+
 function choonCommand(username){
 var xhttp = new XMLHttpRequest();
 xhttp.onreadystatechange = function () {
     if (this.readyState == 4 && this.status == 200) {
     // get display image for the user
-    console.log("got a user image response back");
+    console.log("got a user image response back: " + xhttp.responseText);
     // console.log(xhttp.responseText);
     
     let avatar = [xhttp.responseText];
+    
     //Disabled While Live
-    animations.runAnimation('createAvatarChoon', avatar);
+    src_animations.choon.createAvatarChoon(avatar);
 
     }
 };
@@ -3288,32 +3619,32 @@ function connectws() {
   
         //Hype Train Start - Start the repeating train animation with the train head image and the first cart
         if (wsdata.event.type == "HypeTrainStart") {
-            animations_hypetrainstart();
+            src_animations.hypetrain.hypetrainstart();
             return;
         }
   
         //Hype Train Level Up - Add a cart to the end of the train
         if (wsdata.event.type == "HypeTrainLevelUp") {
-            animations_hypetrainlevelup();  
+            src_animations.hypetrain.hypetrainlevelup();  
             return;
         }
   
   
         //Hype Progression - Add a user to the current train cart
         if (wsdata.event.type == "HypeTrainUpdate") {
-          animations_hypetrainprogression(wsdata.data.userId);
+          src_animations.hypetrain.hypetrainprogression(wsdata.data.userId);
           return;
         }
   
         //Hype Train Finish - Remove the Train
         if (wsdata.event.type == "HypeTrainEnd") {
-          animations_hypetrainfinish();
+          src_animations.hypetrain.hypetrainfinish();
           return;
         }
 
         //Incoming Raid
         if (wsdata.event.type == "Raid") {
-          animations_incomingRaid(wsdata.data.from_broadcaster_user_id, wsdata.data.from_broadcaster_user_name, wsdata.data.viewers);
+          src_animations.hypetrain.incomingRaid(wsdata.data.from_broadcaster_user_id, wsdata.data.from_broadcaster_user_name, wsdata.data.viewers);
           return;
         }
   
@@ -3324,10 +3655,10 @@ function connectws() {
           }
   
           if(wsdata.data.coinFlipResult == "Heads"){
-            animations_createCoins(1, "Heads" );
+            src_animations.coinflip.createCoins(1, "Heads" );
           }
           if(wsdata.data.coinFlipResult == "Tails"){
-            animations_createCoins(1, "Tails" );
+            src_animations.coinflip.createCoins(1, "Tails" );
           }
         }
   
@@ -3355,6 +3686,7 @@ function handleMessage(message) {
 ;// CONCATENATED MODULE: ./src/main.js
 
 
+//import * as animations from './animations.js';
 
 
 const { globalVars: main_globalVars, globalConst: main_globalConst} = config;
@@ -3371,8 +3703,7 @@ function init() {
     gsap.registerPlugin(MotionPathPlugin);
     main_connectws();
 
-    //setTimeout(animations.emoteFirework(["https://static-cdn.jtvnw.net/emoticons/v2/425618/default/dark/2.0"], 200, 20));
-    window.animations = animations_namespaceObject;
+    window.animations = src_animations;
 }
 
 

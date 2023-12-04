@@ -45,6 +45,30 @@ body,
   background-size: 100% 100%;
 }
 
+.fade-element {
+  width: var(--emote-size-standard);
+  height: var(--emote-size-standard);
+  position: absolute;
+  background-size: 100% 100%;
+}
+
+.beer-avatar {
+  width: var(--avatar-size-standard);
+  height: var(--avatar-size-standard);
+  position: absolute;
+  background-size: 100% 100%;
+  opacity: 0.8;
+  filter: blur(2px);
+}
+
+.beer-glass {
+  position: absolute;
+  background-size: 100% 100%;
+  height: 80%;
+  width: auto;
+  aspect-ratio: 0.65; 
+}
+
 .volcano-element {
   width: var(--emote-size-standard);;
   height: var(--emote-size-standard);
@@ -83,6 +107,7 @@ body,
   position: absolute;
   background-size: 100%;
   z-index: 10;
+  filter: invert(44%) sepia(61%) saturate(1001%) hue-rotate(0deg) brightness(99%) contrast(101%);
 }
 .rightwave-element {
   width: var(--emote-size-standard);

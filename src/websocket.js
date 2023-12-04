@@ -1,5 +1,5 @@
 import Variables from './config.js';
-import * as animations from './animations.js';
+import animations from './animations.js';
 import handlers from './handlers.js';
 
 
@@ -94,32 +94,32 @@ function connectws() {
   
         //Hype Train Start - Start the repeating train animation with the train head image and the first cart
         if (wsdata.event.type == "HypeTrainStart") {
-            animations.hypetrainstart();
+            animations.hypetrain.hypetrainstart();
             return;
         }
   
         //Hype Train Level Up - Add a cart to the end of the train
         if (wsdata.event.type == "HypeTrainLevelUp") {
-            animations.hypetrainlevelup();  
+            animations.hypetrain.hypetrainlevelup();  
             return;
         }
   
   
         //Hype Progression - Add a user to the current train cart
         if (wsdata.event.type == "HypeTrainUpdate") {
-          animations.hypetrainprogression(wsdata.data.userId);
+          animations.hypetrain.hypetrainprogression(wsdata.data.userId);
           return;
         }
   
         //Hype Train Finish - Remove the Train
         if (wsdata.event.type == "HypeTrainEnd") {
-          animations.hypetrainfinish();
+          animations.hypetrain.hypetrainfinish();
           return;
         }
 
         //Incoming Raid
         if (wsdata.event.type == "Raid") {
-          animations.incomingRaid(wsdata.data.from_broadcaster_user_id, wsdata.data.from_broadcaster_user_name, wsdata.data.viewers);
+          animations.hypetrain.incomingRaid(wsdata.data.from_broadcaster_user_id, wsdata.data.from_broadcaster_user_name, wsdata.data.viewers);
           return;
         }
   
@@ -130,10 +130,10 @@ function connectws() {
           }
   
           if(wsdata.data.coinFlipResult == "Heads"){
-            animations.createCoins(1, "Heads" );
+            animations.coinflip.createCoins(1, "Heads" );
           }
           if(wsdata.data.coinFlipResult == "Tails"){
-            animations.createCoins(1, "Tails" );
+            animations.coinflip.createCoins(1, "Tails" );
           }
         }
   

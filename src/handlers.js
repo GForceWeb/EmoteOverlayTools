@@ -43,7 +43,15 @@ function chatMessageHandler(wsdata) {
         console.log("Cheers Command Not Enabled");
         return
       }
-      cheersCommand(username);
+
+      let targetuser;
+
+      if(lowermessage.includes("@")){
+        let split = lowermessage.split('@');
+        targetuser = split[1];
+
+      }
+      cheersCommand(username, targetuser);
     }
 
     //Join Hype Train Command for Testing
@@ -55,7 +63,6 @@ function chatMessageHandler(wsdata) {
       hypetrainprogression(userId);
     }
 
-    //Emotes
     //TestCommand: 
     //emoteVolcano(['https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_2758558107d148c9b1e73c56cb2d9e06/default/dark/2.0', 'https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_dcaf0a56231d4443a91546b869b96a25/default/dark/2.0'], 100, 20);
 
@@ -85,7 +92,6 @@ function actionsHandler(wsdata){
 
 }
 
-
 function emoteMessageHandler(wsdata){
   var message = wsdata.data.message.message
   var lowermessage = wsdata.data.message.message.toLowerCase();
@@ -111,18 +117,18 @@ function emoteMessageHandler(wsdata){
 
   //TextCommand, FunctionName, DefaultEmotes, DefaultInterval
   let animationMap = [
-  ['!er rain','emoteRain', 50, 50],
-  ['!er rise', 'emoteRise', 100, 50],
-  ['!er explode', 'emoteExplode', 100, 20],
-  ['!er volcano', 'emoteVolcano', 100, 20],
-  ['!er firework', 'emoteFirework', 100, 20],
-  ['!er rightwave', 'emoteRightWave', 100, 20],
-  ['!er leftwave', 'emoteLeftWave', 100, 20],
-  ['!er carousel', 'emoteCarousel', 100, 150],
-  ['!er spiral', 'emoteSpiral', 100, 170],
-  ['!er comets', 'emoteComets', 100, 50],
-  ['!er dvd', 'emoteDVD', 8, 50],
-  ['!er text', 'emoteText', 'HYPE', 25],
+  ['!er rain','emoteRain', 50, 50, 'rain'],
+  ['!er rise', 'emoteRise', 100, 50, 'rise'],
+  ['!er explode', 'emoteExplode', 100, 20, 'explode'],
+  ['!er volcano', 'emoteVolcano', 100, 20, 'volcano'],
+  ['!er firework', 'emoteFirework', 100, 20, 'firework'],
+  ['!er rightwave', 'emoteRightWave', 100, 20, 'waves'],
+  ['!er leftwave', 'emoteLeftWave', 100, 20, 'waves'],
+  ['!er carousel', 'emoteCarousel', 100, 150, 'carousel'],
+  ['!er spiral', 'emoteSpiral', 100, 170, 'spiral'],
+  ['!er comets', 'emoteComets', 100, 50, 'comets'],
+  ['!er dvd', 'emoteDVD', 8, 50, 'dvd'],
+  ['!er text', 'emoteText', 'HYPE', 25, 'text'],
   //['!er cube', 'emoteCube', 8, 50],
   ];
 
@@ -168,12 +174,15 @@ function emoteMessageHandler(wsdata){
     }
 
     
-    console.log("running " + animation[1] + " with " + eCount + " emote(s)" + " and interval " + eInterval);
-    animations.runAnimation(animation[1], images, eCount, eInterval);
-    // let animationFunction = animationFunctions[animation[1]];
+    console.log("running " + animation[1] + " with " + eCount + " emote(s)" + " and interval " + eInterval + ". module: " + animation[4]);
+    if (animations.hasOwnProperty(animation[4]) && animations[animation[4]].hasOwnProperty(animation[1]) && typeof animations[animation[4]][animation[1]] === 'function'){
+      animations[animation[4]][animation[1]](images, eCount, eInterval);
+    } else {
+      console.log("Animation Function Mapping Failed");
+    }
 
       
-    });
+  });
   
 
 
@@ -185,27 +194,35 @@ function emoteMessageHandler(wsdata){
   }
 
   if(lowermessage.includes("!k ")) {
-      let rAnimation = Math.round(helpers.Randomizer(0,animationMap.length));
+      let rAnimation = Math.round(helpers.Randomizer(0,animationMap.length - 1 ));
       if(!eCount){eCount = animationMap[rAnimation][2];}
       if(!eInterval){eInterval = animationMap[rAnimation][3];}
 
-      animations.runAnimation(animationMap[rAnimation][1],images, eCount, eInterval);
-      // window[animationMap[rAnimation][1]](images, eCount, eInterval);
-      console.log("running " + animationMap[rAnimation][1] + " with " + eCount + " emote(s)" + " and interval " + eInterval);
+      let aniModule = animationMap[rAnimation][4];
+      let aniFunction = animationMap[rAnimation][1];
+      
+      console.log("Rolled: " + rAnimation + ". Running: " + aniModule + " : " + aniFunction + " with " + eCount + " emote(s)" + " and interval " + eInterval);
+      if (animations.hasOwnProperty(aniModule) && animations[aniModule].hasOwnProperty(aniFunction) && typeof animations[aniModule][aniFunction] === 'function'){
+        animations[aniModule][aniFunction](images, eCount, eInterval);
+      } else {
+        console.log("Animation Function Mapping Failed");
+      }
   }
 
 }
 
   //Normal emotes animations
-  let randomAnimation = Math.round(helpers.Randomizer(1,2));
+  let randomAnimation = Math.round(helpers.Randomizer(1,3));
     switch(randomAnimation) {
     case 1:
-        animations.runAnimation('emoteRain', images, emotecount);
+        animations.rain.emoteRain(images, emotecount);
         break;
 
     case 2:  
-        animations.runAnimation('emoteBounce', images, emotecount);
+        animations.bounce.emoteBounce(images, emotecount);
         break;
+    case 3:
+        animations.fade.create(images, emotecount);
   };
 }
 
@@ -225,7 +242,7 @@ function firstWordsHander(wsdata){
         
         avatar = [xhttp.responseText];
         //Trigger Animation
-        animations.runAnimation('emoteRain', avatar, defaultemotes, 50);
+        animations.rain.emoteRain(avatar, defaultemotes, 50);
 
     }
     };
@@ -234,33 +251,50 @@ function firstWordsHander(wsdata){
     xhttp.send();          
 }
 
-function cheersCommand(username){
-    var xhttp = new XMLHttpRequest();
-    xhttp.onreadystatechange = function () {
-      if (this.readyState == 4 && this.status == 200) {
-        // get display image for the user
-        console.log("got a user image response back");
-        // console.log(xhttp.responseText);
-      
-        let avatar = [xhttp.responseText];
-        //createAvatarCheers(avatar);
-      }
-      xhttp.open("GET", "https://decapi.me/twitch/avatar/" + username, true);
-      xhttp.send();
+
+async function cheersCommand(username, targetuser){
+
+  console.log("Cheers: " + username + targetuser);
+  let images = [];
+
+    try {
+        images.push(await helpers.getTwitchAvatar(username));
+    } catch (error) {
+        console.error(error);
+        throw error;
     }
-}
   
+    if(targetuser){
+      try {
+          images.push(await helpers.getTwitchAvatar(targetuser));
+      } catch (error) {
+          console.error(error);
+          throw error;
+      }
+        //images.push(helpers.getTwitchAvatar(targetuser));
+    } else {
+      images.push("https://static-cdn.jtvnw.net/jtv_user_pictures/8e051a26-051f-4abe-bcfa-e13a5d13fad0-profile_image-300x300.png");
+    }
+
+    const delayedFunction = helpers.executeWithInterval(function () {
+      animations.cheers.create(images);
+    }, 15000); 
+
+    delayedFunction();
+}
+
 function choonCommand(username){
 var xhttp = new XMLHttpRequest();
 xhttp.onreadystatechange = function () {
     if (this.readyState == 4 && this.status == 200) {
     // get display image for the user
-    console.log("got a user image response back");
+    console.log("got a user image response back: " + xhttp.responseText);
     // console.log(xhttp.responseText);
     
     let avatar = [xhttp.responseText];
+    
     //Disabled While Live
-    animations.runAnimation('createAvatarChoon', avatar);
+    animations.choon.createAvatarChoon(avatar);
 
     }
 };

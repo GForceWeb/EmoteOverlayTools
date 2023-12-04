@@ -17,6 +17,27 @@ function countvalues(str) {
     return str.match(/\s[0-9]+/g);
 }
 
+let lastExecutionTime = 0;
+
+function executeWithInterval(func, interval) {
+    
+    return function (...args) {
+        const currentTime = Date.now();
+
+        if (currentTime - lastExecutionTime >= interval) {
+        // Sufficient time has passed, execute the function
+        func(...args);
+        lastExecutionTime = currentTime;
+        } else {
+        // Not enough time has passed, wait for the remaining time
+        setTimeout(() => {
+            func(...args);
+            lastExecutionTime = Date.now();
+        }, interval - (currentTime - lastExecutionTime));
+        }
+    };
+}
+
 async function getTwitchAvatar(user, id=false){
 
 
@@ -46,7 +67,6 @@ async function getTwitchAvatar(user, id=false){
 
     return avatar;
 }
-
 
 function makeRequest(url) {
     return new Promise(function(resolve, reject) {
@@ -123,4 +143,5 @@ export default {
     Randomizer,
     TopOrBottom,
     getTwitchAvatar,
+    executeWithInterval,
 }
