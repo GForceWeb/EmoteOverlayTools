@@ -337,20 +337,21 @@ function lurkCommand(username){
 function shoutoutCommand(lowermessage){
             
     // ALLOW - And other word symbols
-    const regexp = /\@(.*)/;
-    const matches = lowermessage.match(regexp);
-    const sousername = matches[1];
+    let regexp = /\@(.*)/;
+    let matches = lowermessage.match(regexp);
+    let sousername = matches[1];
     console.log(sousername);
-    var xhttp = new XMLHttpRequest();
+    let xhttp = new XMLHttpRequest();
     console.log("created xmlhttp object");
     xhttp.onreadystatechange = function () {
       if (this.readyState == 4 && this.status == 200) {
         // get display image for the user
         console.log("got a user image response back");
-        // console.log(xhttp.responseText);
         
-        avatar = [xhttp.responseText];
-        animations.rain.emoteRain(avatar, defaultemotes, 50);
+        
+        let avatar = [xhttp.responseText];
+        //console.log(avatar);
+        animations.rain.emoteRain(avatar, globalConst.defaultemotes, 50);
 
       }
     };
