@@ -11,7 +11,7 @@ import helpers from '../helpers.js';
 //     createEmoteRain(images[imagenum]);
 // }, j * interval);
 
-export function VisualLurk(image, iterations=3, interval=5000) {
+export function create(image, iterations=3, interval=5000) {
     for (let j = 0; j < iterations; j++) {
         let delay = j * interval; // Delay between each iteration in ms
 
