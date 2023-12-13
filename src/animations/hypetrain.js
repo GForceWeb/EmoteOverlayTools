@@ -33,12 +33,8 @@ function createhypetrainprogression(image){
     let currentCart = cartsArray[cartsArray.length - 1];
 
     let UserImage = document.createElement('img');
-    // UserImage.id = divnumber;
-    // divnumber++;
 
     //image = "https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_2758558107d148c9b1e73c56cb2d9e06/default/dark/2.0";
-
-
 
     gsap.set(UserImage, { className: 'cart-image', z: 10, zIndex: 10, position: "absolute", left: "20px;", top: "70px", attr: { src: image } });
 
@@ -47,23 +43,25 @@ function createhypetrainprogression(image){
 
 }
 
+//Fade and Clear the Hype Train
 export function hypetrainfinish(){
 
     //console.log(HypeTrainWrapper.id);
-    let HypeWrapper = document.getElementsByClassName('train-wrapper');
+    let HypeWrapper = document.getElementsByClassName('train-wrapper')[0];
 
     clearTimeout(HypeWrapper.id);
 
-    //hypetimer = setTimeout("removeelement(" + HypeTrainWrapper.id + ")", 5000);
+    fade(HypeWrapper, 0, 4.5);
+
     setTimeout(() => {
-        helpers.removeelement(HypeWrapper);
+        helpers.removeelement(HypeWrapper.id);
     }, 5000);
 
 }
 
 export function hypetrainstart(){
 
-    let image = "../img/trainhead.png";
+    let image = "img/trainhead.png";
     let HypeTrainWrapper = document.createElement('div');
     HypeTrainWrapper.id = setTimeout(() => {
         helpers.removeelement(HypeTrainWrapper.id);
@@ -71,15 +69,7 @@ export function hypetrainstart(){
 
     let HypeTrainHead = document.createElement('div');
 
-    //hypetimer = setTimeout("removeelement(" + HypeTrainWrapper.id + ")", 360000);
-    // let hypetimer = setTimeout(() => {
-    //     helpers.removeelement(HypeTrainWrapper.id);
-    // }, 360000);
-
-    //HypeTrainWrapper.dataset = hypetimer; 
-
-    gsap.set(HypeTrainWrapper, { className: 'train-wrapper', x: 0 - innerWidth, y: 0, z: helpers.Randomizer(-200, 200), });
-    //gsap.set(HypeTrainWrapper, { className: 'train-wrapper', x: 0, y: 0, z: helpers.Randomizer(-200, 200), });
+    gsap.set(HypeTrainWrapper, { className: 'train-wrapper', x: 0 - innerWidth, y: 0, z: helpers.Randomizer(-200, 200), opacity: 0 });
     gsap.set(HypeTrainHead, { className: 'train-head', float: "right", z: helpers.Randomizer(-200, 200), width: "225px", height: "225px", backgroundImage: 'url(' + image + ')' });
 
     globalConst.warp.appendChild(HypeTrainWrapper);
@@ -89,6 +79,7 @@ export function hypetrainstart(){
     // console.log("Timeout:");
     // console.log(hypetimer);
 
+    fade(HypeTrainWrapper, 1, 3);
     train_animation(HypeTrainWrapper);
     hypetrainlevelup();
 
@@ -105,45 +96,45 @@ export function hypetrainstart(){
 export function hypetrainlevelup(){
 
     //reset the timeout on LevelUp
-    let trainWrapper = document.getElementsByClassName('train-wrapper');
-    trainWrapper = trainWrapper[0];
+    let trainWrapper = document.getElementsByClassName('train-wrapper')[0];
 
     console.log(trainWrapper.id);
+
+    //Level up resets 5 minute timer
     clearTimeout(trainWrapper.id);
     trainWrapper.id = setTimeout(() => {
         helpers.removeelement(trainWrapper.id);
-    }, 360000);
+    }, 365000);
 
     let cartNum = Math.round(helpers.Randomizer(1,2));
     let image;
     if(cartNum == 1){
-        image = "../img/cart1.png";
+        image = "img/cart1.png";
     }
     if(cartNum == 2){
-        image = "../img/cart2.png";
+        image = "img/cart2.png";
     }
     else {
-        image = "../img/cart1.png";
+        image = "img/cart1.png";
     }
 
     let HypeCart = document.createElement('div');
-    // HypeCart.id = divnumber;
-    // divnumber++;
-
-    gsap.set(HypeCart, { className: 'train-cart', float: "right", z: helpers.Randomizer(-200, 200), width: "225px", height: "225px" });
+    gsap.set(HypeCart, { className: 'train-cart', float: "right", z: helpers.Randomizer(-200, 200), width: "225px", height: "225px", opacity: 0 });
 
 
     let CartImage = document.createElement('img');
-    // CartImage.id = divnumber;
-    // divnumber++;
-
     gsap.set(CartImage, { className: 'cart-image', z: 100, zIndex: 100, position: "relative", width: "225px", height: "225px", attr: { src: image }  });
 
     trainWrapper.appendChild(HypeCart);
     HypeCart.appendChild(CartImage);
+    fade(HypeCart, 1, 3);
 
 }
 
+
+function fade(element, opacity, duration){
+    gsap.to(element, {opacity: opacity, duration: duration});
+}
 
 function train_animation(element){
     gsap.timeline({ repeat: -1, defaults: { duration: 3, ease: "none" } })
