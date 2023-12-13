@@ -60,7 +60,7 @@ function chatMessageHandler(wsdata) {
         console.log("Cheers Command Not Enabled");
         return
       }
-      hypetrainprogression(userId);
+      animations.hypetrain.hypetrainprogression(userId);
     }
 
     //TestCommand: 
@@ -72,23 +72,8 @@ function chatMessageHandler(wsdata) {
   }
 
 function actionsHandler(wsdata){
-  var data = wsdata.data;
-  var action = wsdata.data.name;
-
-  if (action == "New Cheer" || action == "New Sub"){
-      if(globalVars.hypetrainCache[2]){
-      globalVars.hypetrainCache[3] = globalVars.hypetrainCache[2];
-      globalVars.hypetrainCache[2] = globalVars.hypetrainCache[1];
-      globalVars.hypetrainCache[1] = wsdata.data.arguments.userId;
-      }
-      else if(globalVars.hypetrainCache[1]){
-      globalVars.hypetrainCache[2] = globalVars.hypetrainCache[1];
-      globalVars.hypetrainCache[1] = wsdata.data.arguments.userId;
-      }
-      else {
-      globalVars.hypetrainCache[1] = wsdata.data.arguments.userId;
-      }
-  }     
+  let data = wsdata.data;
+  let action = wsdata.data.name;
 
 }
 
@@ -341,7 +326,7 @@ function lurkCommand(username){
         // get display image for the user
         console.log("got the users image back");         
         //Trigger Animation
-        VisualLurk(xhttp.responseText, 3);
+        animations.lurking.create(xhttp.responseText, 3);
       }
     };
     //console.log(username);
@@ -365,7 +350,7 @@ function shoutoutCommand(lowermessage){
         // console.log(xhttp.responseText);
         
         avatar = [xhttp.responseText];
-        emoteRain(avatar, defaultemotes, 50);
+        animations.rain.emoteRain(avatar, defaultemotes, 50);
 
       }
     };

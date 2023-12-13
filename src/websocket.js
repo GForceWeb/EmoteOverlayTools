@@ -23,7 +23,7 @@ function connectws() {
             "request": "Subscribe",
             "events": {
               "Twitch": [
-                "ChatMessage", "FirstWord", "HypeTrainStart", "HypeTrainUpdate", "HypeTrainLevelUp", "HypeTrainEnd", "Raid" 
+                "ChatMessage", "FirstWord", "HypeTrainStart", "HypeTrainUpdate", "HypeTrainLevelUp", "HypeTrainEnd", "Raid", "Cheer", "Sub", "Resub", "GiftBomb", "GiftSub"
               ],
               "Raw": [
                 "Action"
@@ -78,53 +78,68 @@ function connectws() {
           console.log("Event Type undefined");
           return;
         }
+
+        let event = wsdata.event.type;
   
         //Pass to ChatMessageHandler 
-        if (wsdata.event.type == "ChatMessage") {
+        if (event == "ChatMessage") {
             handlers.chatMessageHandler(wsdata);
             if(globalConst.debug){console.log("Passed to ChatMessageHandler");} 
             return;
         }
   
         //Pass to FirstWordsHandler 
-        if (wsdata.event.type == "FirstWord") {
+        if (event == "FirstWord") {
             handlers.firstWordsHander(wsdata);
             return;
         }
+
+        if (event == "Sub" || event == "Resub" || event == "GiftBomb" || event == "GiftSub" || event == "Cheer"){
+            //Cheer uses message.username. Subs use userName
+            let userName = wsdata.data.message.username ? wsdata.data.message.username : wsdata.data.userName;
+
+            //Add user to the front of the array
+            globalVars.hypetrainCache.unshift(userName);
+
+            //clear the end of cache if too long
+            if(globalVars.hypetrainCache[3]) {
+              globalVars.hypetrainCache.pop()
+            }
+        }  
   
         //Hype Train Start - Start the repeating train animation with the train head image and the first cart
-        if (wsdata.event.type == "HypeTrainStart") {
+        if (event == "HypeTrainStart") {
             animations.hypetrain.hypetrainstart();
             return;
         }
   
         //Hype Train Level Up - Add a cart to the end of the train
-        if (wsdata.event.type == "HypeTrainLevelUp") {
+        if (event == "HypeTrainLevelUp") {
             animations.hypetrain.hypetrainlevelup();  
             return;
         }
   
   
         //Hype Progression - Add a user to the current train cart
-        if (wsdata.event.type == "HypeTrainUpdate") {
+        if (event == "HypeTrainUpdate") {
           animations.hypetrain.hypetrainprogression(wsdata.data.userId);
           return;
         }
   
         //Hype Train Finish - Remove the Train
-        if (wsdata.event.type == "HypeTrainEnd") {
+        if (event == "HypeTrainEnd") {
           animations.hypetrain.hypetrainfinish();
           return;
         }
 
         //Incoming Raid
-        if (wsdata.event.type == "Raid") {
+        if (event == "Raid") {
           animations.hypetrain.incomingRaid(wsdata.data.from_broadcaster_user_id, wsdata.data.from_broadcaster_user_name, wsdata.data.viewers);
           return;
         }
   
         //CoinFlipResults
-        if (wsdata.event.type == "Custom") {
+        if (event == "Custom") {
           if (wsdata.data.coinFlipResult == "undefined") {
             return
           }
@@ -138,7 +153,7 @@ function connectws() {
         }
   
         //Actions
-        if(wsdata.event.type == "Action"){
+        if(event == "Action"){
           handlers.actionsHandler(wsdata);
           return
         }
