@@ -79,22 +79,22 @@ function connectws() {
           return;
         }
 
-        let event = wsdata.event.type;
+        let eventType = wsdata.event.type;
   
         //Pass to ChatMessageHandler 
-        if (event == "ChatMessage") {
+        if (eventType == "ChatMessage") {
             handlers.chatMessageHandler(wsdata);
             if(globalConst.debug){console.log("Passed to ChatMessageHandler");} 
             return;
         }
   
         //Pass to FirstWordsHandler 
-        if (event == "FirstWord") {
+        if (eventType == "FirstWord") {
             handlers.firstWordsHander(wsdata);
             return;
         }
 
-        if (event == "Sub" || event == "Resub" || event == "GiftBomb" || event == "GiftSub" || event == "Cheer"){
+        if (eventType == "Sub" || eventType == "Resub" || eventType == "GiftBomb" || eventType == "GiftSub" || eventType == "Cheer"){
             //Cheer uses message.username. Subs use userName
             let userName = wsdata.data.message.username ? wsdata.data.message.username : wsdata.data.userName;
 
@@ -108,38 +108,38 @@ function connectws() {
         }  
   
         //Hype Train Start - Start the repeating train animation with the train head image and the first cart
-        if (event == "HypeTrainStart") {
+        if (eventType == "HypeTrainStart") {
             animations.hypetrain.hypetrainstart();
             return;
         }
   
         //Hype Train Level Up - Add a cart to the end of the train
-        if (event == "HypeTrainLevelUp") {
+        if (eventType == "HypeTrainLevelUp") {
             animations.hypetrain.hypetrainlevelup();  
             return;
         }
   
   
         //Hype Progression - Add a user to the current train cart
-        if (event == "HypeTrainUpdate") {
+        if (eventType == "HypeTrainUpdate") {
           animations.hypetrain.hypetrainprogression(wsdata.data.userId);
           return;
         }
   
         //Hype Train Finish - Remove the Train
-        if (event == "HypeTrainEnd") {
+        if (eventType == "HypeTrainEnd") {
           animations.hypetrain.hypetrainfinish();
           return;
         }
 
         //Incoming Raid
-        if (event == "Raid") {
+        if (eventType == "Raid") {
           animations.hypetrain.incomingRaid(wsdata.data.from_broadcaster_user_id, wsdata.data.from_broadcaster_user_name, wsdata.data.viewers);
           return;
         }
   
         //CoinFlipResults
-        if (event == "Custom") {
+        if (eventType == "Custom") {
           if (wsdata.data.coinFlipResult == "undefined") {
             return
           }
@@ -153,7 +153,7 @@ function connectws() {
         }
   
         //Actions
-        if(event == "Action"){
+        if(eventType == "Action"){
           handlers.actionsHandler(wsdata);
           return
         }
