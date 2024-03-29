@@ -1,13 +1,6 @@
 const urlParams = new URLSearchParams(window.location.search);
 
-let server = urlParams.get('server');
-if (!(server === null)) {
-  server="ws://"+server+"/";
-}
-else {
-  server="ws://localhost:8080/";
-}
-
+let server = urlParams.get('server') === null ? "ws://localhost:8080/" : "ws://"+urlParams.get('server')+"/";
 
 let maxemotes = urlParams.get('maxemotes') === null ? 200 : urlParams.get('maxemotes');
 let subonly = urlParams.get('subonly') === null ? false : true;
