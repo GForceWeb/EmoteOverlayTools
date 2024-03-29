@@ -61,7 +61,7 @@ export function hypetrainfinish(){
 
 export function hypetrainstart(){
 
-    let image = "img/trainhead.png";
+    let image = "../assets/img/trainhead.png";
     let HypeTrainWrapper = document.createElement('div');
     HypeTrainWrapper.id = setTimeout(() => {
         helpers.removeelement(HypeTrainWrapper.id);
@@ -109,13 +109,13 @@ export function hypetrainlevelup(){
     let cartNum = Math.round(helpers.Randomizer(1,2));
     let image;
     if(cartNum == 1){
-        image = "img/cart1.png";
+        image = "../assets/img/cart1.png";
     }
     if(cartNum == 2){
-        image = "img/cart2.png";
+        image = "../assets/img/cart2.png";
     }
     else {
-        image = "img/cart1.png";
+        image = "../assets/img/cart1.png";
     }
 
     let HypeCart = document.createElement('div');

@@ -19,7 +19,7 @@ export function createAvatarChoon(image) {
     //random = 1;
     console.log(random);
 
-    //var Note = createNote("img/music1.png");
+    //var Note = createNote("../assets/img/music1.png");
 
     let height = helpers.Randomizer(0, innerHeight-400 );
     let times = 5;
@@ -32,7 +32,7 @@ export function createAvatarChoon(image) {
 
         
         for(var i = 0; i < times; i++){
-            Notes[i] = createNote("img/music1.png");
+            Notes[i] = createNote("../assets/img/music1.png");
             gsap.set(Notes[i], { className: 'note-element', x: helpers.Randomizer(0, 250), y: height+helpers.Randomizer(-200, 200), z:10, opacity: 0, scale: 0.01 });
             note_animation(Notes[i]);
             console.log(Notes[i]);
@@ -46,7 +46,7 @@ export function createAvatarChoon(image) {
         gsap.set(Div, { className: 'choon-element', x: innerWidth+400, y: height, z:0  });
 
         for(var i = 0; i < times; i++){
-            Notes[i] = createNote("img/music1.png");
+            Notes[i] = createNote("../assets/img/music1.png");
             gsap.set(Notes[i], { className: 'note-element', x: helpers.Randomizer(innerWidth, innerWidth-350), y: height+helpers.Randomizer(-200, 200), z:10, opacity: 0, scale: 0.01 });
             note_animation(Notes[i]);
             console.log(Notes[i]);
@@ -91,7 +91,7 @@ function note_animation(element){
     let delay = helpers.Randomizer(3,6);
     //Fade In
     gsap.to(element, { opacity: 1, ease: Linear.easeNone, repeat: 0, delay: delay, duration: 4 });
-    gsap.to(element, { scale: 1, ease: Linear.easeNone, repeat: 0, delay: delay, duration: 4 });
+    gsap.to(element, { scale: 1.25, ease: Linear.easeNone, repeat: 0, delay: delay, duration: 4 });
     //Vertical Movement
     // gsap.to(element, { y: `-=${verticalTravel}`, x: function() {
     //     return helpers.Randomizer(-250, 250) + gsap.getProperty(element, "x");
@@ -146,11 +146,6 @@ function choon_animation_left(element) {
     //gsap.to(element, {duration: 0.2, rotationZ:'-=20', yoyo: true, repeat: 23, repeatDelay: 0, delay: 0.2})
     //gsap.to(element, {duration: 0.2, rotationZ: 0, yoyo: false, repeat: 0, delay: 4.8})
 
-    
-    // TweenMax.to(element, 1, { rotationZ:'+=40', yoyo:true,repeat: 0,  ease: Sine.easeInOut, delay: 0 });
-    // TweenMax.to(element, 1, { x:'+=200', yoyo:true,repeat: 0,  ease: Sine.easeInOut, delay: 0 });
-    // TweenMax.to(element, 1, { rotationZ:'-=40' , yoyo:true,repeat: 0,  ease: Sine.easeInOut, delay: 1.5 });
-    // TweenMax.to(element, 1, { x:'-=200' , yoyo:true,repeat: 0,  ease: Sine.easeInOut, delay: 1.5 });
 }
 
 function choon_animation_right(element){
