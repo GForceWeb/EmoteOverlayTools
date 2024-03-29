@@ -46,7 +46,7 @@ __webpack_require__.d(firework_namespaceObject, {
 var rain_namespaceObject = {};
 __webpack_require__.r(rain_namespaceObject);
 __webpack_require__.d(rain_namespaceObject, {
-  "emoteRain": () => (rain_emoteRain)
+  "emoteRain": () => (emoteRain)
 });
 
 // NAMESPACE OBJECT: ./src/animations/explode.js
@@ -67,7 +67,7 @@ __webpack_require__.d(rise_namespaceObject, {
 var lurking_namespaceObject = {};
 __webpack_require__.r(lurking_namespaceObject);
 __webpack_require__.d(lurking_namespaceObject, {
-  "VisualLurk": () => (lurking_VisualLurk)
+  "create": () => (create)
 });
 
 // NAMESPACE OBJECT: ./src/animations/comets.js
@@ -147,7 +147,7 @@ __webpack_require__.r(hypetrain_namespaceObject);
 __webpack_require__.d(hypetrain_namespaceObject, {
   "hypetrainfinish": () => (hypetrainfinish),
   "hypetrainlevelup": () => (hypetrainlevelup),
-  "hypetrainprogression": () => (hypetrain_hypetrainprogression),
+  "hypetrainprogression": () => (hypetrainprogression),
   "hypetrainstart": () => (hypetrainstart)
 });
 
@@ -162,7 +162,7 @@ __webpack_require__.d(choon_namespaceObject, {
 var cheers_namespaceObject = {};
 __webpack_require__.r(cheers_namespaceObject);
 __webpack_require__.d(cheers_namespaceObject, {
-  "create": () => (create)
+  "create": () => (cheers_create)
 });
 
 // NAMESPACE OBJECT: ./src/animations/invaders.js
@@ -190,17 +190,9 @@ __webpack_require__.d(fade_namespaceObject, {
 ;// CONCATENATED MODULE: ./src/config.js
 const urlParams = new URLSearchParams(window.location.search);
 
-let server = urlParams.get('server');
-if (!(server === null)) {
-  server="ws://"+server+"/";
-}
-else {
-  server="ws://localhost:8080/";
-}
+let server = urlParams.get('server') === null ? "ws://localhost:8080/" : "ws://"+urlParams.get('server')+"/";
 
-
-// const maxemotes = urlParams.get('maxemotes');
-let config_maxemotes = urlParams.get('maxemotes') === null ? 200 : urlParams.get('maxemotes');
+let maxemotes = urlParams.get('maxemotes') === null ? 200 : urlParams.get('maxemotes');
 let subonly = urlParams.get('subonly') === null ? false : true;
 let emoterain = urlParams.get('emoterain') === null ? false : true;
 let welcome = urlParams.get('welcome') === null ? false : true;
@@ -208,17 +200,10 @@ let config_all = urlParams.get('all') === null ? false : true;
 let lurk = urlParams.get('lurk') === null ? false : true;
 let kappagen = urlParams.get('kappagen') === null ? false : true;
 let config_debug = urlParams.get('debug') === null ? false : true;
+let hypetrain = urlParams.get('hypetrain') === null ? false : true;
+let cheers = urlParams.get('cheers') === null ? false : true;
+let choon = urlParams.get('choon') === null ? false : true;
 
-// console.log(all);
-// console.log(urlParams.get('all') );
-
-// if(maxemotes === null){maxemotes = 200;}
-// if(!(lurk === null )){lurk = true;} else {lurk = null;}
-// if(!(kappagen === null )){kappagen = true;} else {kappagen = null;}
-// //if(!(all === null )){all = true;} else {all = null;}
-// if(!(subonly === null )){subonly = true;} else {subonly = null;}
-// //if(!(emoterain === null )){emoterain = true;} else {emoterain = null;}
-// if(!(welcome === null )){welcome = true;} else {welcome = null;}
 
 if(config_all){
 lurk = true;
@@ -280,10 +265,10 @@ var globalVars = {
 // Global constants
 const globalConst = {
     defaultemotes: 50,
-    maxemotes: config_maxemotes,
+    maxemotes,
     ws: new WebSocket(server),
     warp: document.getElementById("confetti-container"),
-    maxemotes: config_maxemotes,
+    maxemotes,
     subonly,
     emoterain,
     welcome,
@@ -292,11 +277,15 @@ const globalConst = {
     kappagen,
     debug: config_debug,
     warp: config_warp,
+    hypetrain,
+    cheers,
+    choon
 };
 
-
-
-
+if(globalConst.debug) {
+  console.log(globalConst);
+  console.log(globalVars);
+}
   
 /* harmony default export */ const config = ({
     globalVars,
@@ -538,7 +527,7 @@ function firework_explode_animation(element, delay=5) {
 const { globalVars: rain_globalVars, globalConst: rain_globalConst} = config;
 
 
-function rain_emoteRain(images, count=100, interval=50) {
+function emoteRain(images, count=100, interval=50) {
     
     let imgcount = images.length;
 
@@ -696,7 +685,7 @@ const { globalVars: lurking_globalVars, globalConst: lurking_globalConst} = conf
 //     createEmoteRain(images[imagenum]);
 // }, j * interval);
 
-function lurking_VisualLurk(image, iterations=3, interval=5000) {
+function create(image, iterations=3, interval=5000) {
     for (let j = 0; j < iterations; j++) {
         let delay = j * interval; // Delay between each iteration in ms
 
@@ -2288,7 +2277,7 @@ const { globalVars: hypetrain_globalVars, globalConst: hypetrain_globalConst} = 
 
 
 //Add user avatar to current train car
-function hypetrain_hypetrainprogression(userId){
+function hypetrainprogression(userId){
 
     var xhttp = new XMLHttpRequest();
     console.log("created xmlhttp object");
@@ -2316,12 +2305,8 @@ function createhypetrainprogression(image){
     let currentCart = cartsArray[cartsArray.length - 1];
 
     let UserImage = document.createElement('img');
-    // UserImage.id = divnumber;
-    // divnumber++;
 
     //image = "https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_2758558107d148c9b1e73c56cb2d9e06/default/dark/2.0";
-
-
 
     gsap.set(UserImage, { className: 'cart-image', z: 10, zIndex: 10, position: "absolute", left: "20px;", top: "70px", attr: { src: image } });
 
@@ -2330,23 +2315,25 @@ function createhypetrainprogression(image){
 
 }
 
+//Fade and Clear the Hype Train
 function hypetrainfinish(){
 
     //console.log(HypeTrainWrapper.id);
-    let HypeWrapper = document.getElementsByClassName('train-wrapper');
+    let HypeWrapper = document.getElementsByClassName('train-wrapper')[0];
 
     clearTimeout(HypeWrapper.id);
 
-    //hypetimer = setTimeout("removeelement(" + HypeTrainWrapper.id + ")", 5000);
+    fade(HypeWrapper, 0, 4.5);
+
     setTimeout(() => {
-        helpers.removeelement(HypeWrapper);
+        helpers.removeelement(HypeWrapper.id);
     }, 5000);
 
 }
 
 function hypetrainstart(){
 
-    let image = "../img/trainhead.png";
+    let image = "../assets/img/trainhead.png";
     let HypeTrainWrapper = document.createElement('div');
     HypeTrainWrapper.id = setTimeout(() => {
         helpers.removeelement(HypeTrainWrapper.id);
@@ -2354,15 +2341,7 @@ function hypetrainstart(){
 
     let HypeTrainHead = document.createElement('div');
 
-    //hypetimer = setTimeout("removeelement(" + HypeTrainWrapper.id + ")", 360000);
-    // let hypetimer = setTimeout(() => {
-    //     helpers.removeelement(HypeTrainWrapper.id);
-    // }, 360000);
-
-    //HypeTrainWrapper.dataset = hypetimer; 
-
-    gsap.set(HypeTrainWrapper, { className: 'train-wrapper', x: 0 - innerWidth, y: 0, z: helpers.Randomizer(-200, 200), });
-    //gsap.set(HypeTrainWrapper, { className: 'train-wrapper', x: 0, y: 0, z: helpers.Randomizer(-200, 200), });
+    gsap.set(HypeTrainWrapper, { className: 'train-wrapper', x: 0 - innerWidth, y: 0, z: helpers.Randomizer(-200, 200), opacity: 0 });
     gsap.set(HypeTrainHead, { className: 'train-head', float: "right", z: helpers.Randomizer(-200, 200), width: "225px", height: "225px", backgroundImage: 'url(' + image + ')' });
 
     hypetrain_globalConst.warp.appendChild(HypeTrainWrapper);
@@ -2372,13 +2351,14 @@ function hypetrainstart(){
     // console.log("Timeout:");
     // console.log(hypetimer);
 
+    fade(HypeTrainWrapper, 1, 3);
     train_animation(HypeTrainWrapper);
     hypetrainlevelup();
 
     let delayTime = 1000;
     if(hypetrain_globalVars.hypetrainCache){
         hypetrain_globalVars.hypetrainCache.forEach(async (userId) => {
-            delay(delayTime).then(() => hypetrain_hypetrainprogression(userId));
+            delay(delayTime).then(() => hypetrainprogression(userId));
             delayTime = delayTime + 3000;
         });
     }
@@ -2388,45 +2368,45 @@ function hypetrainstart(){
 function hypetrainlevelup(){
 
     //reset the timeout on LevelUp
-    let trainWrapper = document.getElementsByClassName('train-wrapper');
-    trainWrapper = trainWrapper[0];
+    let trainWrapper = document.getElementsByClassName('train-wrapper')[0];
 
     console.log(trainWrapper.id);
+
+    //Level up resets 5 minute timer
     clearTimeout(trainWrapper.id);
     trainWrapper.id = setTimeout(() => {
         helpers.removeelement(trainWrapper.id);
-    }, 360000);
+    }, 365000);
 
     let cartNum = Math.round(helpers.Randomizer(1,2));
     let image;
     if(cartNum == 1){
-        image = "../img/cart1.png";
+        image = "../assets/img/cart1.png";
     }
     if(cartNum == 2){
-        image = "../img/cart2.png";
+        image = "../assets/img/cart2.png";
     }
     else {
-        image = "../img/cart1.png";
+        image = "../assets/img/cart1.png";
     }
 
     let HypeCart = document.createElement('div');
-    // HypeCart.id = divnumber;
-    // divnumber++;
-
-    gsap.set(HypeCart, { className: 'train-cart', float: "right", z: helpers.Randomizer(-200, 200), width: "225px", height: "225px" });
+    gsap.set(HypeCart, { className: 'train-cart', float: "right", z: helpers.Randomizer(-200, 200), width: "225px", height: "225px", opacity: 0 });
 
 
     let CartImage = document.createElement('img');
-    // CartImage.id = divnumber;
-    // divnumber++;
-
     gsap.set(CartImage, { className: 'cart-image', z: 100, zIndex: 100, position: "relative", width: "225px", height: "225px", attr: { src: image }  });
 
     trainWrapper.appendChild(HypeCart);
     HypeCart.appendChild(CartImage);
+    fade(HypeCart, 1, 3);
 
 }
 
+
+function fade(element, opacity, duration){
+    gsap.to(element, {opacity: opacity, duration: duration});
+}
 
 function train_animation(element){
     gsap.timeline({ repeat: -1, defaults: { duration: 3, ease: "none" } })
@@ -2464,7 +2444,7 @@ function createAvatarChoon(image) {
     //random = 1;
     console.log(random);
 
-    //var Note = createNote("img/music1.png");
+    //var Note = createNote("../assets/img/music1.png");
 
     let height = helpers.Randomizer(0, innerHeight-400 );
     let times = 5;
@@ -2477,7 +2457,7 @@ function createAvatarChoon(image) {
 
         
         for(var i = 0; i < times; i++){
-            Notes[i] = createNote("img/music1.png");
+            Notes[i] = createNote("../assets/img/music1.png");
             gsap.set(Notes[i], { className: 'note-element', x: helpers.Randomizer(0, 250), y: height+helpers.Randomizer(-200, 200), z:10, opacity: 0, scale: 0.01 });
             note_animation(Notes[i]);
             console.log(Notes[i]);
@@ -2491,7 +2471,7 @@ function createAvatarChoon(image) {
         gsap.set(Div, { className: 'choon-element', x: innerWidth+400, y: height, z:0  });
 
         for(var i = 0; i < times; i++){
-            Notes[i] = createNote("img/music1.png");
+            Notes[i] = createNote("../assets/img/music1.png");
             gsap.set(Notes[i], { className: 'note-element', x: helpers.Randomizer(innerWidth, innerWidth-350), y: height+helpers.Randomizer(-200, 200), z:10, opacity: 0, scale: 0.01 });
             note_animation(Notes[i]);
             console.log(Notes[i]);
@@ -2536,7 +2516,7 @@ function note_animation(element){
     let delay = helpers.Randomizer(3,6);
     //Fade In
     gsap.to(element, { opacity: 1, ease: Linear.easeNone, repeat: 0, delay: delay, duration: 4 });
-    gsap.to(element, { scale: 1, ease: Linear.easeNone, repeat: 0, delay: delay, duration: 4 });
+    gsap.to(element, { scale: 1.25, ease: Linear.easeNone, repeat: 0, delay: delay, duration: 4 });
     //Vertical Movement
     // gsap.to(element, { y: `-=${verticalTravel}`, x: function() {
     //     return helpers.Randomizer(-250, 250) + gsap.getProperty(element, "x");
@@ -2591,11 +2571,6 @@ function choon_animation_left(element) {
     //gsap.to(element, {duration: 0.2, rotationZ:'-=20', yoyo: true, repeat: 23, repeatDelay: 0, delay: 0.2})
     //gsap.to(element, {duration: 0.2, rotationZ: 0, yoyo: false, repeat: 0, delay: 4.8})
 
-    
-    // TweenMax.to(element, 1, { rotationZ:'+=40', yoyo:true,repeat: 0,  ease: Sine.easeInOut, delay: 0 });
-    // TweenMax.to(element, 1, { x:'+=200', yoyo:true,repeat: 0,  ease: Sine.easeInOut, delay: 0 });
-    // TweenMax.to(element, 1, { rotationZ:'-=40' , yoyo:true,repeat: 0,  ease: Sine.easeInOut, delay: 1.5 });
-    // TweenMax.to(element, 1, { x:'-=200' , yoyo:true,repeat: 0,  ease: Sine.easeInOut, delay: 1.5 });
 }
 
 function choon_animation_right(element){
@@ -2630,7 +2605,7 @@ Drops sender and target (or me) into the beer.
 Floats/bounces around then all fade out
 */
 
-function create(images) {
+function cheers_create(images) {
 
     let imgcount = images.length;
     let interval = 250;
@@ -3153,8 +3128,8 @@ function chatMessageHandler(wsdata) {
     }
 
     //Choon
-    if (lowermessage.includes("!choon")) {
-      if(!handlers_globalConst.all){
+    if (lowermessage.includes("!choon") || lowermessage.includes("!tune")) {
+      if(!handlers_globalConst.all && !handlers_globalConst.choon){
         console.log("Choon Command Not Enabled");
         return
       }
@@ -3162,8 +3137,8 @@ function chatMessageHandler(wsdata) {
     }
 
     //Cheers
-    if (lowermessage.includes("!cheers") || lowermessage.includes("!tune")) {
-      if(!handlers_globalConst.all){
+    if (lowermessage.includes("!cheers")) {
+      if(!handlers_globalConst.all && !handlers_globalConst.cheers){
         console.log("Cheers Command Not Enabled");
         return
       }
@@ -3184,7 +3159,7 @@ function chatMessageHandler(wsdata) {
         console.log("Cheers Command Not Enabled");
         return
       }
-      hypetrainprogression(userId);
+      src_animations.hypetrain.hypetrainprogression(userId);
     }
 
     //TestCommand: 
@@ -3196,23 +3171,8 @@ function chatMessageHandler(wsdata) {
   }
 
 function actionsHandler(wsdata){
-  var data = wsdata.data;
-  var action = wsdata.data.name;
-
-  if (action == "New Cheer" || action == "New Sub"){
-      if(handlers_globalVars.hypetrainCache[2]){
-      handlers_globalVars.hypetrainCache[3] = handlers_globalVars.hypetrainCache[2];
-      handlers_globalVars.hypetrainCache[2] = handlers_globalVars.hypetrainCache[1];
-      handlers_globalVars.hypetrainCache[1] = wsdata.data.arguments.userId;
-      }
-      else if(handlers_globalVars.hypetrainCache[1]){
-      handlers_globalVars.hypetrainCache[2] = handlers_globalVars.hypetrainCache[1];
-      handlers_globalVars.hypetrainCache[1] = wsdata.data.arguments.userId;
-      }
-      else {
-      handlers_globalVars.hypetrainCache[1] = wsdata.data.arguments.userId;
-      }
-  }     
+  let data = wsdata.data;
+  let action = wsdata.data.name;
 
 }
 
@@ -3234,8 +3194,8 @@ function emoteMessageHandler(wsdata){
   var eCount = helpers.getCommandValue(lowermessage, "count");
 
   if(eCount != null) {
-  if(eCount > maxemotes){
-      eCount = maxemotes;           
+  if(eCount > handlers_globalConst.maxemotes){
+      eCount = handlers_globalConst.maxemotes;           
   }
   }
 
@@ -3356,7 +3316,7 @@ function firstWordsHander(wsdata){
     return
     }
     
-    var username = wsdata.data.user.name;
+    var username = wsdata.data.message.username;
     var xhttp = new XMLHttpRequest();
     console.log("created xmlhttp object");
     xhttp.onreadystatechange = function () {
@@ -3465,7 +3425,7 @@ function lurkCommand(username){
         // get display image for the user
         console.log("got the users image back");         
         //Trigger Animation
-        VisualLurk(xhttp.responseText, 3);
+        src_animations.lurking.create(xhttp.responseText, 3);
       }
     };
     //console.log(username);
@@ -3476,20 +3436,21 @@ function lurkCommand(username){
 function shoutoutCommand(lowermessage){
             
     // ALLOW - And other word symbols
-    const regexp = /\@(.*)/;
-    const matches = lowermessage.match(regexp);
-    const sousername = matches[1];
+    let regexp = /\@(.*)/;
+    let matches = lowermessage.match(regexp);
+    let sousername = matches[1];
     console.log(sousername);
-    var xhttp = new XMLHttpRequest();
+    let xhttp = new XMLHttpRequest();
     console.log("created xmlhttp object");
     xhttp.onreadystatechange = function () {
       if (this.readyState == 4 && this.status == 200) {
         // get display image for the user
         console.log("got a user image response back");
-        // console.log(xhttp.responseText);
         
-        avatar = [xhttp.responseText];
-        emoteRain(avatar, defaultemotes, 50);
+        
+        let avatar = [xhttp.responseText];
+        //console.log(avatar);
+        src_animations.rain.emoteRain(avatar, handlers_globalConst.defaultemotes, 50);
 
       }
     };
@@ -3548,7 +3509,7 @@ function connectws() {
             "request": "Subscribe",
             "events": {
               "Twitch": [
-                "ChatMessage", "FirstWord", "HypeTrainStart", "HypeTrainUpdate", "HypeTrainLevelUp", "HypeTrainEnd", "Raid" 
+                "ChatMessage", "FirstWord", "HypeTrainStart", "HypeTrainUpdate", "HypeTrainLevelUp", "HypeTrainEnd", "Raid", "Cheer", "Sub", "Resub", "GiftBomb", "GiftSub"
               ],
               "Raw": [
                 "Action"
@@ -3603,53 +3564,68 @@ function connectws() {
           console.log("Event Type undefined");
           return;
         }
+
+        let eventType = wsdata.event.type;
   
         //Pass to ChatMessageHandler 
-        if (wsdata.event.type == "ChatMessage") {
+        if (eventType == "ChatMessage") {
             handlers.chatMessageHandler(wsdata);
             if(websocket_globalConst.debug){console.log("Passed to ChatMessageHandler");} 
             return;
         }
   
         //Pass to FirstWordsHandler 
-        if (wsdata.event.type == "FirstWord") {
+        if (eventType == "FirstWord") {
             handlers.firstWordsHander(wsdata);
             return;
         }
+
+        if (eventType == "Sub" || eventType == "Resub" || eventType == "GiftBomb" || eventType == "GiftSub" || eventType == "Cheer"){
+            //Cheer uses message.username. Subs use userName
+            let userName = wsdata.data.message.username ? wsdata.data.message.username : wsdata.data.userName;
+
+            //Add user to the front of the array
+            websocket_globalVars.hypetrainCache.unshift(userName);
+
+            //clear the end of cache if too long
+            if(websocket_globalVars.hypetrainCache[3]) {
+              websocket_globalVars.hypetrainCache.pop()
+            }
+        }  
   
         //Hype Train Start - Start the repeating train animation with the train head image and the first cart
-        if (wsdata.event.type == "HypeTrainStart") {
+        if (eventType == "HypeTrainStart" && (websocket_globalConst.hypetrain || websocket_globalConst.all)) {
             src_animations.hypetrain.hypetrainstart();
             return;
         }
   
         //Hype Train Level Up - Add a cart to the end of the train
-        if (wsdata.event.type == "HypeTrainLevelUp") {
+        if (eventType == "HypeTrainLevelUp" && (websocket_globalConst.hypetrain || websocket_globalConst.all)) {
             src_animations.hypetrain.hypetrainlevelup();  
             return;
         }
   
   
         //Hype Progression - Add a user to the current train cart
-        if (wsdata.event.type == "HypeTrainUpdate") {
-          src_animations.hypetrain.hypetrainprogression(wsdata.data.userId);
+        if (eventType == "HypeTrainUpdate" && (websocket_globalConst.hypetrain || websocket_globalConst.all)) {
+          src_animations.hypetrain.hypetrainprogression(wsdata.data.last_contribution.user_id);
           return;
         }
   
         //Hype Train Finish - Remove the Train
-        if (wsdata.event.type == "HypeTrainEnd") {
+        if (eventType == "HypeTrainEnd" && (websocket_globalConst.hypetrain || websocket_globalConst.all)) {
           src_animations.hypetrain.hypetrainfinish();
           return;
         }
 
         //Incoming Raid
-        if (wsdata.event.type == "Raid") {
-          src_animations.hypetrain.incomingRaid(wsdata.data.from_broadcaster_user_id, wsdata.data.from_broadcaster_user_name, wsdata.data.viewers);
+        if (eventType == "Raid") {
+          //animations.hypetrain.incomingRaid(wsdata.data.from_broadcaster_user_id, wsdata.data.from_broadcaster_user_name, wsdata.data.viewers);
           return;
         }
   
         //CoinFlipResults
-        if (wsdata.event.type == "Custom") {
+        if (eventType == "Custom") {
           if (wsdata.data.coinFlipResult == "undefined") {
             return
           }
@@ -3663,7 +3639,7 @@ function connectws() {
         }
   
         //Actions
-        if(wsdata.event.type == "Action"){
+        if(eventType == "Action"){
           handlers.actionsHandler(wsdata);
           return
         }
