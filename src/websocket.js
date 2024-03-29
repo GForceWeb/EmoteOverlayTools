@@ -108,33 +108,33 @@ function connectws() {
         }  
   
         //Hype Train Start - Start the repeating train animation with the train head image and the first cart
-        if (eventType == "HypeTrainStart") {
+        if (eventType == "HypeTrainStart" && (globalConst.hypetrain || globalConst.all)) {
             animations.hypetrain.hypetrainstart();
             return;
         }
   
         //Hype Train Level Up - Add a cart to the end of the train
-        if (eventType == "HypeTrainLevelUp") {
+        if (eventType == "HypeTrainLevelUp" && (globalConst.hypetrain || globalConst.all)) {
             animations.hypetrain.hypetrainlevelup();  
             return;
         }
   
   
         //Hype Progression - Add a user to the current train cart
-        if (eventType == "HypeTrainUpdate") {
-          animations.hypetrain.hypetrainprogression(wsdata.data.userId);
+        if (eventType == "HypeTrainUpdate" && (globalConst.hypetrain || globalConst.all)) {
+          animations.hypetrain.hypetrainprogression(wsdata.data.last_contribution.user_id);
           return;
         }
   
         //Hype Train Finish - Remove the Train
-        if (eventType == "HypeTrainEnd") {
+        if (eventType == "HypeTrainEnd" && (globalConst.hypetrain || globalConst.all)) {
           animations.hypetrain.hypetrainfinish();
           return;
         }
 
         //Incoming Raid
         if (eventType == "Raid") {
-          animations.hypetrain.incomingRaid(wsdata.data.from_broadcaster_user_id, wsdata.data.from_broadcaster_user_name, wsdata.data.viewers);
+          //animations.hypetrain.incomingRaid(wsdata.data.from_broadcaster_user_id, wsdata.data.from_broadcaster_user_name, wsdata.data.viewers);
           return;
         }
   

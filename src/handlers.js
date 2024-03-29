@@ -29,8 +29,8 @@ function chatMessageHandler(wsdata) {
     }
 
     //Choon
-    if (lowermessage.includes("!choon")) {
-      if(!globalConst.all){
+    if (lowermessage.includes("!choon") || lowermessage.includes("!tune")) {
+      if(!globalConst.all && !globalConst.choon){
         console.log("Choon Command Not Enabled");
         return
       }
@@ -38,8 +38,8 @@ function chatMessageHandler(wsdata) {
     }
 
     //Cheers
-    if (lowermessage.includes("!cheers") || lowermessage.includes("!tune")) {
-      if(!globalConst.all){
+    if (lowermessage.includes("!cheers")) {
+      if(!globalConst.all && !globalConst.cheers){
         console.log("Cheers Command Not Enabled");
         return
       }
@@ -95,8 +95,8 @@ function emoteMessageHandler(wsdata){
   var eCount = helpers.getCommandValue(lowermessage, "count");
 
   if(eCount != null) {
-  if(eCount > maxemotes){
-      eCount = maxemotes;           
+  if(eCount > globalConst.maxemotes){
+      eCount = globalConst.maxemotes;           
   }
   }
 
@@ -217,7 +217,7 @@ function firstWordsHander(wsdata){
     return
     }
     
-    var username = wsdata.data.user.name;
+    var username = wsdata.data.message.username;
     var xhttp = new XMLHttpRequest();
     console.log("created xmlhttp object");
     xhttp.onreadystatechange = function () {

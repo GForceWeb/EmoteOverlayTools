@@ -9,7 +9,6 @@ else {
 }
 
 
-// const maxemotes = urlParams.get('maxemotes');
 let maxemotes = urlParams.get('maxemotes') === null ? 200 : urlParams.get('maxemotes');
 let subonly = urlParams.get('subonly') === null ? false : true;
 let emoterain = urlParams.get('emoterain') === null ? false : true;
@@ -18,17 +17,10 @@ let all = urlParams.get('all') === null ? false : true;
 let lurk = urlParams.get('lurk') === null ? false : true;
 let kappagen = urlParams.get('kappagen') === null ? false : true;
 let debug = urlParams.get('debug') === null ? false : true;
+let hypetrain = urlParams.get('hypetrain') === null ? false : true;
+let cheers = urlParams.get('cheers') === null ? false : true;
+let choon = urlParams.get('choon') === null ? false : true;
 
-// console.log(all);
-// console.log(urlParams.get('all') );
-
-// if(maxemotes === null){maxemotes = 200;}
-// if(!(lurk === null )){lurk = true;} else {lurk = null;}
-// if(!(kappagen === null )){kappagen = true;} else {kappagen = null;}
-// //if(!(all === null )){all = true;} else {all = null;}
-// if(!(subonly === null )){subonly = true;} else {subonly = null;}
-// //if(!(emoterain === null )){emoterain = true;} else {emoterain = null;}
-// if(!(welcome === null )){welcome = true;} else {welcome = null;}
 
 if(all){
 lurk = true;
@@ -102,11 +94,15 @@ export const globalConst = {
     kappagen,
     debug,
     warp,
+    hypetrain,
+    cheers,
+    choon
 };
 
-
-
-
+if(globalConst.debug) {
+  console.log(globalConst);
+  console.log(globalVars);
+}
   
 export default {
     globalVars,
