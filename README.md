@@ -7,7 +7,7 @@ Inspiration to work on this came from the lack of Twitch Animated emote support 
 ## Installation
 
 - Ensure you have Streamer.Bot installed and running with the WebSocket server enabled (Servers/Clients -> WebSocket Server -> Start Server)
-- Head to [https://gforceweb.github.io/EmoteOverlayTools/config.html](https://gforceweb.github.io/EmoteOverlayTools/config.html) and select your settings
+- Head to [https://gforceweb.github.io/EmoteOverlayTools/dist/config.html](https://gforceweb.github.io/EmoteOverlayTools/config.html) and select your settings
 - Copy the URL from the address bar and add it as a Browser Source in OBS
 - Enjoy!
 
@@ -18,7 +18,6 @@ Inspiration to work on this came from the lack of Twitch Animated emote support 
 - Maximum Emotes Per Action: Sets a hard cap on the number of emotes that can be included in a single action. Can help prevent lag if your setup struggles with too many emotes.
 - Restrict Commands to Subs Only: If enabled, only users with a Twitch Subscriber role can use the !k and !er commands.
 - SB Server Address: Leave as `localhost:8080` unless you run Streamer.Bot on a different machine to OBS
--
 
 ```
     welcome
