@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>URL Configuration Form</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@1.10.0/dist/full.css" rel="stylesheet">
+
+  <style>
+    #features {
+      height: 160px;
+    }
+  </style>
+
+</head>
+
+<body class="bg-gray-100 bg-opacity-0">
+  <div class="container mx-auto py-8">
+    <h1 class="text-3xl font-bold mb-6">URL Configuration Form</h1>
+
+    <form id="configForm" class="space-y-4">
+      <!-- Form fields will be dynamically generated here -->
+    </form>
+
+    <p id="outputURL" class="mt-4">https://gforceweb.github.io/EmoteOverlayTools/dist/?all</p>
+
+    <button id="copyButton" class="btn btn-primary mt-4">Copy URL</button>
+  </div>
+
+  <script>
+    // Define your parameters as a JSON object
+    var parameters = [
+      {
+        name: "all",
+        type: "select",
+        label: "Enable All Features?",
+        options: ["True", "False"],
+        defaultValue: "True",
+        visibile: true,
+      },
+      {
+        name: "features",
+        type: "multiselect",
+        label: "Specific Features to Enable (Select Multiple with Ctrl/Shift)",
+        options: ["lurk", "welcome", "emoterain", "kappagen", "choon", "cheers", "hypetrain"],
+        defaultValue: "", //["all"]
+        visibile: false
+      },
+      // {
+      //   name: "features2",
+      //   type: "toggle",
+      //   label: "Specific Features to Enable",
+      //   options: ["lurk", "welcome", "emoterain", "kappagen"],
+      //   defaultValue: "", //["all"]
+      //   visibile: false
+      // },
+      {
+        name: "maxemotes",
+        type: "number",
+        label: "Maximum Emotes Per Action",
+        defaultValue: "200",
+        visibile: true
+      },
+      {
+        name: "subonly",
+        type: "select",
+        label: "Restrict commands to Subscribers Only",
+        options: ["True", "False"],
+        defaultValue: "False",
+        visibile: true,
+      },
+      {
+        name: "server",
+        type: "text",
+        label: "IP Address of the StreamerBot WebSocket Server",
+        defaultValue: "localhost:8080",
+        visibile: true,
+      }
+    ];
+
+    var form = document.getElementById("configForm");
+    var outputURL = document.getElementById("outputURL");
+    var copyButton = document.getElementById("copyButton");
+
+    // Function to generate the HTML form based on the parameters JSON
+    function generateForm() {
+      parameters.forEach(function (param) {
+        var field;
+        switch (param.type) {
+          case "text":
+          case "number":
+            field = document.createElement("input");
+            field.type = param.type;
+            field.id = param.name;
+            field.classList.add("input", "input-bordered", "w-full", "max-w-xs");
+            field.name = param.name;
+            field.placeholder = param.label;
+            field.value = param.defaultValue;
+            break;
+          case "select":
+            field = document.createElement("select");
+            field.id = param.name;
+            field.name = param.name;
+            field.classList.add("select", "select-bordered", "w-full", "max-w-xs");
+            param.options.forEach(function (option) {
+              var optionElement = document.createElement("option");
+              optionElement.value = option;
+              optionElement.textContent = option;
+              if (option === param.defaultValue) {
+                optionElement.selected = true;
+              }
+              field.appendChild(optionElement);
+            });
+            break;
+          case "multiselect":
+            field = document.createElement("select");
+            field.id = param.name;
+            field.name = param.name;
+            field.classList.add("block", "select", "select-bordered", "grow", "w-full", "max-w-lg");
+            field.multiple = true;
+            param.options.forEach(function (option) {
+              var optionElement = document.createElement("option");
+              optionElement.value = option;
+              optionElement.textContent = option;
+              if (param.defaultValue.includes(option)) {
+                optionElement.selected = true;
+              }
+              field.appendChild(optionElement);
+            });
+            break;
+          case "toggle":
+            field = document.createElement("div");
+            field.id = param.name;
+            param.options.forEach(function (option) {
+              var optionElement = document.createElement("input");
+              optionElement.id = option;
+              optionElement.name = option;
+              optionElement.classList.add("toggle");
+              optionElement.value = true;
+              field.appendChild(optionElement);
+            });
+            break;
+        }
+        var label = document.createElement("label");
+        label.id = param.name + "Label";
+        label.classList.add("form-control", "w-full", "max-w-xs");
+        let labelDiv = label.appendChild(document.createElement("div"));
+        labelDiv.classList.add("label");
+        let labelSpan = labelDiv.appendChild(document.createElement("span"));
+        labelSpan.classList.add("label-text");
+        labelSpan.textContent = param.label + ": ";
+        label.setAttribute("for", param.name);
+        //let fieldDiv = form.appendChild(document.createElement("div"));
+        //fieldDiv.id = param.name + "Div";
+        if (param.visibile === false) {
+          label.style.display = "none";
+        }
+        form.appendChild(label);
+        //fieldDiv.appendChild(document.createElement("br"));
+        label.appendChild(field);
+        //fieldDiv.appendChild(document.createElement("br"));
+
+        //hide features field if all is set to true
+        if (param.name === "all") {
+          field.addEventListener("change", function () {
+            if (field.value === "True") {
+              document.getElementById("featuresLabel").style.display = "none";
+              document.getElementById("features").value = "";
+              generateURL();
+            } else {
+              document.getElementById("featuresLabel").style.display = "block";
+            }
+          });
+        }
+      });
+    }
+
+    // Call generateForm initially to generate the form
+    generateForm();
+
+    // Function to generate the URL based on the form fields
+    function generateURL() {
+      var queryParams = new URLSearchParams();
+      parameters.forEach(function (param) {
+        var field = document.getElementById(param.name);
+        var value;
+        if (field.type === "select-multiple" && field.multiple) {
+          value = Array.from(field.selectedOptions).map(option => option.value);
+          value.forEach(function (val) {
+            queryParams.set(val, true);
+          });
+          return;
+        } else {
+          value = field.value;
+        }
+        if (value !== "False") {
+          queryParams.set(param.name, value);
+        }
+      });
+      var finalURL = "https://gforceweb.github.io/EmoteOverlayTools/?" + queryParams.toString();
+      outputURL.textContent = finalURL;
+    }
+
+    // Attach event listeners to form fields to regenerate URL on change
+    form.addEventListener("input", generateURL);
+
+    // Function to copy the URL to clipboard
+    function copyURLToClipboard() {
+      var urlText = outputURL.textContent;
+      navigator.clipboard.writeText(urlText).then(function () {
+        console.log('URL copied to clipboard');
+        // Optionally, you can provide visual feedback to the user here
+      }, function (err) {
+        console.error('Could not copy URL to clipboard: ', err);
+        // Handle errors here
+      });
+    }
+
+
+
+    // Attach event listener to the copy button
+    copyButton.addEventListener("click", copyURLToClipboard);
+  </script>
+</body>
+
+</html>
