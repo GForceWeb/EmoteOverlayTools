@@ -7,7 +7,7 @@ Inspiration to work on this came from the lack of Twitch Animated emote support 
 ## Installation
 
 - Ensure you have Streamer.Bot installed and running with the WebSocket server enabled (Servers/Clients -> WebSocket Server -> Start Server)
-- Head to [https://gforceweb.github.io/EmoteOverlayTools/dist/config.html](https://gforceweb.github.io/EmoteOverlayTools/config.html) and select your settings
+- Head to [https://gforceweb.github.io/EmoteOverlayTools/dist/config.html](https://gforceweb.github.io/EmoteOverlayTools/dist/config.html) and select your settings
 - Copy the URL from the address bar and add it as a Browser Source in OBS
 - Enjoy!
 
