@@ -3067,7 +3067,7 @@ function createEmoteCyclone(image) {
     cyclone_globalConst.warp.appendChild(Div);
 
     // Run animation
-    cyclone_volcano_animation(Div);
+    cyclone_animation(Div);
     //Destroy element after X seconds so we don't eat up resources over time!
     setTimeout(() => {
         helpers.removeelement(Div.id);
@@ -3076,7 +3076,7 @@ function createEmoteCyclone(image) {
 }
 
 // Explosion Animation
-function cyclone_volcano_animation(element) {
+function cyclone_animation(element) {
 
     //Set a base intensity value, then use that to derive the motion path
     let intensity = helpers.Randomizer(5, 100);
@@ -3111,8 +3111,6 @@ function cyclone_volcano_animation(element) {
     //         autoRotate: true        
     //     }
     // });
-
-
 
       //Construct the Motion Path. Reference tool for paths: https://yqnn.github.io/svg-path-editor/
       //let motionPath = "M"+ " " + innerWidth/2 + " " + innerHeight + " " + "c " + verticalStrengthx + " " + verticalStrengthy + " " + horizontalStrengthx + " " +  horizontalStrengthy + " " + finalLocationx + " " + finalLocationy;
