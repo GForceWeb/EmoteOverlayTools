@@ -3,6 +3,7 @@ const { globalVars, globalConst} = Variables;
 
 import helpers from './helpers.js';
 import animations from './animations.js';
+import posthog from 'posthog-js';
 
 function chatMessageHandler(wsdata) {
     var message = wsdata.data.message.message
@@ -114,6 +115,7 @@ function emoteMessageHandler(wsdata){
   ['!er comets', 'emoteComets', 100, 50, 'comets'],
   ['!er dvd', 'emoteDVD', 8, 50, 'dvd'],
   ['!er text', 'emoteText', 'HYPE', 25, 'text'],
+  ['!er cyclone', 'emoteCyclone', 100, 30, 'cyclone'],
   //['!er cube', 'emoteCube', 8, 50],
   ];
 
@@ -225,9 +227,9 @@ function firstWordsHander(wsdata){
         // get display image for the user
         console.log("got a user image response back");
         
-        avatar = [xhttp.responseText];
+        let avatar = [xhttp.responseText];
         //Trigger Animation
-        animations.rain.emoteRain(avatar, defaultemotes, 50);
+        animations.rain.emoteRain(avatar, globalConst.defaultemotes, 50);
 
     }
     };
@@ -266,6 +268,9 @@ async function cheersCommand(username, targetuser){
     }, 15000); 
 
     delayedFunction();
+
+    posthog.capture('Commands', { property: 'Cheers' })
+
 }
 
 function choonCommand(username){

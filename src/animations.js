@@ -22,6 +22,7 @@ import * as cheers from './animations/cheers.js'
 import * as invaders from './animations/invaders.js';
 import * as raiders from './animations/raiders.js';
 import * as fade from './animations/fade.js';
+import * as cyclone from './animations/cyclone.js';
 
 const animations = {
   firework,
@@ -45,6 +46,7 @@ const animations = {
   invaders,
   raiders,
   fade,
+  cyclone
 }
 
 

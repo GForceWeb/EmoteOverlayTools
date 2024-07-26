@@ -75,6 +75,12 @@ body,
   position: absolute;
   background-size: 100% 100%;
 }
+.cyclone-element {
+  width: var(--emote-size-standard);;
+  height: var(--emote-size-standard);
+  position: absolute;
+  background-size: 100% 100%;
+}
 
 .lurking-element {
   width: 400px;
