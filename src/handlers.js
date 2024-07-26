@@ -3,7 +3,7 @@ const { globalVars, globalConst} = Variables;
 
 import helpers from './helpers.js';
 import animations from './animations.js';
-import posthog from 'posthog-js';
+//import posthog from 'posthog-js';
 
 function chatMessageHandler(wsdata) {
     var message = wsdata.data.message.message
@@ -269,7 +269,7 @@ async function cheersCommand(username, targetuser){
 
     delayedFunction();
 
-    posthog.capture('Commands', { property: 'Cheers' })
+    //posthog.capture('Commands', { property: 'Cheers' })
 
 }
 
