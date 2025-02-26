@@ -3077,61 +3077,105 @@ function createEmoteCyclone(image) {
 
 // Explosion Animation
 function cyclone_animation(element) {
-
-    //Set a base intensity value, then use that to derive the motion path
-    let intensity = helpers.Randomizer(5, 100);
-
-    let verticalStrengthx = 0;
-    let verticalStrengthy = -200 * Math.ceil(intensity/20);
-    let horizontalStrengthx = 20 * Math.ceil(intensity/5) 
-    let horizontalStrengthy = -400 * Math.ceil(intensity/30);
-    let finalLocationx = helpers.Randomizer(300, innerWidth/2);
-    let finalLocationy = helpers.Randomizer(-50, -350);
+    let centerX = innerWidth / 2;
+    let startY = innerHeight;
     
-    //Flip half to the other side
-    let direction = helpers.Randomizer(0, 1);
-    if(Math.round(direction) == 1) {
-        verticalStrengthx = -(verticalStrengthx);
-        horizontalStrengthx = -(horizontalStrengthx);
-        finalLocationx = -(finalLocationx);
-    }
+    // Get random starting position on the circle
+    let startAngle = helpers.Randomizer(0, 360);
+    let angleRad = (startAngle * Math.PI) / 180;
+    
+    // Initial radius is 8% of screen width
+    const initialRadius = innerWidth * 0.08;
+    
+    // Set initial position
+    gsap.set(element, {
+        x: centerX + Math.cos(angleRad) * initialRadius,
+        y: startY,
+        rotation: startAngle
+    });
 
-    //Construct the Motion Path. Reference tool for paths: https://yqnn.github.io/svg-path-editor/
-    //let motionPath = "M"+ " " + innerWidth/2 + " " + innerHeight + " " + "c " + verticalStrengthx + " " + verticalStrengthy + " " + horizontalStrengthx + " " +  horizontalStrengthy + " " + finalLocationx + " " + finalLocationy;
-    // let motionPath = "M 250 400 Q 260 380, 270 360 T 290 320 Q 310 280, 330 240 T 370 160 Q 410 80, 450 40";
-    // console.log(motionPath);
+    // Create a timeline for smoother animation
+    let tl = gsap.timeline();
+    
+    // Calculate single segment duration and overlap
+    const segmentDuration = 0.8;
+    const overlap = 0.4;
+    // Total duration = (segmentDuration - overlap) * (number of segments - 1) + segmentDuration
+    const totalDuration = (segmentDuration - overlap) * 7 + segmentDuration; // About 2.8 seconds
 
-    // gsap.to(element, { 
-    //     duration: helpers.Randomizer(4, 8),
-    //     ease: "power1.inOut",
-    //     repeat: -1,
-    //     motionPath: {
-    //         path: "#cyclonePath",
-    //         align: "#cyclonePath",
-    //         autoRotate: true        
-    //     }
-    // });
+    // Add each segment to the timeline with position parameter for overlap
+    tl.to(element, {
+        x: centerX + Math.cos(angleRad + Math.PI/4) * (innerWidth * 0.10),
+        y: startY - (innerHeight * 0.1),
+        rotation: startAngle + 90,
+        scale: 1.05,
+        duration: segmentDuration,
+        ease: "none"
+    })
+    .to(element, {
+        x: centerX + Math.cos(angleRad + Math.PI/2) * (innerWidth * 0.14),
+        y: startY - (innerHeight * 0.25),
+        rotation: startAngle + 180,
+        scale: 1.1,
+        duration: segmentDuration,
+        ease: "none"
+    }, "-=0.4")  // Start 0.4s before previous tween ends
+    .to(element, {
+        x: centerX + Math.cos(angleRad + Math.PI*3/4) * (innerWidth * 0.18),
+        y: startY - (innerHeight * 0.4),
+        rotation: startAngle + 270,
+        scale: 1.15,
+        duration: segmentDuration,
+        ease: "none"
+    }, "-=0.4")
+    .to(element, {
+        x: centerX + Math.cos(angleRad + Math.PI) * (innerWidth * 0.22),
+        y: startY - (innerHeight * 0.5),
+        rotation: startAngle + 360,
+        scale: 1.2,
+        duration: segmentDuration,
+        ease: "none"
+    }, "-=0.4")
+    .to(element, {
+        x: centerX + Math.cos(angleRad + Math.PI*5/4) * (innerWidth * 0.24),
+        y: startY - (innerHeight * 0.6),
+        rotation: startAngle + 450,
+        scale: 1.25,
+        duration: segmentDuration,
+        ease: "none"
+    }, "-=0.4")
+    .to(element, {
+        x: centerX + Math.cos(angleRad + Math.PI*3/2) * (innerWidth * 0.26),
+        y: startY - (innerHeight * 0.7),
+        rotation: startAngle + 540,
+        scale: 1.3,
+        duration: segmentDuration,
+        ease: "none"
+    }, "-=0.4")
+    .to(element, {
+        x: centerX + Math.cos(angleRad + Math.PI*7/4) * (innerWidth * 0.28),
+        y: startY - (innerHeight * 0.75),
+        rotation: startAngle + 630,
+        scale: 1.35,
+        duration: segmentDuration,
+        ease: "none"
+    }, "-=0.4")
+    .to(element, {
+        x: centerX + Math.cos(angleRad + Math.PI*2) * (innerWidth * 0.3),
+        y: startY - (innerHeight * 0.8),
+        rotation: startAngle + 720,
+        scale: 1.4,
+        duration: segmentDuration,
+        ease: "none"
+    }, "-=0.4");
 
-      //Construct the Motion Path. Reference tool for paths: https://yqnn.github.io/svg-path-editor/
-      //let motionPath = "M"+ " " + innerWidth/2 + " " + innerHeight + " " + "c " + verticalStrengthx + " " + verticalStrengthy + " " + horizontalStrengthx + " " +  horizontalStrengthy + " " + finalLocationx + " " + finalLocationy;
-      //let motionPath = "m"+ " " + innerWidth/2 + " " + innerHeight + " " + "c 119 -29 67 -51 -42 -53 s 76 66 137 -7 s -54 -108 -222 -60 s 256 89 302 -47 s -205 -179 -378 -43 s 439 127 498 -74 s -503 -252 -618 -76 s 658 194 721 -112 s -655 -91.6667 -1168 -241";
-      let motionPath = "m"+ " " + innerWidth/2 + " " + innerHeight + " " + "c 154 -23 165 -73 -5 -71 s -211 72 5 69 c 323 -53 198 -146 -3 -141 s -333 110 2 107 c 428 -19 532 -195 -17 -218 s -376 121 17 108 c 702 16 1110 -259 -14 -249 s -204 171 1 142 c 1293 21 2175 -379 -15 -459 s -627 420 18 318 c 3017 -113 2968 -790 -22 -855 c -2857 -605 -2755 138 -5044 -970";
-
-      console.log(motionPath);
-  
-      gsap.to(element, { 
-      //duration: helpers.Randomizer(4, 8),
-      duration: 7,
-      ease: "power1.in",
-      delay: 0.5,
-      motionPath: {
-        path: motionPath,
-        autoRotate: true
-          
-      }
-      });
-
-    gsap.to(element, helpers.Randomizer(3, 5), { opacity: 0, ease: Sine.easeIn, delay: 4 });
+    // Add fade out that starts before motion completes
+    gsap.to(element, {
+        opacity: 0,
+        duration: 1.5,
+        ease: "power2.in",
+        delay: totalDuration - 1 // Start fading 1 second before motion completes
+    });
 }
 
 ;// CONCATENATED MODULE: ./src/animations.js
