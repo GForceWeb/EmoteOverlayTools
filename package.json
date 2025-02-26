@@ -9,7 +9,8 @@
         "webpack-cli": "^5.0.1"
     },
     "scripts": {
-        "cypress:open": "cypress open"
+        "cypress:open": "cypress open",
+        "build": "webpack"
     },
     "dependencies": {
         "posthog-js": "^1.149.0"
