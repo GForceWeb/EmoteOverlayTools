@@ -116,6 +116,7 @@ function emoteMessageHandler(wsdata){
   ['!er dvd', 'emoteDVD', 8, 50, 'dvd'],
   ['!er text', 'emoteText', 'HYPE', 25, 'text'],
   ['!er cyclone', 'emoteCyclone', 100, 30, 'cyclone'],
+  ['!er tetris', 'emoteTetris', 50, 40, 'tetris']
   //['!er cube', 'emoteCube', 8, 50],
   ];
 
