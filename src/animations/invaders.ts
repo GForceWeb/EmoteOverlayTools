@@ -1,8 +1,10 @@
-import Variables from '../config.js';
+import Variables from '../config.ts';
+import { GlobalVars, GlobalConst } from '../types';
 const { globalVars, globalConst} = Variables;
-import helpers from '../helpers.js';
+import helpers from '../helpers.ts';
+import { gsap } from 'gsap';
 
-export function emoteInvaders (images, count=56, interval=50) {
+export function emoteInvaders(images: string[], count: number = 56, interval: number = 50): void {
     let imgcount = images.length;
     if(count > 256){
       count = 256;
@@ -30,7 +32,7 @@ export function emoteInvaders (images, count=56, interval=50) {
       const y = row * cellHeight;
   
       let Div = document.createElement('div');
-      Div.id = globalVars.divnumber;
+      Div.id = globalVars.divnumber.toString();
       globalVars.divnumber++;
   
       console.log(x);
@@ -48,10 +50,9 @@ export function emoteInvaders (images, count=56, interval=50) {
     }
   
     invaders_animation();
-  
   }
   
-  function invaders_animation() {
+function invaders_animation(): void {
     const invaders = document.querySelectorAll('.invader-element');
   
     // create a timeline for the animation
@@ -72,7 +73,7 @@ export function emoteInvaders (images, count=56, interval=50) {
       .to(invaders, { x: '-=200', duration: initialDuration, onComplete: shortenDuration })
       .to(invaders, { y: '+=75', duration: initialDuration, onComplete: shortenDuration });
   
-      function shortenDuration() {
+    function shortenDuration(): void {
         // get the current duration
         const currentDuration = tl.getChildren()[0].duration();
   
@@ -81,9 +82,8 @@ export function emoteInvaders (images, count=56, interval=50) {
   
         // set the new duration
         tl.getChildren().forEach(child => child.duration(newDuration));
-      }
+    }
     
     // start the animation
     tl.play();
-  
-  }
+}
