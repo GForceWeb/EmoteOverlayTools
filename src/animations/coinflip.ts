@@ -4,10 +4,27 @@ const { globalVars, globalConst } = Variables;
 import helpers from "../helpers.ts";
 import { gsap } from "gsap";
 
-export function coinFlip(count: number = 1, result: string = "Heads"): void {
+// Coin image URLs
+const COIN_IMAGES = {
+  heads: "https://www.joshworth.com/dev/78coins/img/cf/coin-heads.svg",
+  tails: "https://www.joshworth.com/dev/78coins/img/cf/coin-tails.svg",
+  edge: "https://www.joshworth.com/dev/78coins/img/cf/coin-edge.svg",
+  line: "https://www.joshworth.com/dev/78coins/img/cf/coin-line.svg",
+};
+
+type CoinResult = "Heads" | "Tails";
+
+/**
+ * Creates a coin flip animation
+ * @param count Number of coins to flip sequentially
+ * @param result Optional result (Heads or Tails). If not provided, result is random
+ */
+export function coinFlip(count: number = 1, result?: string): void {
   for (let i = 0; i < count; i++) {
     setTimeout(() => {
-      createCoinFlip(result);
+      // If no result provided, randomize between Heads and Tails
+      const finalResult = result || (Math.random() < 0.5 ? "Heads" : "Tails");
+      createCoinFlip(finalResult as CoinResult);
     }, i * 150);
   }
 }
@@ -15,165 +32,289 @@ export function coinFlip(count: number = 1, result: string = "Heads"): void {
 interface CoinElement {
   el: HTMLElement;
   heads: HTMLImageElement;
+  tails: HTMLImageElement;
   edge: HTMLImageElement;
   line: HTMLImageElement;
-  tails: HTMLImageElement;
   angle: number;
-  rotateY: number;
   rotateX: number;
-  finalState: string;
+  finalState: CoinResult;
 }
 
-function createCoinFlip(result: string): void {
-  // Create wrapper element
+function createCoinFlip(result: CoinResult): void {
+  // Create container for perspective
+  const container = document.createElement("div");
+  gsap.set(container, {
+    perspective: 1000,
+    position: "absolute",
+    left: "50%",
+    bottom: "15%",
+    xPercent: -50,
+    width: "100px",
+    height: "100px",
+    zIndex: 10,
+    opacity: 0,
+  });
+
+  document.body.appendChild(container);
+
+  // Create coin wrapper
   const wrapper = document.createElement("div");
   wrapper.className = "coin";
   wrapper.id = globalVars.divnumber.toString();
   globalVars.divnumber++;
 
-  // Position in the center of screen
   gsap.set(wrapper, {
+    width: "100px",
+    height: "100px",
+    position: "absolute",
+    transformStyle: "preserve-3d",
+    left: "50%",
+    top: "50%",
+    xPercent: -50,
+    yPercent: -50,
+  });
+
+  container.appendChild(wrapper);
+
+  // Create heads side
+  const heads = document.createElement("div");
+  heads.className = "coinFace heads";
+  gsap.set(heads, {
+    width: "100%",
+    height: "100%",
+    position: "absolute",
+    backfaceVisibility: "hidden",
+    transformStyle: "preserve-3d",
+  });
+
+  const headsImg = document.createElement("img");
+  headsImg.src = COIN_IMAGES.heads;
+  headsImg.style.width = "100%";
+  headsImg.style.height = "100%";
+  heads.appendChild(headsImg);
+
+  // Create tails side
+  const tails = document.createElement("div");
+  tails.className = "coinFace tails";
+  gsap.set(tails, {
+    width: "100%",
+    height: "100%",
+    position: "absolute",
+    backfaceVisibility: "hidden",
+    transform: "rotateX(180deg)", // Flip to back
+    transformStyle: "preserve-3d",
+  });
+
+  const tailsImg = document.createElement("img");
+  tailsImg.src = COIN_IMAGES.tails;
+  tailsImg.style.width = "100%";
+  tailsImg.style.height = "100%";
+  tails.appendChild(tailsImg);
+
+  // Create edge
+  const edge = document.createElement("img");
+  edge.src = COIN_IMAGES.edge;
+  edge.className = "coinEdge";
+  gsap.set(edge, {
     position: "absolute",
     left: "50%",
     top: "50%",
-    transform: "translate(-50%, -50%)",
-    zIndex: 10,
+    xPercent: -50,
+    yPercent: -50,
+    width: "100%",
+    height: "100%",
+    visibility: "hidden",
   });
 
-  // Add to DOM
-  document.body.appendChild(wrapper);
-
-  // Create coin elements
-  const heads = document
-    .querySelector(".coinHeads")
-    ?.cloneNode(true) as HTMLImageElement;
-  const edge = document
-    .querySelector(".coinEdge")
-    ?.cloneNode(true) as HTMLImageElement;
-  const line = document
-    .querySelector(".coinLine")
-    ?.cloneNode(true) as HTMLImageElement;
-  const tails = document
-    .querySelector(".coinTails")
-    ?.cloneNode(true) as HTMLImageElement;
-
-  if (!heads || !edge || !line || !tails) {
-    console.error("Coin elements not found!");
-    return;
-  }
+  // Create line
+  const line = document.createElement("img");
+  line.src = COIN_IMAGES.line;
+  line.className = "coinLine";
+  gsap.set(line, {
+    position: "absolute",
+    left: "50%",
+    top: "50%",
+    xPercent: -50,
+    yPercent: -50,
+    width: "100%",
+    height: "100%",
+    visibility: "hidden",
+  });
 
   // Append all elements to wrapper
   wrapper.appendChild(heads);
+  wrapper.appendChild(tails);
   wrapper.appendChild(edge);
   wrapper.appendChild(line);
-  wrapper.appendChild(tails);
 
   // Create coin object
   const coin: CoinElement = {
     el: wrapper,
-    heads: heads,
+    heads: headsImg,
+    tails: tailsImg,
     edge: edge,
     line: line,
-    tails: tails,
     angle: 0,
-    rotateY: 0,
     rotateX: 0,
     finalState: result,
   };
 
-  // Set initial state
-  updateCoinState(coin);
-
   // Start animation
-  flipCoin(coin);
+  flipCoinTrajectory(coin, container);
 
   // Remove after animation
   setTimeout(() => {
-    if (wrapper.parentNode) {
-      wrapper.parentNode.removeChild(wrapper);
+    if (container.parentNode) {
+      container.parentNode.removeChild(container);
     }
-  }, 5000);
+  }, 20000);
 }
 
 function updateCoinState(coin: CoinElement): void {
-  const angle = coin.angle;
-
-  // Calculate visibility based on angle
-  const headsVisible = Math.abs(((angle + 180) % 360) - 180) < 90;
-  const tailsVisible = Math.abs((angle % 360) - 180) < 90;
-
-  // Set visibility
-  coin.heads.style.visibility = headsVisible ? "visible" : "hidden";
-  coin.tails.style.visibility = tailsVisible ? "visible" : "hidden";
-
-  // Calculate edge visibility
-  const isEdgeVisible = Math.abs(((angle + 90) % 180) - 90) < 15;
-
-  // Set edge visibility
-  coin.edge.style.visibility = isEdgeVisible ? "visible" : "hidden";
-  coin.line.style.visibility = isEdgeVisible ? "visible" : "hidden";
-
-  // Apply rotation
+  // Apply rotation to the wrapper
   gsap.set(coin.el, {
-    rotationY: coin.rotateY,
     rotationX: coin.rotateX,
   });
+
+  // Calculate edge visibility based on rotation angle
+  const angle = coin.rotateX % 360;
+  const isEdgeVisible = Math.abs((angle % 180) - 90) < 15;
+
+  coin.edge.style.visibility = isEdgeVisible ? "visible" : "hidden";
+  coin.line.style.visibility = isEdgeVisible ? "visible" : "hidden";
 }
 
-function flipCoin(coin: CoinElement): void {
-  // Random number of flips (5-10)
-  const flips = Math.floor(Math.random() * 5) + 5;
-  const flipDuration = 0.2; // seconds per flip
-
-  // Final rotation based on result
-  const finalRotation = coin.finalState === "Heads" ? 0 : 180;
-
-  // Create timeline for flipping animation
+function flipCoinTrajectory(coin: CoinElement, container: HTMLElement): void {
   const timeline = gsap.timeline({
     onUpdate: function () {
       updateCoinState(coin);
     },
-    onComplete: function () {
-      // Final state
-      coin.angle = finalRotation;
+  });
+
+  // Fade in at the bottom
+  timeline.to(container, {
+    duration: 0.5,
+    opacity: 1,
+    scale: 1,
+    ease: "power1.out",
+  });
+
+  // Calculate final rotation based on result
+  const finalRotation = coin.finalState === "Heads" ? 0 : 180;
+
+  // Number of flips - reduced for slower rotation
+  const flips = Math.floor(helpers.Randomizer(1, 3)) + 4; // Fewer flips
+  const fullRotation = flips * 360 + finalRotation;
+
+  console.log("Coin flip rotation:", fullRotation);
+
+  // First phase: Start flipping with consistent speed as the coin moves up
+  timeline.to(
+    coin,
+    {
+      duration: 1.5,
+      rotateX: `+=${Math.floor(fullRotation * 0.5)}`, // First portion of rotation
+      angle: `+=${Math.floor(fullRotation * 0.5)}`,
+      ease: "linear", // Linear for consistent speed
+      onUpdate: function () {
+        updateCoinState(coin);
+      },
+    },
+    "<"
+  );
+
+  // Move up with easeOut for natural deceleration at top
+  timeline.to(
+    container,
+    {
+      duration: 1.5, // Match rotation duration
+      bottom: "70%", // Move to top
+      ease: "power2.out", // More pronounced easing for better deceleration
+    },
+    "<"
+  );
+
+  // Second phase: Continue spinning consistently as it starts to fall
+  timeline.to(coin, {
+    duration: 0.75,
+    rotateX: `+=${Math.floor(fullRotation * 0.25)}`, // Second portion of rotation
+    angle: `+=${Math.floor(fullRotation * 0.25)}`,
+    ease: "linear", // Keep consistent speed
+    onUpdate: function () {
       updateCoinState(coin);
     },
   });
 
-  // Initial toss
+  // Start falling with the coin still spinning
   timeline.to(
-    coin,
+    container,
     {
-      rotateX: 720,
-      duration: 1,
-      ease: "power1.out",
+      duration: 0.8,
+      bottom: "40%", // Start moving down
+      ease: "power1.in", // Start of gravity
     },
-    0
+    "<" // Sync with spin
   );
 
-  // Add flips
-  for (let i = 0; i < flips; i++) {
-    timeline.to(
-      coin,
-      {
-        rotateY: "+=180",
-        angle: "+=" + 180,
-        duration: flipDuration,
-        ease: i === flips - 1 ? "power1.inOut" : "linear",
-      },
-      1 + i * flipDuration
-    );
-  }
-
-  // Final landing
-  timeline.to(
-    coin,
-    {
-      rotateY: Math.floor(coin.rotateY / 180) * 180 + finalRotation,
-      angle: finalRotation,
-      duration: 0.5,
-      ease: "bounce.out",
+  // Final phase: Slow the spinning down for landing and show result
+  timeline.to(coin, {
+    duration: 0.75,
+    rotateX: fullRotation, // Final rotation to show result, // Final rotation to show result
+    angle: fullRotation,
+    ease: "power1.out", // Ease out the rotation
+    onUpdate: function () {
+      updateCoinState(coin);
     },
-    1 + flips * flipDuration
+  });
+
+  // Complete the fall with bounce
+  timeline.to(
+    container,
+    {
+      duration: 0.6,
+      bottom: "15%", // Back to starting position
+      ease: "power2.in", // Accelerate down
+    },
+    "<" // Sync with final spin
   );
+
+  // Add bounce effect separately for more natural physics
+  timeline.to(container, {
+    duration: 0.4,
+    bottom: "18%", // Small bounce up
+    ease: "power2.out",
+  });
+
+  timeline.to(container, {
+    duration: 0.3,
+    bottom: "15%", // Settle back down
+    ease: "power2.in",
+  });
+
+  // Final state adjustment to ensure correct result is shown
+  // timeline.to(
+  //   coin,
+  //   {
+  //     duration: 0.2,
+  //     rotateX: fullRotation,
+  //     angle: fullRotation,
+  //     onUpdate: function () {
+  //       updateCoinState(coin);
+  //     },
+  //     onComplete: function () {
+  //       // Ensure final state shows correct result
+  //       coin.angle = fullRotation;
+  //       updateCoinState(coin);
+  //     },
+  //   },
+  //   "-=0.3"
+  // );
+
+  // Hold for a moment then fade out
+  timeline.to(container, {
+    duration: 1.5,
+    delay: 15,
+    opacity: 0,
+    ease: "power1.in",
+  });
 }
