@@ -1,15 +1,14 @@
-import Variables from '../config.js';
+import Variables from '../config.ts';
+import { GlobalVars, GlobalConst } from '../types';
 const { globalVars, globalConst} = Variables;
-import helpers from '../helpers.js';
+import helpers from '../helpers.ts';
 
-export function emoteFirework(images, count=100, interval=1) {
-
+export function emoteFirework(images: string[], count: number = 100, interval: number = 1): void {
     let imgcount = images.length;
-    let chargeCount =  Math.ceil(count / imgcount);
+    let chargeCount = Math.ceil(count / imgcount);
 
     //separate firework for each image
     for (let i = 0; i < imgcount; i++) {
-    
         let explodeX = helpers.Randomizer(200, innerWidth - 200);
         let explodeY = helpers.Randomizer(200, innerHeight - 200);
         let travelTime = helpers.Randomizer(2, 5);
@@ -21,17 +20,17 @@ export function emoteFirework(images, count=100, interval=1) {
         for (let j = 0; j < chargeCount; j++) {
             setTimeout(() => {
                 createFireworkExplode(images[i], explodeX, explodeY, travelTime);
-                }, (j * interval));
+            }, (j * interval));
         }
     }
 }
 
-function createFireworkTravel(image, explodeX, explodeY, travelTime) {
-    
+function createFireworkTravel(image: string, explodeX: number, explodeY: number, travelTime: number): void {
     var Div = document.createElement('div');
-    Div.id = globalVars.divnumber;
+    Div.id = globalVars.divnumber.toString();
     globalVars.divnumber++;
 
+    // @ts-ignore - GSAP is included via CDN
     gsap.set(Div, { className: 'firework-element', x: innerWidth/2, y: innerHeight, z: helpers.Randomizer(-200, 200), backgroundImage: 'url(' + image + ')' });
 
     globalConst.warp.appendChild(Div);
@@ -41,16 +40,15 @@ function createFireworkTravel(image, explodeX, explodeY, travelTime) {
     //Destroy element after X seconds so we don't eat up resources over time!
     setTimeout(() => {
         helpers.removeelement(Div.id);
-      }, 5000);
-
+    }, 5000);
 }
 
-function createFireworkExplode(image, explodeX, explodeY, travelTime) {
-    
+function createFireworkExplode(image: string, explodeX: number, explodeY: number, travelTime: number): void {
     var Div = document.createElement('div');
-    Div.id = globalVars.divnumber;
+    Div.id = globalVars.divnumber.toString();
     globalVars.divnumber++;
 
+    // @ts-ignore - GSAP is included via CDN
     gsap.set(Div, { className: 'firework-element', x: explodeX, y: explodeY, z: helpers.Randomizer(-200, 200), backgroundImage: 'url(' + image + ')', opacity: 0});
 
     globalConst.warp.appendChild(Div);
@@ -60,23 +58,26 @@ function createFireworkExplode(image, explodeX, explodeY, travelTime) {
     //Destroy element after X seconds so we don't eat up resources over time!
     setTimeout(() => {
         helpers.removeelement(Div.id);
-      }, 15000);
-
+    }, 15000);
 }
 
 // Explosion Animation
-function firework_travel_animation(element, targetX, targety, duration=5) {
-    gsap.to(element, { x: targetX, y: targety, ease: Sine.easeOut, duration: duration });
+function firework_travel_animation(element: HTMLElement, targetX: number, targetY: number, duration: number = 5): void {
+    // @ts-ignore - GSAP is included via CDN
+    gsap.to(element, { x: targetX, y: targetY, ease: Sine.easeOut, duration: duration });
 }
     
 // Explosion Animation
-function firework_explode_animation(element, delay=5) {
+function firework_explode_animation(element: HTMLElement, delay: number = 5): void {
     //Fire off in a random direction
-    var angle = Math.random()*Math.PI*2;
-    let animatex = Math.cos(angle)*innerWidth*1.5;
-    let animatey = Math.sin(angle)*innerHeight*1.5;
+    var angle = Math.random() * Math.PI * 2;
+    let animateX = Math.cos(angle) * innerWidth * 1.5;
+    let animateY = Math.sin(angle) * innerHeight * 1.5;
 
+    // @ts-ignore - GSAP is included via CDN
     gsap.set(element, { opacity: 1, delay: delay});
-    gsap.to(element, helpers.Randomizer(5, 10), { x: animatex, y: animatey, ease: Sine.easeOut, delay: delay });
+    // @ts-ignore - GSAP is included via CDN
+    gsap.to(element, helpers.Randomizer(5, 10), { x: animateX, y: animateY, ease: Sine.easeOut, delay: delay });
+    // @ts-ignore - GSAP is included via CDN
     gsap.to(element, helpers.Randomizer(5, 10), { opacity: 0, ease: Sine.easeIn, delay: delay });
 }

@@ -94,8 +94,8 @@ function emoteMessageHandler(wsdata: WSData): void {
     }
   }
 
-  let eInterval = helpers.getCommandValue(lowermessage, "interval");
-  let eCount = helpers.getCommandValue(lowermessage, "count");
+  let eInterval: number = helpers.getCommandValue(lowermessage, "interval");
+  let eCount: number = helpers.getCommandValue(lowermessage, "count");
 
   if(eCount != null) {
     if(eCount > globalConst.maxemotes){
@@ -104,7 +104,7 @@ function emoteMessageHandler(wsdata: WSData): void {
   }
 
   //TextCommand, FunctionName, DefaultEmotes, DefaultInterval
-  let animationMap: [string, string, any, number, string][] = [
+  let animationMap: [string, string, number, number, string, string?][] = [
     ['!er rain','emoteRain', 50, 50, 'rain'],
     ['!er rise', 'emoteRise', 100, 50, 'rise'],
     ['!er explode', 'emoteExplode', 100, 20, 'explode'],
@@ -116,7 +116,7 @@ function emoteMessageHandler(wsdata: WSData): void {
     ['!er spiral', 'emoteSpiral', 100, 170, 'spiral'],
     ['!er comets', 'emoteComets', 100, 50, 'comets'],
     ['!er dvd', 'emoteDVD', 8, 50, 'dvd'],
-    ['!er text', 'emoteText', 'HYPE', 25, 'text'],
+    ['!er text', 'emoteText', 1, 25, 'text', 'HYPE'],
     ['!er cyclone', 'emoteCyclone', 100, 30, 'cyclone'],
     ['!er tetris', 'emoteTetris', 50, 40, 'tetris']
   ];
@@ -136,13 +136,20 @@ function emoteMessageHandler(wsdata: WSData): void {
 
     if(!eCount){eCount = animation[2];}
     if(!eInterval){eInterval = animation[3];}
+    let emoteText = false;
 
     //EmoteText Specific Handling
     if(animation[1] == "emoteText") {
+        emoteText = true;
+
+        //Set Default Text if no text supplied
+        let text = "Hype";
+
+        //Get Text from Command
         let regexp = /text (\S*)/gm;  
         let matches = regexp.exec(message);
         if (matches && matches[1]) {
-          eCount = matches[1];
+          text = matches[1];
         }
 
         if(emotes.length < 1 && Botchat){
@@ -155,10 +162,10 @@ function emoteMessageHandler(wsdata: WSData): void {
         for(const emote of emotes) {
           emotenames = emotenames + emote["name"] + " ";
         }
-        //Set Default Text if no text supplied
-        if(typeof eCount === 'string' && emotenames.includes(eCount)){
-          eCount = "Hype";
-        }                
+
+        console.log("running emoteText:  " + text + ". module: " + animation[4]);
+        animations[animation[4]][animation[1]](images, text, eInterval);
+        return;
     }
 
     console.log("running " + animation[1] + " with " + eCount + " emote(s)" + " and interval " + eInterval + ". module: " + animation[4]);
@@ -194,7 +201,7 @@ function emoteMessageHandler(wsdata: WSData): void {
   }
 
   //Normal emotes animations
-  let randomAnimation = Math.round(helpers.Randomizer(1,3));
+  let randomAnimation = Math.round(helpers.Randomizer(1,4));
   switch(randomAnimation) {
     case 1:
       animations.rain.emoteRain(images, emotecount);
@@ -206,6 +213,9 @@ function emoteMessageHandler(wsdata: WSData): void {
 
     case 3:
       animations.fade.create(images, emotecount);
+      break;
+    case 4:
+      animations.dvd.create(images, emotecount);
       break;
   }
 }
