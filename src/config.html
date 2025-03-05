@@ -24,7 +24,7 @@
       <!-- Form fields will be dynamically generated here -->
     </form>
 
-    <p id="outputURL" class="mt-4">https://gforceweb.github.io/EmoteOverlayTools/dist/?all</p>
+    <p id="outputURL" class="mt-4"></p>
 
     <button id="copyButton" class="btn btn-primary mt-4">Copy URL</button>
   </div>
@@ -199,12 +199,19 @@
           queryParams.set(param.name, value);
         }
       });
-      var finalURL = "https://gforceweb.github.io/EmoteOverlayTools/dist/?" + queryParams.toString();
+      
+      // Use a dynamic base URL that works in both dev and production
+      var baseUrl = window.location.origin;
+      var path = window.location.pathname.replace('config.html', '');
+      var finalURL = baseUrl + path + "?" + queryParams.toString();
       outputURL.textContent = finalURL;
     }
 
     // Attach event listeners to form fields to regenerate URL on change
     form.addEventListener("input", generateURL);
+    
+    // Generate URL on page load
+    generateURL();
 
     // Function to copy the URL to clipboard
     function copyURLToClipboard() {
@@ -217,8 +224,6 @@
         // Handle errors here
       });
     }
-
-
 
     // Attach event listener to the copy button
     copyButton.addEventListener("click", copyURLToClipboard);
