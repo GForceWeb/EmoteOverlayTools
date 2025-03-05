@@ -31,7 +31,7 @@ function createCarousel(image: string): void {
   //create at random Y height at left edge of screen
   gsap.set(Div, {
     className: "carousel-element",
-    x: innerWidth / 2,
+    x: -100,
     y: innerHeight / 2,
     z: helpers.Randomizer(-200, 200),
     backgroundImage: "url(" + image + ")",
@@ -48,29 +48,22 @@ function createCarousel(image: string): void {
 }
 
 function carousel_animation(element: HTMLElement): void {
-  //Travel left to right
-  let carouselstartx = innerWidth / 2;
-  let carouselstarty = innerHeight / 2;
-  let carouselRadius = innerHeight / 4;
-
-  //Maths constants for a proper circle
-  let r = carouselRadius;
-  let cx = carouselstartx;
-  let cy = carouselstarty;
-  let carouselPath =
-    "M" + cx + "," + (cy - r) + " a" + r + "," + r + " 0 1 1 -0.0001,0";
-
+  gsap.to(element, { x: innerWidth + 100, duration: 5, ease: Sine.easeInOut });
   gsap.to(element, {
-    duration: 10,
-    // ease: "slow(0.7, 0.7, false)",
-    ease: "none",
-    delay: 0,
-    motionPath: {
-      alignOrigin: [0.5, 0.5],
-      path: carouselPath,
-    },
+    y: "+=200",
+    duration: 2.5,
+    ease: Sine.easeInOut,
+    repeat: 1,
+    yoyo: true,
   });
 
-  gsap.to(element, { scale: 0.1, duration: 9, delay: 0, ease: "none" });
-  gsap.to(element, { opacity: 0, duration: 9, delay: 0, ease: "none" });
+  gsap.to(element, { x: -100, duration: 5, ease: Sine.easeInOut, delay: 5 });
+  gsap.to(element, {
+    y: "-=200",
+    duration: 2.5,
+    ease: Sine.easeInOut,
+    repeat: 1,
+    yoyo: true,
+    delay: 5,
+  });
 }

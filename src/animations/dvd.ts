@@ -40,73 +40,60 @@ function createEmoteDVD(image: string): void {
   //Destroy element after X seconds so we don't eat up resources over time!
   setTimeout(() => {
     helpers.removeelement(Div.id);
-  }, 25000);
+  }, 15000);
 }
 
 // DVD Bounce animation
 function dvd_animation(element: HTMLElement): void {
-  // X and Y speeds
-  const xSpeed = helpers.Randomizer(1, 5) * helpers.randomSign();
-  const ySpeed = helpers.Randomizer(1, 5) * helpers.randomSign();
+  let DVDStartDirection = helpers.Randomizer(0, 360);
+  let DVDFirstX = helpers.Randomizer(0, innerWidth);
+  let DVDFirstY = helpers.Randomizer(0, innerWidth);
 
-  // Initial position
-  let posX = parseFloat(element.style.left || "0");
-  let posY = parseFloat(element.style.top || "0");
+  DVDFirstX = Math.sin(DVDStartDirection) * 2000;
+  DVDFirstY = Math.cos(DVDStartDirection) * 2000;
 
-  // Width and height of element
-  const elemWidth = 75; // width of your element
-  const elemHeight = 75; // height of your element
+  gsap.to(element, {
+    duration: 15,
+    x: helpers.Randomizer(4000, 8000) * helpers.randomSign(),
+    y: helpers.Randomizer(4000, 8000) * helpers.randomSign(),
+    modifiers: { x: modX, y: modY },
+  });
 
-  // Create an update function
-  function updatePosition(): void {
-    posX = gsap.getProperty(element, "x") as number;
-    posY = gsap.getProperty(element, "y") as number;
-
-    // Calculate new position
-    posX += xSpeed;
-    posY += ySpeed;
-
-    // Check for collisions with viewport boundaries
-    if (posX <= 0 || posX + elemWidth >= innerWidth) {
-      // Choose a random color on bounce
-      const newColor = getRandomColor();
-      gsap.to(element, { backgroundColor: newColor, duration: 0.5 });
-
-      // Reverse X direction
-      if (posX <= 0) {
-        posX = 0;
-      } else {
-        posX = innerWidth - elemWidth;
-      }
-    }
-
-    if (posY <= 0 || posY + elemHeight >= innerHeight) {
-      // Choose a random color on bounce
-      const newColor = getRandomColor();
-      gsap.to(element, { backgroundColor: newColor, duration: 0.5 });
-
-      // Reverse Y direction
-      if (posY <= 0) {
-        posY = 0;
-      } else {
-        posY = innerHeight - elemHeight;
-      }
-    }
-
-    gsap.set(element, { x: posX, y: posY });
-    requestAnimationFrame(updatePosition);
-  }
-
-  // Start the animation
-  updatePosition();
+  gsap.to(element, { duration: 1, opacity: 0, delay: 14 });
 }
 
-// Helper function to generate random color
-function getRandomColor(): string {
-  const letters = "0123456789ABCDEF";
-  let color = "#";
-  for (let i = 0; i < 6; i++) {
-    color += letters[Math.floor(Math.random() * 16)];
+function modX(x) {
+  var minX = 0;
+  var size = 75;
+  var maxX = innerWidth - size;
+  x = parseInt(x);
+
+  if (x > maxX || x < minX) {
+    var delta = ((x % maxX) + maxX) % maxX;
+    var start = x > maxX ? 1 : 0;
+    var ratio = x / maxX + start;
+    var even = !(ratio & 1);
+
+    x = even ? maxX - delta : minX + delta;
   }
-  return color;
+
+  return x + "px";
+}
+
+function modY(y) {
+  var minY = 0;
+  var size = 75;
+  var maxY = innerHeight - size;
+  y = parseInt(y);
+
+  if (y > maxY || y < minY) {
+    var delta = ((y % maxY) + maxY) % maxY;
+    var start = y > maxY ? 1 : 0;
+    var ratio = y / maxY + start;
+    var even = !(ratio & 1);
+
+    y = even ? maxY - delta : minY + delta;
+  }
+
+  return y + "px";
 }

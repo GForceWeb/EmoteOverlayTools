@@ -55,7 +55,7 @@ function createFireworkTravel(
   //Destroy element after X seconds so we don't eat up resources over time!
   setTimeout(() => {
     helpers.removeelement(Div.id);
-  }, 5000);
+  }, travelTime * 1000);
 }
 
 function createFireworkExplode(
@@ -105,7 +105,7 @@ function firework_travel_animation(
 // Explosion Animation
 function firework_explode_animation(
   element: HTMLElement,
-  delay: number = 5
+  delay: number = 4
 ): void {
   //Fire off in a random direction
   var angle = Math.random() * Math.PI * 2;

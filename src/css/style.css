@@ -105,16 +105,40 @@ body,
   height: var(--avatar-size-standard);
   position: absolute;
   background-size: 100%;
-  z-index: -10;
+  z-index: 5; /* Increased z-index to make visible */
 }
+
+/* Enhanced singing container styles */
+.singing-container {
+  position: absolute;
+  width: var(--avatar-size-standard);
+  height: var(--avatar-size-standard);
+  z-index: 5;
+  transform-origin: center center;
+  /* Add subtle glow effect for the singing container */
+  filter: drop-shadow(0 0 3px rgba(255,255,255,0.5));
+}
+
+.mouth-overlay {
+  position: absolute;
+  width: 40%;
+  height: 20%;
+  bottom: 25%;
+  left: 30%;
+  z-index: 15;
+  border-radius: 50%;
+  transform-origin: center;
+}
+
 .note-element {
   width: var(--emote-size-standard);
   height: var(--emote-size-standard);
   position: absolute;
   background-size: 100%;
-  z-index: 10;
-  filter: invert(44%) sepia(61%) saturate(1001%) hue-rotate(0deg) brightness(99%) contrast(101%);
+  z-index: 4; /* Place notes behind the profile */
+  filter: blur(0.5px) invert(44%) sepia(61%) saturate(1001%) hue-rotate(0deg) brightness(99%) contrast(101%);
 }
+
 .rightwave-element {
   width: var(--emote-size-standard);
   height: var(--emote-size-standard);

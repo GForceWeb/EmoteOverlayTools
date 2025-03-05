@@ -58,7 +58,7 @@ export function hypetrainfinish(): void {
 }
 
 export function hypetrainstart(): void {
-  const image = "../assets/img/trainhead.png";
+  const image = "img/trainhead.png";
   const HypeTrainWrapper = document.createElement("div");
   HypeTrainWrapper.id = String(
     setTimeout(() => {
@@ -117,11 +117,11 @@ export function hypetrainlevelup(): void {
   const cartNum = Math.round(helpers.Randomizer(1, 2));
   let image: string;
   if (cartNum === 1) {
-    image = "../assets/img/cart1.png";
+    image = "img/cart1.png";
   } else if (cartNum === 2) {
-    image = "../assets/img/cart2.png";
+    image = "img/cart2.png";
   } else {
-    image = "../assets/img/cart1.png";
+    image = "img/cart1.png";
   }
 
   const HypeCart = document.createElement("div");

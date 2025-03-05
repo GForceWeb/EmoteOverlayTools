@@ -4,174 +4,351 @@ const { globalVars, globalConst } = Variables;
 import helpers from "../helpers.ts";
 import { gsap } from "gsap";
 
-export function choon(images: string[]): void {
-  if (images.length < 1) {
-    console.error("No images provided for avatar choon animation");
-    return;
-  }
-
-  // Create container for the animation
-  const container = document.createElement("div");
-  container.id = "choon-container-" + globalVars.divnumber;
+export function choon(image) {
+  var Div = document.createElement("div");
+  Div.id = globalVars.divnumber.toString();
   globalVars.divnumber++;
-  container.className = "choon-container";
+  Div.style.background = "url(" + image + ")";
+  Div.style.backgroundSize = "100% 100%";
+  Div.className = "choon-element"; // Add the class to the profile image
 
-  // Create avatar element
-  const avatar = createAvatarElement(images[0]);
+  // Create singing container to hold the profile
+  var SingingContainer = document.createElement("div");
+  SingingContainer.id = "singing-container-" + globalVars.divnumber.toString();
+  SingingContainer.className = "singing-container";
+  SingingContainer.appendChild(Div);
 
-  // Create music notes
-  const musicNotes: HTMLElement[] = [];
-  for (let i = 0; i < 10; i++) {
-    const note = createMusicNote();
-    musicNotes.push(note);
-    container.appendChild(note);
+  // Randomise side to peep from
+  var random = Math.floor(helpers.Randomizer(1, 2.99));
+  let height = helpers.Randomizer(0, innerHeight - 400);
+  let times = 8; // Increased number of notes
+  let Notes = [];
+
+  switch (random) {
+    case 1:
+      // left
+      gsap.set(SingingContainer, {
+        x: -400,
+        y: height,
+        z: 100,
+        transformOrigin: "center",
+      });
+
+      for (var i = 0; i < times; i++) {
+        // Alternate between music note types for variety
+        let noteImg = i % 2 === 0 ? "img/music1.png" : "img/music2.png";
+        Notes[i] = createNote(noteImg);
+
+        // More varied positioning of notes
+        gsap.set(Notes[i], {
+          className: "note-element",
+          x: helpers.Randomizer(-50, 250),
+          y: height + helpers.Randomizer(-200, 200),
+          z: 10,
+          opacity: 0,
+          scale: 0.01,
+          rotation: helpers.Randomizer(-30, 30),
+        });
+
+        // Stagger the note animations for a more rhythmic feel
+        note_animation(Notes[i], i * 0.7);
+      }
+
+      choon_animation_left(SingingContainer);
+      break;
+
+    case 2:
+      // right
+      gsap.set(SingingContainer, {
+        x: innerWidth + 400,
+        y: height,
+        z: 0,
+        transformOrigin: "center",
+      });
+
+      for (var i = 0; i < times; i++) {
+        // Alternate between music note types for variety
+        let noteImg = i % 2 === 0 ? "img/music1.png" : "img/music2.png";
+        Notes[i] = createNote(noteImg);
+
+        // More varied positioning of notes
+        gsap.set(Notes[i], {
+          className: "note-element",
+          x: helpers.Randomizer(innerWidth - 100, innerWidth - 350),
+          y: height + helpers.Randomizer(-200, 200),
+          z: 10,
+          opacity: 0,
+          scale: 0.01,
+          rotation: helpers.Randomizer(-30, 30),
+        });
+
+        // Stagger the note animations for a more rhythmic feel
+        note_animation(Notes[i], i * 0.7);
+      }
+
+      choon_animation_right(SingingContainer);
+      break;
   }
 
-  // Add avatar to container
-  container.appendChild(avatar);
+  globalConst.warp.appendChild(SingingContainer);
 
-  // Add container to the DOM
-  document.body.appendChild(container);
+  // Add mouth animation to simulate singing
+  animate_singing(Div);
 
-  // Set container styles
-  gsap.set(container, {
-    position: "absolute",
-    width: "100%",
-    height: "100%",
-    top: 0,
-    left: 0,
-    zIndex: 1000,
-  });
-
-  // Start the animation sequence
-  startChoonAnimation(avatar, musicNotes, container);
+  setTimeout(() => {
+    helpers.removeelement(SingingContainer.id);
+  }, 15000);
 }
 
-function createAvatarElement(imageUrl: string): HTMLElement {
-  const avatar = document.createElement("div");
-  avatar.className = "choon-avatar";
+function createNote(image) {
+  var MNoteDiv = document.createElement("div");
+  MNoteDiv.id = globalVars.divnumber.toString();
+  globalVars.divnumber++;
+  MNoteDiv.style.background = "url(" + image + ")";
+  MNoteDiv.style.backgroundSize = "100% 100%";
 
-  gsap.set(avatar, {
-    position: "absolute",
-    bottom: "20%",
-    left: "50%",
-    width: "200px",
-    height: "200px",
-    xPercent: -50,
-    backgroundImage: `url(${imageUrl})`,
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    borderRadius: "50%",
-    opacity: 0,
-    scale: 0.7,
-  });
+  globalConst.warp.appendChild(MNoteDiv);
+  setTimeout(() => {
+    helpers.removeelement(MNoteDiv.id);
+  }, 15000);
 
-  return avatar;
+  return MNoteDiv;
 }
 
-function createMusicNote(): HTMLElement {
-  const note = document.createElement("div");
-  note.className = "music-note";
+function animate_singing(element) {
+  // Create a rhythmic pulsing effect to simulate singing
+  const timeline = gsap.timeline({ repeat: 8, repeatDelay: 0.1 });
 
-  // Randomly choose which music note image to use
-  const noteType = Math.random() < 0.5 ? "music1.png" : "music2.png";
+  // Simulate mouth opening/closing with scale changes
+  timeline
+    .to(element, {
+      duration: 0.2,
+      scaleY: 0.9,
+      scaleX: 1.1,
+      ease: "power1.out",
+    })
+    .to(element, {
+      duration: 0.2,
+      scaleY: 1,
+      scaleX: 1,
+      ease: "power1.in",
+    })
+    .to(element, {
+      duration: 0.3,
+      scaleY: 0.85,
+      scaleX: 1.15,
+      ease: "power1.out",
+    })
+    .to(element, {
+      duration: 0.3,
+      scaleY: 1,
+      scaleX: 1,
+      ease: "power1.in",
+    });
 
-  gsap.set(note, {
-    position: "absolute",
-    width: "40px",
-    height: "40px",
-    backgroundImage: `url(/assets/img/${noteType})`,
-    backgroundSize: "contain",
-    backgroundPosition: "center",
-    backgroundRepeat: "no-repeat",
-    opacity: 0,
-    scale: 0.5,
-  });
-
-  return note;
-}
-
-function startChoonAnimation(
-  avatar: HTMLElement,
-  musicNotes: HTMLElement[],
-  container: HTMLElement
-): void {
-  const tl = gsap.timeline();
-
-  // Fade in avatar with bounce
-  tl.to(avatar, {
-    opacity: 1,
-    scale: 1,
-    duration: 1,
-    ease: "back.out(1.7)",
-  });
-
-  // Start head bobbing animation
-  gsap.to(avatar, {
-    rotate: 5,
-    duration: 0.3,
-    repeat: 20,
+  // Add a subtle brightness filter pulse to enhance the singing effect
+  gsap.to(element, {
+    duration: 0.5,
+    filter: "brightness(1.3)",
+    repeat: 16,
     yoyo: true,
     ease: "sine.inOut",
   });
-
-  // Animate each music note
-  musicNotes.forEach((note, index) => {
-    const delay = index * 0.4; // Stagger the notes
-    animateMusicNote(note, avatar, delay);
-  });
-
-  // After all animations, fade everything out
-  setTimeout(() => {
-    gsap.to([avatar, ...musicNotes], {
-      opacity: 0,
-      duration: 1,
-      onComplete: () => {
-        // Remove the container when done
-        if (container.parentNode) {
-          container.parentNode.removeChild(container);
-        }
-      },
-    });
-  }, 8000); // Adjust timing as needed
 }
 
-function animateMusicNote(
-  note: HTMLElement,
-  avatar: HTMLElement,
-  delay: number
-): void {
-  const avatarRect = avatar.getBoundingClientRect();
-  const startX = avatarRect.x + avatarRect.width / 2;
-  const startY = avatarRect.y + avatarRect.height / 4;
+function note_animation(element, delay = 0) {
+  // Reduce the minimum starting delay from 1 to 0.3
+  // This will make notes start appearing much sooner
+  let randomDelay = helpers.Randomizer(0.3, 1.5) + delay;
+  let randomDuration = helpers.Randomizer(3, 6);
+  let verticalTravel = helpers.Randomizer(100, 300);
 
-  // Position the note near the avatar's head
-  gsap.set(note, {
-    x: startX,
-    y: startY,
-    rotation: Math.random() * 360,
+  // Create a more dynamic note animation
+  // Fade in
+  gsap.to(element, {
+    opacity: 1,
+    scale: helpers.Randomizer(0.8, 1.2),
+    ease: "power2.out",
+    delay: randomDelay,
+    duration: 1,
   });
 
-  // Random path for the note to follow
-  const pathX =
-    startX + (Math.random() < 0.5 ? -1 : 1) * (50 + Math.random() * 100);
-  const pathY = startY - 100 - Math.random() * 150;
+  // Floating movement pattern - more natural
+  gsap.to(element, {
+    y: "-=" + verticalTravel,
+    x: "+=" + helpers.Randomizer(-50, 50),
+    rotation: helpers.Randomizer(-180, 180),
+    duration: randomDuration,
+    delay: randomDelay,
+    ease: "power1.out",
+  });
 
-  // Animate the note
-  gsap
-    .timeline({ delay })
-    .to(note, {
-      opacity: 1,
-      scale: 0.7 + Math.random() * 0.5,
+  // Color variation
+  gsap.to(element, {
+    duration: randomDuration,
+    delay: randomDelay,
+    ease: "none",
+    "--hue-rotate": helpers.Randomizer(180, 360),
+    onUpdate: () => {
+      element.style.filter = `invert(44%) sepia(61%) saturate(1001%) brightness(99%) contrast(101%) hue-rotate(${gsap.getProperty(
+        element,
+        "--hue-rotate"
+      )}deg)`;
+    },
+  });
+
+  // Fade out with a little spin
+  gsap.to(element, {
+    duration: 1.5,
+    delay: randomDelay + randomDuration - 1,
+    ease: "power2.out",
+    scale: 0.5,
+    opacity: 0,
+    rotation: "+=" + helpers.Randomizer(90, 180),
+    onComplete: () => {
+      element.style.display = "none";
+    },
+  });
+}
+
+function choon_animation_left(element) {
+  // Entrance animation
+  gsap.to(element, {
+    duration: 1.5,
+    x: "+=450",
+    ease: "back.out(1.2)",
+  });
+
+  // More natural head-bobbing with varying intensity
+  const bobbingTimeline = gsap.timeline({ repeat: 8, repeatDelay: 0.1 });
+
+  bobbingTimeline
+    .to(element, {
       duration: 0.3,
+      y: "-=30",
+      rotation: helpers.Randomizer(-5, 5),
+      ease: "sine.inOut",
     })
-    .to(note, {
-      x: pathX,
-      y: pathY,
-      rotation: Math.random() * 360,
-      scale: 0.3,
-      opacity: 0,
-      duration: 2.5,
-      ease: "power1.out",
+    .to(element, {
+      duration: 0.3,
+      y: "+=30",
+      rotation: 0,
+      ease: "sine.inOut",
+    })
+    .to(element, {
+      duration: 0.2,
+      y: "-=15",
+      rotation: helpers.Randomizer(-3, 3),
+      ease: "sine.inOut",
+    })
+    .to(element, {
+      duration: 0.2,
+      y: "+=15",
+      rotation: 0,
+      ease: "sine.inOut",
+    });
+
+  // Add enthusiastic sideways movement
+  gsap.to(element, {
+    x: "+=30",
+    duration: 0.8,
+    repeat: 5,
+    yoyo: true,
+    ease: "sine.inOut",
+    delay: 2,
+  });
+
+  // Exit animation - mirror the entrance animation in reverse
+  gsap
+    .to(element, {
+      duration: 1.5,
+      delay: helpers.Randomizer(9, 11),
+      ease: "back.in(1.2)",
+      x: "-=450", // Mirror the entrance animation distance
+      rotation: 0, // Return to neutral rotation
+      scale: 1, // Keep normal scale until the very end
+      opacity: 1,
+    })
+    .then(() => {
+      // Quick fade out at the end of movement
+      gsap.to(element, {
+        duration: 0.3,
+        opacity: 0,
+        scale: 0.8,
+        onComplete: () => {
+          element.style.display = "none";
+        },
+      });
+    });
+}
+
+function choon_animation_right(element) {
+  // Entrance animation
+  gsap.to(element, {
+    duration: 1.5,
+    x: "-=650",
+    ease: "back.out(1.2)",
+  });
+
+  // More natural head-bobbing with varying intensity
+  const bobbingTimeline = gsap.timeline({ repeat: 8, repeatDelay: 0.1 });
+
+  bobbingTimeline
+    .to(element, {
+      duration: 0.3,
+      y: "-=30",
+      rotation: helpers.Randomizer(-5, 5),
+      ease: "sine.inOut",
+    })
+    .to(element, {
+      duration: 0.3,
+      y: "+=30",
+      rotation: 0,
+      ease: "sine.inOut",
+    })
+    .to(element, {
+      duration: 0.2,
+      y: "-=15",
+      rotation: helpers.Randomizer(-3, 3),
+      ease: "sine.inOut",
+    })
+    .to(element, {
+      duration: 0.2,
+      y: "+=15",
+      rotation: 0,
+      ease: "sine.inOut",
+    });
+
+  // Add enthusiastic sideways movement
+  gsap.to(element, {
+    x: "-=30",
+    duration: 0.8,
+    repeat: 5,
+    yoyo: true,
+    ease: "sine.inOut",
+    delay: 2,
+  });
+
+  // Exit animation - mirror the entrance animation in reverse
+  gsap
+    .to(element, {
+      duration: 1.5,
+      delay: helpers.Randomizer(9, 11),
+      ease: "back.in(1.2)",
+      x: "+=650", // Mirror the entrance animation distance
+      rotation: 0, // Return to neutral rotation
+      scale: 1, // Keep normal scale until the very end
+      opacity: 1,
+    })
+    .then(() => {
+      // Quick fade out at the end of movement
+      gsap.to(element, {
+        duration: 0.3,
+        opacity: 0,
+        scale: 0.8,
+        onComplete: () => {
+          element.style.display = "none";
+        },
+      });
     });
 }

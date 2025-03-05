@@ -28,7 +28,7 @@ function createEmoteComets(image: string): void {
   gsap.set(Div, {
     className: "comet-element",
     x: helpers.Randomizer(0, innerWidth),
-    y: -300,
+    y: helpers.Randomizer(-200, -75),
     z: helpers.Randomizer(-200, 200),
     backgroundImage: "url(" + image + ")",
   });
@@ -46,35 +46,36 @@ function createEmoteComets(image: string): void {
 // Comets animation
 function comet_animation(element: HTMLElement): void {
   // create random size of the travel
-  let id =
-    "left" +
-    helpers.Randomizer(-250, 250) +
-    "-" +
-    "top" +
-    helpers.Randomizer(450, 550);
-
+  let cometDuration = helpers.Randomizer(4, 8);
+  let cometSize = helpers.Randomizer(25, 100);
+  let cometX = gsap.getProperty(element, "x") as number;
+  if (cometX > 920) {
+    cometX = cometX - helpers.Randomizer(1150, 1500);
+  } else if (cometX < 920) {
+    cometX = cometX + helpers.Randomizer(1150, 1500);
+  }
+  gsap.to(element, { duration: cometDuration, x: cometX, ease: "sine.out" });
   gsap.to(element, {
-    y: innerHeight + 400,
-    duration: helpers.Randomizer(3, 6),
-    ease: Linear.easeNone,
+    duration: cometDuration,
+    y: helpers.Randomizer(800, 1080),
+    ease: "power3.in",
   });
-
-  gsap.from(element, { opacity: 0, duration: 0.5 });
   gsap.to(element, {
+    duration: cometDuration,
+    width: cometSize,
+    height: cometSize,
+    ease: "sine.out",
+  });
+  gsap.to(element, {
+    duration: 1,
     opacity: 0,
-    duration: 0.5,
-    delay: helpers.Randomizer(2, 5.5),
+    ease: "sine.inOut",
+    delay: cometDuration,
   });
-
   gsap.to(element, {
-    rotation: helpers.Randomizer(180, 360) * helpers.randomSign(),
-    duration: helpers.Randomizer(3, 6),
-    ease: Linear.easeNone,
-  });
-
-  gsap.to(element, {
-    scale: 0.5,
-    duration: helpers.Randomizer(3, 6),
-    ease: Linear.easeNone,
+    duration: 1,
+    height: 0,
+    ease: "power3.out",
+    delay: cometDuration,
   });
 }

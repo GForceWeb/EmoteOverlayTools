@@ -7,7 +7,7 @@ import { gsap } from "gsap";
 
 export function text(
   images: string[],
-  text: string = "hype",
+  text: string = "HYPE",
   interval: number = 25
 ): void {
   let imgcount = images.length;
