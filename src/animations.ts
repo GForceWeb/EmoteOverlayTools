@@ -1,6 +1,5 @@
-import Variables from './config.js';
-const { globalVars, globalConst} = Variables;
-import helpers from './helpers.js';
+import Variables from './config.ts';
+import helpers from './helpers.ts';
 import * as firework from './animations/firework.js';
 import * as rain from './animations/rain.js';
 import * as explode from './animations/explode.js';
@@ -25,7 +24,14 @@ import * as fade from './animations/fade.js';
 import * as cyclone from './animations/cyclone.js';
 import * as tetris from './animations/tetris.js';
 
-const animations = {
+//automatically import all animations in the folder
+
+
+interface AnimationsCollection {
+  [key: string]: any;
+}
+
+const animations: AnimationsCollection = {
   firework,
   rain,
   explode,
@@ -50,17 +56,5 @@ const animations = {
   cyclone,
   tetris
 }
-
-
-// function runAnimation(functionName, images, eCount, eInterval) {
-//     // Execute the function dynamically using the mapping object
-//     const animationFunction = animationFunctions[functionName];
-//     if (typeof animationFunction === 'function') {
-//       animationFunction(images, eCount, eInterval);
-//     } else {
-//       console.error(`Function '${functionName}' does not exist.`);
-//     }
-//   }
-
 
 export default animations;
