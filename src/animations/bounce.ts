@@ -45,17 +45,28 @@ function createEmoteBounce(image: string): void {
 
 // Bounce animation
 function bounce_animation(element: HTMLElement): void {
-  gsap.to(element, 0.6, {
-    y: innerHeight - 100,
-    ease: Bounce.easeOut,
+  gsap.to(element, {
+    x: function () {
+      let currentX = gsap.getProperty(element, "x") as number;
+      return helpers.Randomizer(0, 250) + currentX;
+    },
+    y: innerHeight - helpers.Randomizer(50, 150),
+    duration: 3,
+    ease: "bounce.out",
+  });
+  //Move right as we bounce
+  gsap.to(element, {
+    x: "+=200",
+    duration: 3,
+    // ease: "sine.inOut",
+    delay: 0,
+  });
+  //Do a flip
+  gsap.to(element, {
+    rotationZ: 360,
+    duration: 2,
     delay: 1,
   });
-  gsap.to(element, 5, { x: "+=" + helpers.Randomizer(-500, 500), delay: 1.6 });
-  gsap.to(element, 5, {
-    rotationY: 360,
-    rotationX: 360,
-    repeat: 1,
-    delay: 1.6,
-  });
-  gsap.to(element, 3, { opacity: 0, delay: 6 });
+  //Fade out
+  gsap.to(element, { opacity: 0, duration: 1, ease: "sine.inOut", delay: 3 });
 }
