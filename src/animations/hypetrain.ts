@@ -1,395 +1,169 @@
-import Variables from '../config.ts';
-import { GlobalVars, GlobalConst } from '../types';
-const { globalVars, globalConst} = Variables;
-import helpers from '../helpers.ts';
+import Variables from '../config';
+const { globalVars, globalConst } = Variables;
+import helpers from '../helpers';
+import { gsap } from "gsap";
 
-let currentLevel = 1;
+// Add user avatar to current train car
+export function hypetrainprogression(userId: string): void {
+    const xhttp = new XMLHttpRequest();
+    console.log("created xmlhttp object");
+    xhttp.onreadystatechange = function(): void {
+        if (this.readyState === 4 && this.status === 200) {
+            // get display image for the userId
+            console.log("got a user image response back");
+            const image = [xhttp.responseText];
+            createhypetrainprogression(image);
+        }
+    };
+
+    xhttp.open("GET", `https://decapi.me/twitch/avatar/${userId}?id=true`, true);
+    xhttp.send();
+}
+
+function createhypetrainprogression(image: string[]): void {
+    const HypeWrapper = document.getElementsByClassName('train-wrapper');
+    const carts = document.getElementsByClassName('train-cart');
+    const cartsArray = Array.from(carts);
+    const currentCart = cartsArray[cartsArray.length - 1];
+
+    const UserImage = document.createElement('img');
+
+    gsap.set(UserImage, { 
+        className: 'cart-image', 
+        z: 10, 
+        zIndex: 10, 
+        position: "absolute", 
+        left: "20px", 
+        top: "70px", 
+        attr: { src: image[0] } 
+    });
+
+    currentCart.appendChild(UserImage);
+    passenger_animation(UserImage);
+}
+
+// Fade and Clear the Hype Train
+export function hypetrainfinish(): void {
+    const HypeWrapper = document.getElementsByClassName('train-wrapper')[0] as HTMLElement;
+
+    clearTimeout(Number(HypeWrapper.id));
+
+    fade(HypeWrapper, 0, 4.5);
+
+    setTimeout(() => {
+        helpers.removeelement(HypeWrapper.id);
+    }, 5000);
+}
 
 export function hypetrainstart(): void {
-    console.log("Current Level: " + currentLevel);
+    const image = "../assets/img/trainhead.png";
+    const HypeTrainWrapper = document.createElement('div');
+    HypeTrainWrapper.id = String(setTimeout(() => {
+        helpers.removeelement(HypeTrainWrapper.id);
+    }, 360000));
 
-    // Create the wrapper if it doesn't exist
-    if (!globalVars.HypeTrainWrapper) {
-        createHypeTrainWrapper();
+    const HypeTrainHead = document.createElement('div');
+
+    gsap.set(HypeTrainWrapper, { 
+        className: 'train-wrapper', 
+        x: 0 - window.innerWidth, 
+        y: 0, 
+        z: helpers.Randomizer(-200, 200), 
+        opacity: 0 
+    });
+    gsap.set(HypeTrainHead, { 
+        className: 'train-head', 
+        float: "right", 
+        z: helpers.Randomizer(-200, 200), 
+        width: "225px", 
+        height: "225px", 
+        backgroundImage: `url(${image})` 
+    });
+
+    globalConst.warp.appendChild(HypeTrainWrapper);
+    HypeTrainWrapper.appendChild(HypeTrainHead);
+
+    fade(HypeTrainWrapper, 1, 3);
+    train_animation(HypeTrainWrapper);
+    hypetrainlevelup();
+
+    let delayTime = 1000;
+    if (globalVars.hypetrainCache) {
+        globalVars.hypetrainCache.forEach((userId: string) => {
+            delay(delayTime).then(() => hypetrainprogression(userId));
+            delayTime = delayTime + 3000;
+        });
     }
-
-    // Clear any existing interval
-    if (globalVars.hypetimer) {
-        clearInterval(globalVars.hypetimer);
-    }
-
-    // Create the train head
-    createTrainHead();
-
-    // Create the first cart
-    createTrainCart();
-
-    // Start looping through the cached avatars
-    startHypeTrainLoop();
 }
 
+// Add additional Car to Train
 export function hypetrainlevelup(): void {
-    currentLevel++;
-    console.log("LevelUp - Current Level: " + currentLevel);
+    const trainWrapper = document.getElementsByClassName('train-wrapper')[0];
 
-    // Add a new cart
-    createTrainCart();
-}
+    console.log(trainWrapper.id);
 
-export function hypetrainprogression(userId: string): void {
-    const userAvatar = getUserAvatar(userId);
-    addUserToCart(userAvatar);
-}
+    // Level up resets 5 minute timer
+    clearTimeout(Number(trainWrapper.id));
+    trainWrapper.id = String(setTimeout(() => {
+        helpers.removeelement(trainWrapper.id);
+    }, 365000));
 
-export function hypetrainfinish(): void {
-    // Stop the train loop
-    if (globalVars.hypetimer) {
-        clearInterval(globalVars.hypetimer);
+    const cartNum = Math.round(helpers.Randomizer(1, 2));
+    let image: string;
+    if (cartNum === 1) {
+        image = "../assets/img/cart1.png";
+    } else if (cartNum === 2) {
+        image = "../assets/img/cart2.png";
+    } else {
+        image = "../assets/img/cart1.png";
     }
 
-    // Remove the train wrapper after animation
-    if (globalVars.HypeTrainWrapper) {
-        const trainWrapper = globalVars.HypeTrainWrapper;
-        
-        // Animate the train out of view
-        // @ts-ignore - GSAP is included via CDN
-        gsap.to(trainWrapper, {
-            x: innerWidth + 500,
-            duration: 5,
-            ease: "power2.in",
-            onComplete: () => {
-                // Remove the train from DOM
-                if (trainWrapper.parentNode) {
-                    trainWrapper.parentNode.removeChild(trainWrapper);
-                }
-                
-                // Reset variables
-                globalVars.HypeTrainWrapper = undefined;
-                globalVars.HypeCart = undefined;
-                globalVars.hypetrainCache = [];
-                currentLevel = 1;
-            }
-        });
-    }
+    const HypeCart = document.createElement('div');
+    gsap.set(HypeCart, { 
+        className: 'train-cart', 
+        float: "right", 
+        z: helpers.Randomizer(-200, 200), 
+        width: "225px", 
+        height: "225px", 
+        opacity: 0 
+    });
+
+    const CartImage = document.createElement('img');
+    gsap.set(CartImage, { 
+        className: 'cart-image', 
+        z: 100, 
+        zIndex: 100, 
+        position: "relative", 
+        width: "225px", 
+        height: "225px", 
+        attr: { src: image } 
+    });
+
+    trainWrapper.appendChild(HypeCart);
+    HypeCart.appendChild(CartImage);
+    fade(HypeCart, 1, 3);
 }
 
-export function incomingRaid(userId: string, userName: string, viewers: number): void {
-    // If hypetrain is currently active, don't show raid
-    if (globalVars.HypeTrainWrapper) {
-        return;
-    }
-
-    // Create a simple animated message for the raid
-    const raidContainer = document.createElement('div');
-    raidContainer.className = 'raid-container';
-    
-    // @ts-ignore - GSAP is included via CDN
-    gsap.set(raidContainer, {
-        position: 'absolute',
-        top: '30%',
-        left: '-100%',
-        width: '80%',
-        textAlign: 'center',
-        padding: '20px',
-        backgroundColor: 'rgba(0, 0, 0, 0.7)',
-        borderRadius: '10px',
-        color: 'white',
-        fontSize: '32px',
-        fontWeight: 'bold',
-        zIndex: 1000
-    });
-
-    // Create message elements
-    const messageEl = document.createElement('div');
-    messageEl.innerHTML = `<span style="color: #ff4500;">${userName}</span> is raiding with <span style="color: #ff4500;">${viewers}</span> viewers!`;
-    
-    // Get user avatar
-    helpers.getTwitchAvatar(userName)
-    .then(avatarUrl => {
-        const avatarEl = document.createElement('img');
-        avatarEl.src = avatarUrl;
-        avatarEl.style.width = '100px';
-        avatarEl.style.height = '100px';
-        avatarEl.style.borderRadius = '50%';
-        avatarEl.style.margin = '10px';
-        
-        raidContainer.appendChild(avatarEl);
-        raidContainer.appendChild(messageEl);
-        document.body.appendChild(raidContainer);
-        
-        // Animate in
-        // @ts-ignore - GSAP is included via CDN
-        gsap.to(raidContainer, {
-            left: '10%',
-            duration: 1,
-            ease: "elastic.out(1, 0.5)"
-        });
-        
-        // Wait and then animate out
-        setTimeout(() => {
-            // @ts-ignore - GSAP is included via CDN
-            gsap.to(raidContainer, {
-                left: '-100%',
-                duration: 1,
-                ease: "power2.in",
-                onComplete: () => {
-                    if (raidContainer.parentNode) {
-                        raidContainer.parentNode.removeChild(raidContainer);
-                    }
-                }
-            });
-        }, 5000);
-    })
-    .catch(error => {
-        console.error('Error getting avatar:', error);
-        
-        // Fallback if avatar fails
-        raidContainer.appendChild(messageEl);
-        document.body.appendChild(raidContainer);
-        
-        // Animate in
-        // @ts-ignore - GSAP is included via CDN
-        gsap.to(raidContainer, {
-            left: '10%',
-            duration: 1,
-            ease: "elastic.out(1, 0.5)"
-        });
-        
-        // Wait and then animate out
-        setTimeout(() => {
-            // @ts-ignore - GSAP is included via CDN
-            gsap.to(raidContainer, {
-                left: '-100%',
-                duration: 1,
-                ease: "power2.in",
-                onComplete: () => {
-                    if (raidContainer.parentNode) {
-                        raidContainer.parentNode.removeChild(raidContainer);
-                    }
-                }
-            });
-        }, 5000);
-    });
+function fade(element: HTMLElement, opacity: number, duration: number): void {
+    gsap.to(element, { opacity, duration });
 }
 
-// Helper functions
-
-function createHypeTrainWrapper(): void {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'hype-train-wrapper';
-    
-    // @ts-ignore - GSAP is included via CDN
-    gsap.set(wrapper, {
-        position: 'absolute',
-        bottom: '10%',
-        left: '-1000px', // Start off-screen
-        width: 'auto',
-        height: '150px',
-        display: 'flex',
-        alignItems: 'flex-end',
-        zIndex: 1000
-    });
-    
-    document.body.appendChild(wrapper);
-    globalVars.HypeTrainWrapper = wrapper;
-    
-    // Animate the train into view
-    // @ts-ignore - GSAP is included via CDN
-    gsap.to(wrapper, {
-        left: '50px',
-        duration: 2,
-        ease: "power2.out"
-    });
+function train_animation(element: HTMLElement): void {
+    gsap.timeline({ repeat: -1, defaults: { duration: 3, ease: "none" } })
+        .to(element, { x: window.innerWidth, duration: 10 })
+        .to(element, { y: -500, duration: 0.5 })
+        .to(element, { x: 0 - window.innerWidth, duration: 0.5 })
+        .to(element, { y: 0, duration: 0.5 });
 }
 
-function createTrainHead(): void {
-    if (!globalVars.HypeTrainWrapper) return;
-    
-    const trainHead = document.createElement('div');
-    trainHead.className = 'train-head';
-    
-    // @ts-ignore - GSAP is included via CDN
-    gsap.set(trainHead, {
-        position: 'relative',
-        width: '200px',
-        height: '120px',
-        backgroundImage: 'url(/assets/img/trainhead.png)',
-        backgroundSize: 'contain',
-        backgroundRepeat: 'no-repeat',
-        marginRight: '10px'
-    });
-    
-    globalVars.HypeTrainWrapper.appendChild(trainHead);
-    
-    // Add some smoke/steam effect
-    createSteamEffect(trainHead);
+function passenger_animation(element: HTMLElement): void {
+    gsap.timeline({ repeat: -1, defaults: { duration: 3, ease: "none" } })
+        .to(element, { x: "+=120" })
+        .to(element, { x: "-=120" });
+    gsap.to(element, { duration: 1, repeat: -1, y: "-=20", ease: "sine.out", yoyo: true });
 }
 
-function createTrainCart(): void {
-    if (!globalVars.HypeTrainWrapper) return;
-    
-    const cart = document.createElement('div');
-    cart.className = 'train-cart';
-    
-    // Choose cart image based on current level
-    const cartImage = `cart${Math.min(currentLevel, 4)}.png`;
-    
-    // @ts-ignore - GSAP is included via CDN
-    gsap.set(cart, {
-        position: 'relative',
-        width: '120px',
-        height: '100px',
-        backgroundImage: `url(/assets/img/${cartImage})`,
-        backgroundSize: 'contain',
-        backgroundRepeat: 'no-repeat',
-        marginRight: '10px',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center'
-    });
-    
-    // Animate the cart entering
-    // @ts-ignore - GSAP is included via CDN
-    gsap.from(cart, {
-        x: -100,
-        opacity: 0,
-        duration: 1,
-        ease: "elastic.out(1, 0.5)"
-    });
-    
-    globalVars.HypeTrainWrapper.appendChild(cart);
-    globalVars.HypeCart = cart;
-    
-    // When adding a new cart, create the avatars container
-    const avatarsContainer = document.createElement('div');
-    avatarsContainer.className = 'avatars-container';
-    
-    // @ts-ignore - GSAP is included via CDN
-    gsap.set(avatarsContainer, {
-        position: 'absolute',
-        width: '100%',
-        height: '100%',
-        display: 'flex',
-        flexWrap: 'wrap',
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: '10px'
-    });
-    
-    cart.appendChild(avatarsContainer);
-}
-
-function startHypeTrainLoop(): void {
-    // Set up a loop to cycle through avatars in the cache
-    globalVars.hypetimer = setInterval(() => {
-        // If there are avatars in the cache, cycle them
-        if (globalVars.hypetrainCache.length > 0) {
-            const username = globalVars.hypetrainCache[0];
-            
-            // If we have an avatar to show
-            if (username) {
-                // Get the avatar and add it to current cart
-                getUserAvatar(username)
-                    .then(avatarUrl => {
-                        addUserToCart(avatarUrl);
-                    })
-                    .catch(err => {
-                        console.error("Error getting avatar:", err);
-                    });
-                
-                // Rotate the cache
-                globalVars.hypetrainCache.push(globalVars.hypetrainCache.shift() || "");
-            }
-        }
-    }, 3000); // Cycle every 3 seconds
-}
-
-function getUserAvatar(userId: string): Promise<string> {
-    if (userId === "placeholder") {
-        return Promise.resolve("https://static-cdn.jtvnw.net/jtv_user_pictures/8e051a26-051f-4abe-bcfa-e13a5d13fad0-profile_image-300x300.png");
-    }
-    
-    return helpers.getTwitchAvatar(userId, true);
-}
-
-function addUserToCart(avatarUrl: string): void {
-    if (!globalVars.HypeCart) return;
-    
-    // Find the avatars container in the current cart
-    const avatarsContainer = globalVars.HypeCart.querySelector('.avatars-container');
-    if (!avatarsContainer) return;
-    
-    // Check if we have space for more avatars (max 4)
-    if (avatarsContainer.children.length >= 4) return;
-    
-    // Create avatar element
-    const avatar = document.createElement('div');
-    avatar.className = 'hype-avatar';
-    
-    // @ts-ignore - GSAP is included via CDN
-    gsap.set(avatar, {
-        width: '40px',
-        height: '40px',
-        borderRadius: '50%',
-        backgroundImage: `url(${avatarUrl})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        margin: '2px',
-        opacity: 0,
-        scale: 0.5
-    });
-    
-    avatarsContainer.appendChild(avatar);
-    
-    // Animate avatar appearing
-    // @ts-ignore - GSAP is included via CDN
-    gsap.to(avatar, {
-        opacity: 1,
-        scale: 1,
-        duration: 0.5,
-        ease: "back.out(1.7)"
-    });
-}
-
-function createSteamEffect(trainHead: HTMLElement): void {
-    // Create steam particles periodically
-    const steamInterval = setInterval(() => {
-        // If train is no longer in DOM, clear the interval
-        if (!trainHead.parentNode) {
-            clearInterval(steamInterval);
-            return;
-        }
-        
-        const steamParticle = document.createElement('div');
-        // @ts-ignore - GSAP is included via CDN
-        gsap.set(steamParticle, {
-            position: 'absolute',
-            width: '20px',
-            height: '20px',
-            backgroundColor: 'rgba(255, 255, 255, 0.7)',
-            borderRadius: '50%',
-            top: '20px',
-            left: '50px',
-            opacity: 0.7,
-            scale: 0.1
-        });
-        
-        trainHead.appendChild(steamParticle);
-        
-        // Animate the steam rising and fading
-        // @ts-ignore - GSAP is included via CDN
-        gsap.to(steamParticle, {
-            y: '-=70',
-            x: '+=20',
-            opacity: 0,
-            scale: 1.5,
-            duration: 2,
-            ease: "power1.out",
-            onComplete: () => {
-                if (steamParticle.parentNode) {
-                    steamParticle.parentNode.removeChild(steamParticle);
-                }
-            }
-        });
-    }, 500);
+// Helper function for delay
+function delay(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }

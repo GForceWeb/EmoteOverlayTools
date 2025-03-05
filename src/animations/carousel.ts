@@ -54,8 +54,7 @@ function carousel_animation(element: HTMLElement): void {
         delay: 0,
         motionPath: {
             alignOrigin: [0.5, 0.5],
-            path: carouselPath,
-            repeat: -1
+            path: carouselPath
         }
     });
     
