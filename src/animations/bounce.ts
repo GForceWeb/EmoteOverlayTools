@@ -2,6 +2,7 @@ import Variables from '../config.ts';
 import { GlobalVars, GlobalConst } from '../types';
 const { globalVars, globalConst} = Variables;
 import helpers from '../helpers.ts';
+import { gsap } from "gsap";
 
 export function emoteBounce(images: string[], count: number = 5, interval: number = 100): void {
     let imgcount = images.length;
