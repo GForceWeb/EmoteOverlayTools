@@ -3,6 +3,7 @@ import { GlobalVars, GlobalConst } from '../types';
 const { globalVars, globalConst} = Variables;
 import helpers from '../helpers.ts';
 import { alnumDist } from '../lib/emotetext.js'
+import { gsap } from "gsap";
 
 export function emoteText(images: string[], text: string = 'hype', interval: number = 25): void {
     let imgcount = images.length;

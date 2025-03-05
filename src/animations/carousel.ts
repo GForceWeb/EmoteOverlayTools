@@ -2,6 +2,8 @@ import Variables from '../config.ts';
 import { GlobalVars, GlobalConst } from '../types';
 const { globalVars, globalConst} = Variables;
 import helpers from '../helpers.ts';
+import { gsap } from "gsap";
+import { MotionPathPlugin } from "gsap/MotionPathPlugin";
 
 export function emoteCarousel(images: string[], count: number = 100, interval: number = 150): void {
     let imgcount = images.length;
@@ -21,7 +23,6 @@ function createCarousel(image: string): void {
     globalVars.divnumber++;
 
     //create at random Y height at left edge of screen
-    // @ts-ignore - GSAP is included via CDN
     gsap.set(Div, { className: 'carousel-element', x: innerWidth/2, y: innerHeight/2, z: helpers.Randomizer(-200, 200), backgroundImage: 'url(' + image + ')' });
 
     globalConst.warp.appendChild(Div);
@@ -46,7 +47,6 @@ function carousel_animation(element: HTMLElement): void {
     let cy = carouselstarty;
     let carouselPath = "M" + cx + "," + (cy-r) + " a" + r + "," + r + " 0 1 1 -0.0001,0";
 
-    // @ts-ignore - GSAP is included via CDN
     gsap.to(element, { 
         duration: 10,
         // ease: "slow(0.7, 0.7, false)",
@@ -59,8 +59,6 @@ function carousel_animation(element: HTMLElement): void {
         }
     });
     
-    // @ts-ignore - GSAP is included via CDN
     gsap.to(element, {scale: 0.1, duration: 9, delay: 0, ease: "none"});
-    // @ts-ignore - GSAP is included via CDN
     gsap.to(element, {opacity: 0, duration: 9, delay: 0, ease: "none"});
 }

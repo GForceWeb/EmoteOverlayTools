@@ -80,7 +80,6 @@ export const globalConst: GlobalConst = {
   maxemotes,
   ws: new WebSocket(server),
   warp: document.getElementById("confetti-container") as HTMLElement,
-  maxemotes,
   subonly,
   emoterain,
   welcome,
@@ -88,7 +87,6 @@ export const globalConst: GlobalConst = {
   lurk,
   kappagen,
   debug,
-  warp,
   hypetrain,
   cheers,
   choon

@@ -2,6 +2,9 @@ import Variables from '../config.ts';
 import { GlobalVars, GlobalConst } from '../types';
 const { globalVars, globalConst} = Variables;
 import helpers from '../helpers.ts';
+import { gsap } from "gsap";
+
+
 
 export function emoteRightWave(images: string[], count: number = 100, interval: number = 20): void {
     let imgcount = images.length;
@@ -72,7 +75,8 @@ function rightwave_animation(element: HTMLElement): void {
     //sway up and down a bit
     // @ts-ignore - GSAP is included via CDN
     gsap.to(element, { y: function() {
-        return helpers.Randomizer(-350, 350) + gsap.getProperty(element, "y");
+        let y = gsap.getProperty(element, "y") as number;
+        return helpers.Randomizer(-350, 350) + y;
         }, duration: helpers.Randomizer(1, 2), ease: Sine.easeInOut, yoyo: true, repeat: -1});
 }
 
@@ -83,6 +87,7 @@ function leftwave_animation(element: HTMLElement): void {
     //sway up and down a bit
     // @ts-ignore - GSAP is included via CDN
     gsap.to(element, { y: function() {
-        return helpers.Randomizer(-350, 350) + gsap.getProperty(element, "y");
+        let y = gsap.getProperty(element, "y") as number;
+        return helpers.Randomizer(-350, 350) + y;
         }, duration: helpers.Randomizer(1, 2), ease: Sine.easeInOut, yoyo: true, repeat: -1});
 }
