@@ -1,15 +1,15 @@
-import Variables from '../config.js';
+import Variables from '../config.ts';
+import { GlobalVars, GlobalConst } from '../types';
 const { globalVars, globalConst} = Variables;
-import helpers from '../helpers.js';
+import helpers from '../helpers.ts';
 import { alnumDist } from '../lib/emotetext.js'
 
-
-export function emoteText (images, text='hype', interval=25){
+export function emoteText(images: string[], text: string = 'hype', interval: number = 25): void {
     let imgcount = images.length;
     let count = 0;
     let length = text.length
     let character = 0;
-    let thischaracter = [];
+    let thischaracter: any[] = [];
     
     //Iterate each letter in textstring
     for (var i = 0; i < text.length; i++) {
@@ -21,14 +21,12 @@ export function emoteText (images, text='hype', interval=25){
         //Iterate over each line of the letter
         for (let j = 0; j < pattern.length; j++) {   
             let line = j + 1;
-            //console.log(pattern[k]);
-            
             
             //Iterate each pixel of line
             for (let k = 0; k < pattern[j].length; k++) {
 
                 let position = k + 1;
-                let show;
+                let show: string;
                 if (pattern[j][k] == 1) {
                     show = "true";
                 }
@@ -43,7 +41,7 @@ export function emoteText (images, text='hype', interval=25){
                         setTimeout(() => {
                             createEmoteText(image, length, character, line, position);
                         }, j * interval);
-                      })(images[imagenum], length, character, line,  position);
+                      })(images[imagenum], length, character, line, position);
                 }
             }
         }
@@ -51,23 +49,21 @@ export function emoteText (images, text='hype', interval=25){
     }
 }
 
-function createEmoteText(image, length, character, x, y) {
+function createEmoteText(image: string, length: number, character: number, x: number, y: number): void {
     var Div = document.createElement('div');
-    Div.id = globalVars.divnumber;
+    Div.id = globalVars.divnumber.toString();
     globalVars.divnumber++;
 
-    let charwidthstart;
+    let charwidthstart: number;
     let pixelsize = 30;
     let letterpadding = 20
     let letterwidth = 5 * pixelsize + letterpadding;
 
     //Total Width = Length of Word x pixels per letter x size of pixel
     let totalwidth = length * letterwidth;
-    //console.log("innerWidth: " + innerWidth);
-    //console.log("TotalWidth: " + totalwidth);
+
     if(totalwidth < innerWidth){
         charwidthstart = (innerWidth - totalwidth) / 2;
-        //console.log("Shorter than width");
     }
     else {
         charwidthstart = 0;
@@ -89,8 +85,7 @@ function createEmoteText(image, length, character, x, y) {
 
     //Work out locations
     
-    console.log("Start: " + charwidthstart + ", LetterWidth: " + letterwidth + ", Char: " + character );
-    //let charwidthstart = (innerWidth / 11) + (letterwidth * (character - 1));
+    console.log("Start: " + charwidthstart + ", LetterWidth: " + letterwidth + ", Char: " + character);
     charwidthstart = charwidthstart + (letterwidth * (character - 1));
     console.log("finalwidthstart: " + charwidthstart);
     let charheightstart = innerHeight / 10 * 6;
@@ -126,8 +121,8 @@ function createEmoteText(image, length, character, x, y) {
     default:
     }
 
-
     //create at random X/Y within screen bounds
+    // @ts-ignore - GSAP is included via CDN
     gsap.set(Div, { className: 'text-element', x: startX, y: startY, z: helpers.Randomizer(-200, 200), opacity: 0, width: pixelsize, height: pixelsize, backgroundImage: 'url(' + image + ')' });
 
     globalConst.warp.appendChild(Div);
@@ -140,16 +135,16 @@ function createEmoteText(image, length, character, x, y) {
     }, 15000);
 }
 
-function text_animation(element, pixelX, pixelY) {
-    
-
+function text_animation(element: HTMLElement, pixelX: number, pixelY: number): void {
+    // @ts-ignore - GSAP is included via CDN
     gsap.to(element, {duration: 2, opacity: 1, delay: 0});
+    // @ts-ignore - GSAP is included via CDN
     gsap.to(element, {duration: helpers.Randomizer(3, 5), x: pixelX, y: pixelY, delay: 0});
+    // @ts-ignore - GSAP is included via CDN
     gsap.to(element, {duration: 2, opacity: 0, delay: 13});
 
+    // @ts-ignore - GSAP is included via CDN
     gsap.to(element, {duration: 0.7, rotation: 30, repeat: -1, repeatDelay: 3});
-    gsap.to(element, {duration: 2.3, rotation: 0, ease:Elastic.easeOut.config(0.9,0.1), delay: 0.7, repeat: -1, repeatDelay: 3});
-
-    //gsap.to(element, {duration: 0.5, x: ""});
-
+    // @ts-ignore - GSAP is included via CDN
+    gsap.to(element, {duration: 2.3, rotation: 0, ease: Elastic.easeOut.config(0.9,0.1), delay: 0.7, repeat: -1, repeatDelay: 3});
 }

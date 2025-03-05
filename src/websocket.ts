@@ -64,11 +64,11 @@ function connectws(): void {
           }
         }
   
-        //Check if the channel is a gforce sub IN PROGRESS
-        if(!globalConst.channelsub) {
-            //   let channelsub = true;
-            //console.log("I should only see this once");
-        }
+        // //Check if the channel is a gforce sub IN PROGRESS
+        // if(!globalConst.channelsub) {
+        //     //   let channelsub = true;
+        //     //console.log("I should only see this once");
+        // }
   
   
         //Check for Undefined WS Events

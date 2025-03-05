@@ -49,6 +49,7 @@ export interface WSData {
     last_contribution?: {
       user_id?: string;
     };
+    name?: string;
     coinFlipResult?: string;
     from_broadcaster_user_id?: string;
     from_broadcaster_user_name?: string;

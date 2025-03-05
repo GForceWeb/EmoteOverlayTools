@@ -1,9 +1,9 @@
-import Variables from '../config.js';
+import Variables from '../config.ts';
+import { GlobalVars, GlobalConst } from '../types';
 const { globalVars, globalConst} = Variables;
-import helpers from '../helpers.js';
+import helpers from '../helpers.ts';
 
-export function emoteCyclone(images, count=100, interval=30) {
-
+export function emoteCyclone(images: string[], count: number = 100, interval: number = 30): void {
     let imgcount = images.length;
 
     for (let j = 0; j < count; j++) {
@@ -15,12 +15,12 @@ export function emoteCyclone(images, count=100, interval=30) {
     }
 }
 
-function createEmoteCyclone(image) {
-
+function createEmoteCyclone(image: string): void {
     var Div = document.createElement('div');
-    Div.id = globalVars.divnumber;
+    Div.id = globalVars.divnumber.toString();
     globalVars.divnumber++;
 
+    // @ts-ignore - GSAP is included via CDN
     gsap.set(Div, { className: 'cyclone-element', x: innerWidth/2, y: innerHeight, z: helpers.Randomizer(-200, 200), backgroundImage: 'url(' + image + ')' });
 
     globalConst.warp.appendChild(Div);
@@ -31,11 +31,10 @@ function createEmoteCyclone(image) {
     setTimeout(() => {
         helpers.removeelement(Div.id);
     }, 15000);
-
 }
 
 // Explosion Animation
-function cyclone_animation(element) {
+function cyclone_animation(element: HTMLElement): void {
     let centerX = innerWidth / 2;
     let startY = innerHeight;
     
@@ -47,6 +46,7 @@ function cyclone_animation(element) {
     const initialRadius = innerWidth * 0.08;
     
     // Set initial position
+    // @ts-ignore - GSAP is included via CDN
     gsap.set(element, {
         x: centerX + Math.cos(angleRad) * initialRadius,
         y: startY,
@@ -54,6 +54,7 @@ function cyclone_animation(element) {
     });
 
     // Create a timeline for smoother animation
+    // @ts-ignore - GSAP is included via CDN
     let tl = gsap.timeline();
     
     // Calculate single segment duration and overlap
@@ -129,6 +130,7 @@ function cyclone_animation(element) {
     }, "-=0.4");
 
     // Add fade out that starts before motion completes
+    // @ts-ignore - GSAP is included via CDN
     gsap.to(element, {
         opacity: 0,
         duration: 1.5,
