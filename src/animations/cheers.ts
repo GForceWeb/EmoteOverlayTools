@@ -2,6 +2,7 @@ import Variables from '../config.ts';
 import { GlobalVars, GlobalConst } from '../types';
 const { globalVars, globalConst} = Variables;
 import helpers from '../helpers.ts';
+import { gsap } from "gsap";
 
 export function create(images: string[]): void {
     createDrinkingAnimation(images);

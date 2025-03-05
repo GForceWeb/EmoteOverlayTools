@@ -2,6 +2,7 @@ import Variables from '../config.ts';
 import { GlobalVars, GlobalConst } from '../types';
 const { globalVars, globalConst} = Variables;
 import helpers from '../helpers.ts';
+import { gsap } from "gsap";
 
 export function create(image: string, iterations: number = 3, interval: number = 5000): void {
     for (let j = 0; j < iterations; j++) {
@@ -14,39 +15,27 @@ export function create(image: string, iterations: number = 3, interval: number =
 }
 
 function lurking_animation_left(element: HTMLElement): void {
-    // @ts-ignore - TweenMax is included via GSAP CDN
-    TweenMax.to(element, 1, { rotationZ:'+=40', yoyo: true, repeat: 0, ease: Sine.easeInOut, delay: 0 });
-    // @ts-ignore - TweenMax is included via GSAP CDN
-    TweenMax.to(element, 1, { x:'+=200', yoyo: true, repeat: 0, ease: Sine.easeInOut, delay: 0 });
-    // @ts-ignore - TweenMax is included via GSAP CDN
-    TweenMax.to(element, 1, { rotationZ:'-=40', yoyo: true, repeat: 0, ease: Sine.easeInOut, delay: 1.5 });
-    // @ts-ignore - TweenMax is included via GSAP CDN
-    TweenMax.to(element, 1, { x:'-=200', yoyo: true, repeat: 0, ease: Sine.easeInOut, delay: 1.5 });
+    gsap.to(element, 1, { rotationZ:'+=40', yoyo: true, repeat: 0, ease: Sine.easeInOut, delay: 0 });
+    gsap.to(element, 1, { x:'+=200', yoyo: true, repeat: 0, ease: Sine.easeInOut, delay: 0 });
+    gsap.to(element, 1, { rotationZ:'-=40', yoyo: true, repeat: 0, ease: Sine.easeInOut, delay: 1.5 });
+    gsap.to(element, 1, { x:'-=200', yoyo: true, repeat: 0, ease: Sine.easeInOut, delay: 1.5 });
 }
 
 function lurking_animation_right(element: HTMLElement): void {
-    // @ts-ignore - TweenMax is included via GSAP CDN
-    TweenMax.to(element, 1, { rotationZ:'-=40', yoyo: true, repeat: 0, ease: Sine.easeInOut, delay: 0 });
-    // @ts-ignore - TweenMax is included via GSAP CDN
-    TweenMax.to(element, 1, { x:'-=200', yoyo: true, repeat: 0, ease: Sine.easeInOut, delay: 0 });
-    // @ts-ignore - TweenMax is included via GSAP CDN
-    TweenMax.to(element, 1, { rotationZ:'+=40', yoyo: true, repeat: 0, ease: Sine.easeInOut, delay: 1.5 });
-    // @ts-ignore - TweenMax is included via GSAP CDN
-    TweenMax.to(element, 1, { x:'+=200', yoyo: true, repeat: 0, ease: Sine.easeInOut, delay: 1.5 });
+    gsap.to(element, 1, { rotationZ:'-=40', yoyo: true, repeat: 0, ease: Sine.easeInOut, delay: 0 });
+    gsap.to(element, 1, { x:'-=200', yoyo: true, repeat: 0, ease: Sine.easeInOut, delay: 0 });
+    gsap.to(element, 1, { rotationZ:'+=40', yoyo: true, repeat: 0, ease: Sine.easeInOut, delay: 1.5 });
+    gsap.to(element, 1, { x:'+=200', yoyo: true, repeat: 0, ease: Sine.easeInOut, delay: 1.5 });
 }
 
 function lurking_animation_top(element: HTMLElement): void {
-    // @ts-ignore - TweenMax is included via GSAP CDN
-    TweenMax.to(element, 1, { y:'+=250', yoyo: true, repeat: 0, ease: Sine.easeInOut, delay: 0 });
-    // @ts-ignore - TweenMax is included via GSAP CDN
-    TweenMax.to(element, 1, { y:'-=250', yoyo: true, repeat: 0, ease: Sine.easeInOut, delay: 1.5 });
+    gsap.to(element, 1, { y:'+=250', yoyo: true, repeat: 0, ease: Sine.easeInOut, delay: 0 });
+    gsap.to(element, 1, { y:'-=250', yoyo: true, repeat: 0, ease: Sine.easeInOut, delay: 1.5 });
 }
 
 function lurking_animation_bottom(element: HTMLElement): void {
-    // @ts-ignore - TweenMax is included via GSAP CDN
-    TweenMax.to(element, 1, { y:'-=250', yoyo: true, repeat: 0, ease: Sine.easeInOut, delay: 0 });
-    // @ts-ignore - TweenMax is included via GSAP CDN
-    TweenMax.to(element, 1, { y:'+=250', yoyo: true, repeat: 0, ease: Sine.easeInOut, delay: 1.5 });
+    gsap.to(element, 1, { y:'-=250', yoyo: true, repeat: 0, ease: Sine.easeInOut, delay: 0 });
+    gsap.to(element, 1, { y:'+=250', yoyo: true, repeat: 0, ease: Sine.easeInOut, delay: 1.5 });
 }
 
 function createVisualLurk(image: string): void {
@@ -64,26 +53,22 @@ function createVisualLurk(image: string): void {
     switch (random) {
     case 1:
         // left
-        // @ts-ignore - TweenLite is included via GSAP CDN
-        TweenLite.set(Div, { className: 'lurking-element', x: -400, y: helpers.Randomizer(0, innerHeight-400), z: 0 });
+        gsap.set(Div, { className: 'lurking-element', x: -400, y: helpers.Randomizer(0, innerHeight-400), z: 0 });
         lurking_animation_left(Div);                        
         break;
     case 2:
         // right
-        // @ts-ignore - TweenLite is included via GSAP CDN
-        TweenLite.set(Div, { className: 'lurking-element', x: innerWidth, y: helpers.Randomizer(0, innerHeight-400), z: 0 });
+        gsap.set(Div, { className: 'lurking-element', x: innerWidth, y: helpers.Randomizer(0, innerHeight-400), z: 0 });
         lurking_animation_right(Div); 
         break;
     case 3:
         // top
-        // @ts-ignore - TweenLite is included via GSAP CDN
-        TweenLite.set(Div, { className: 'lurking-element', x: helpers.Randomizer(0, innerWidth-400), y: -400, z: 0, rotationX: 180 });
+        gsap.set(Div, { className: 'lurking-element', x: helpers.Randomizer(0, innerWidth-400), y: -400, z: 0, rotationX: 180 });
         lurking_animation_top(Div); 
         break;
     default:
         // bottom
-        // @ts-ignore - TweenLite is included via GSAP CDN
-        TweenLite.set(Div, { className: 'lurking-element', x: helpers.Randomizer(0, innerWidth-400), y: innerHeight, z: 0 });
+        gsap.set(Div, { className: 'lurking-element', x: helpers.Randomizer(0, innerWidth-400), y: innerHeight, z: 0 });
         lurking_animation_bottom(Div); 
     }
     globalConst.warp.appendChild(Div);

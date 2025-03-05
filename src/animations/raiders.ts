@@ -1,11 +1,9 @@
 import Variables from '../config.js';
 const { globalVars, globalConst} = Variables;
 import helpers from '../helpers.js';
-
-
+import { gsap } from "gsap";
 
 //TWITCH HAS DEPRECATED THE IDs of each raider so this code doesn't work anymore
-
 //TODO: Replace with raid animation where raiding user is shown, with an army of default people icons, charging across the screen
 
 
@@ -27,12 +25,14 @@ export async function incomingRaid(userId, displayName, viewers){
     console.log(avatar);
 
     //Setup the raid wrapper
-    let raidWrapper = document.createElement('div');
-    raidWrapper.id = setTimeout(() => {
-        helpers.removeelement(raidWrapper.id);
-    }, 600000);
-    gsap.set(raidWrapper, { className: 'raid-wrapper', position: "absolute", height: innerHeight, width: innerWidth, x: 0, y: 0, z: helpers.Randomizer(-200, 200), });
-    globalConst.warp.appendChild(raidWrapper);
+
+    //Commented out for type error
+    // let raidWrapper = document.createElement('div');
+    // raidWrapper.id = setTimeout(() => {
+    //     helpers.removeelement(raidWrapper.id);
+    // }, 600000);
+    // gsap.set(raidWrapper, { className: 'raid-wrapper', position: "absolute", height: innerHeight, width: innerWidth, x: 0, y: 0, z: helpers.Randomizer(-200, 200), });
+    // globalConst.warp.appendChild(raidWrapper);
 
 
     // Calculate the number of rows and columns in the pyramid
@@ -63,7 +63,7 @@ export async function incomingRaid(userId, displayName, viewers){
     
     // Append the raider to the container
     gsap.set(raider, { className: 'raider-leader', z: 10, zIndex: 10, position: "absolute", backgroundImage: 'url(' + avatar + ')' });
-    raidWrapper.appendChild(raider);
+    //raidWrapper.appendChild(raider);
 
     //raiderAnimation(raider);
 
@@ -85,7 +85,7 @@ export async function incomingRaid(userId, displayName, viewers){
             
             // Append the element to the container
             gsap.set(element, { className: 'raider-image', z: 10, zIndex: 10, position: "absolute", backgroundImage: 'url(' + avatar + ')' });
-            raidWrapper.appendChild(element);
+            //raidWrapper.appendChild(element);
 
             //raiderAnimation(element);
             console.log("raider added");
@@ -102,8 +102,8 @@ export async function incomingRaid(userId, displayName, viewers){
 
 export function createRaider(image){
     var Div = document.createElement('div');
-    Div.id = divnumber;
-    divnumber++;
+    Div.id = globalVars.divnumber.toString();
+    globalVars.divnumber++;
     Div.style.background = 'url(' + image + ')';
     Div.style.backgroundSize = '100% 100%';
 

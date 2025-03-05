@@ -13,6 +13,8 @@
     "isolatedModules": true,
     "noEmit": true,
 
+    "types": ["gsap"],
+
     /* Linting */
     "strict": false,
     "noUnusedLocals": false,
