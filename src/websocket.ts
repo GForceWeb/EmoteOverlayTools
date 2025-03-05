@@ -1,23 +1,25 @@
-import Variables from './config.js';
-import animations from './animations.js';
-import handlers from './handlers.js';
+import Variables from './config.ts';
+import animations from './animations.ts';
+import handlers from './handlers.ts';
+import { WSData } from './types';
 
 
 const { globalVars, globalConst} = Variables;
 
 
 let ws = globalConst.ws;
+let Botchat: boolean = false;
 
-function connectws() {
+function connectws(): void {
     if ("WebSocket" in window) {
      
-      ws.onclose = function () {
+      ws.onclose = function (): void {
         // "connectws" is the function we defined previously
         setTimeout(connectws, 10000);
       };
   
       //Enable all Events
-      ws.onopen = function () {
+      ws.onopen = function (): void {
         ws.send(JSON.stringify(
           {
             "request": "Subscribe",
@@ -45,15 +47,15 @@ function connectws() {
       
       };
   
-      ws.onmessage = function (event) {
+      ws.onmessage = function (event: MessageEvent): void {
         // grab message and parse JSON
         const msg = event.data;
-        const wsdata = JSON.parse(msg);
+        const wsdata: WSData = JSON.parse(msg);
   
         console.log(wsdata);
   
         //SetupChecks
-        if(typeof wsdata.actions != "undefined" && typeof wsdata.id == "ActionList") {
+        if(typeof wsdata.actions != "undefined" && typeof wsdata.id == "string" && wsdata.id === "ActionList") {
           let ChatAction = wsdata.actions.filter(function (SBAction) { return SBAction.name == "ERTwitchBotChat" });
           console.log(ChatAction);
           if(ChatAction.length >= 1){
@@ -96,14 +98,16 @@ function connectws() {
 
         if (eventType == "Sub" || eventType == "Resub" || eventType == "GiftBomb" || eventType == "GiftSub" || eventType == "Cheer"){
             //Cheer uses message.username. Subs use userName
-            let userName = wsdata.data.message.username ? wsdata.data.message.username : wsdata.data.userName;
+            let userName = wsdata.data?.message?.username ? wsdata.data.message.username : wsdata.data?.userName;
 
             //Add user to the front of the array
-            globalVars.hypetrainCache.unshift(userName);
+            if (userName) {
+              globalVars.hypetrainCache.unshift(userName);
 
-            //clear the end of cache if too long
-            if(globalVars.hypetrainCache[3]) {
-              globalVars.hypetrainCache.pop()
+              //clear the end of cache if too long
+              if(globalVars.hypetrainCache[3]) {
+                globalVars.hypetrainCache.pop();
+              }
             }
         }  
   
@@ -119,10 +123,12 @@ function connectws() {
             return;
         }
   
-  
         //Hype Progression - Add a user to the current train cart
         if (eventType == "HypeTrainUpdate" && (globalConst.hypetrain || globalConst.all)) {
-          animations.hypetrain.hypetrainprogression(wsdata.data.last_contribution.user_id);
+          const userId = wsdata.data?.last_contribution?.user_id;
+          if (userId) {
+            animations.hypetrain.hypetrainprogression(userId);
+          }
           return;
         }
   
@@ -140,14 +146,14 @@ function connectws() {
   
         //CoinFlipResults
         if (eventType == "Custom") {
-          if (wsdata.data.coinFlipResult == "undefined") {
-            return
+          if (wsdata.data?.coinFlipResult == "undefined") {
+            return;
           }
   
-          if(wsdata.data.coinFlipResult == "Heads"){
+          if(wsdata.data?.coinFlipResult == "Heads"){
             animations.coinflip.createCoins(1, "Heads" );
           }
-          if(wsdata.data.coinFlipResult == "Tails"){
+          if(wsdata.data?.coinFlipResult == "Tails"){
             animations.coinflip.createCoins(1, "Tails" );
           }
         }
@@ -155,17 +161,15 @@ function connectws() {
         //Actions
         if(eventType == "Action"){
           handlers.actionsHandler(wsdata);
-          return
+          return;
         }
       }
     }
   }
 
-
-
 // Function 2
-function handleMessage(message) {
-// Message handling logic goes here
+function handleMessage(message: any): void {
+  // Message handling logic goes here
 }
 
 // Export the functions as a single object
