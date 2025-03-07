@@ -1,21 +1,57 @@
 {
+    "name": "emote-overlay-tools",
+    "version": "1.0.0",
+    "description": "G-Force's Emote Overlay Tools for OBS",
     "type": "module",
-    "start": "nodemon",
+    "main": "dist/electron/main.cjs",
     "devDependencies": {
+        "@types/express": "^4.17.21",
         "@types/gsap": "^1.20.2",
+        "@types/node": "^20.11.0",
+        "@types/ws": "^8.5.10",
+        "concurrently": "^8.2.2",
+        "cross-env": "^7.0.3",
         "cypress": "^13.6.0",
         "cypress-wait-until": "^2.0.1",
+        "electron": "^28.1.0",
+        "electron-builder": "^24.9.1",
+        "nodemon": "^3.0.2",
         "typescript": "^5.8.2",
-        "vite": "^6.2.0"
+        "vite": "^6.2.0",
+        "vite-plugin-electron": "^0.15.5",
+        "vite-plugin-electron-renderer": "^0.14.5"
     },
     "scripts": {
         "dev": "vite",
         "build": "vite build",
         "preview": "vite preview",
-        "cypress:open": "cypress open"
+        "cypress:open": "cypress open",
+        "electron:dev": "concurrently \"cross-env VITE_DEV_SERVER_URL=http://localhost:3001 vite\" \"tsc -p electron/tsconfig.json -w\" \"electron-forge start\"",
+        "electron:start": "nodemon --exec \"electron .\" --ext ts,js,cjs --watch dist/electron",
+        "electron:build": "tsc -p electron/tsconfig.json && vite build && electron-builder",
+        "electron:preview": "npm run build && electron ."
     },
     "dependencies": {
+        "express": "^4.18.2",
         "gsap": "^3.12.7",
-        "posthog-js": "^1.149.0"
+        "posthog-js": "^1.149.0",
+        "ws": "^8.16.0"
+    },
+    "build": {
+        "appId": "com.gforce.emoteoverlaytools",
+        "productName": "Emote Overlay Tools",
+        "mac": {
+            "category": "public.app-category.utilities"
+        },
+        "win": {
+            "target": "nsis"
+        },
+        "linux": {
+            "target": "deb"
+        },
+        "files": [
+            "dist/**/*",
+            "electron/**/*"
+        ]
     }
 }

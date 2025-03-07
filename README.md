@@ -1,15 +1,55 @@
-## Streamer.Bot EmoteOverlayTools
+## G-Force's Emote Overlay Tools
 
 Forked from [VRFlad's](https://vrflad.com) amazing work on [EmoteRain](https://codepen.io/vrflad/pen/VwMYaYo). I couldn't have built this without his code as a building block.
 
 Inspiration to work on this came from the lack of Twitch Animated emote support in StreamElements. Now I have more animation variation than before and Twitch animated emotes work great!
 
-## Installation
+## Installation Options
+
+### Option 1: Desktop Application (Recommended)
+
+- Download and install the latest release of Emote Overlay Tools from the [releases page](https://github.com/gforceweb/EmoteOverlayTools/releases)
+- Launch the application
+- Copy the provided OBS Browser Source URL and add it as a Browser Source in OBS
+- Configure your settings in the app interface
+- Test animations directly from the app
+
+### Option 2: Browser Source (Streamer.Bot Required)
 
 - Ensure you have Streamer.Bot installed and running with the WebSocket server enabled (Servers/Clients -> WebSocket Server -> Start Server)
 - Head to [https://gforceweb.github.io/EmoteOverlayTools/dist/config.html](https://gforceweb.github.io/EmoteOverlayTools/dist/config.html) and select your settings
 - Copy the URL from the address bar and add it as a Browser Source in OBS
 - Enjoy!
+
+## Desktop Application Overview
+
+The desktop application provides several benefits:
+
+- No need for Streamer.Bot (though still compatible if you want to use both)
+- Built-in animation testing and preview
+- Easy configuration through a user-friendly interface
+- Self-contained web server for OBS browser source
+
+### Application Tabs
+
+1. **Settings**: Configure all aspects of the overlay including:
+
+   - Server port for the local web server
+   - Feature toggles
+   - Maximum emote counts
+   - Subscriber-only mode options
+
+2. **Test Animations**: Preview and test all animations directly:
+
+   - Select animation types
+   - Set emote counts
+   - Use specific usernames for avatar-based animations
+   - View real-time previews
+
+3. **Logs**: Monitor activity and debug issues:
+   - Track WebSocket connections
+   - View animation trigger events
+   - Identify any potential errors
 
 ## Settings Breakdown
 
@@ -45,6 +85,9 @@ A set of specific animation commands that accept emotes along with optional quan
 - !er carousel
 - !er spiral
 - !er dvd
+- !er cube
+- !er cyclone
+- !er tetris
 - !er text TEXT_TO_WRITE
 
 All animations have default values for quantity and interval so there's never a need to specify them. But you can get creative and add values like so:
@@ -83,6 +126,49 @@ When a user types `!cheers @username` in chat both theirs and their targets avat
 ## Hype Train
 
 A Visual Train effect that drives along the top of the screen. The train will be made up of the avatars of the users who have contributed to the hype train.
+
+# Developer Information
+
+## Project Structure
+
+The application is structured as follows:
+
+- `/src` - Main animation and frontend code
+
+  - `/animations` - Individual animation modules
+  - `/css` - Styling for the application
+  - `/lib` - Utility libraries and helpers
+  - `index.html` - Main animation display (used in OBS)
+  - `admin.html` - Desktop application UI
+  - `config.html` - Configuration for browser source mode
+  - Various TypeScript files for handling animations, websockets, etc.
+
+- `/electron` - Electron-specific code
+
+  - `main.ts` - Main process for Electron (window management and Express server)
+  - `preload.ts` - Secure bridge between renderer and main processes
+
+- `/assets` - Static assets (images, sounds, etc.)
+
+## Development Setup
+
+1. Install dependencies:
+
+```
+npm install
+```
+
+2. Run in development mode:
+
+```
+npm run electron:dev
+```
+
+3. Build for distribution:
+
+```
+npm run electron:build
+```
 
 # Feedback
 
