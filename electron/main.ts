@@ -18,7 +18,7 @@ function setupExpressServer() {
 
   // Serve the animation interface
   expressApp.get("/", (req: express.Request, res: express.Response) => {
-    res.sendFile(path.join(__dirname, "../renderer/index.html"));
+    res.sendFile(path.join(__dirname, "../renderer/overlay/index.html"));
   });
 
   // Start the server
@@ -74,10 +74,10 @@ function createWindow() {
 
   // Load the admin interface in development or production
   if (process.env.NODE_ENV === "development") {
-    mainWindow.loadURL("http://localhost:3000/admin.html");
+    mainWindow.loadURL("http://localhost:3000/admin/admin.html");
     mainWindow.webContents.openDevTools();
   } else {
-    mainWindow.loadFile(path.join(__dirname, "../renderer/admin.html"));
+    mainWindow.loadFile(path.join(__dirname, "../renderer/admin/admin.html"));
   }
 
   // Handle window being closed

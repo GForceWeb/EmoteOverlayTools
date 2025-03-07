@@ -64,9 +64,8 @@ export default defineConfig({
     emptyOutDir: true,
     rollupOptions: {
       input: {
-        main: resolve(__dirname, "src/index.html"),
-        config: resolve(__dirname, "src/config.html"),
-        admin: resolve(__dirname, "src/admin.html"),
+        main: resolve(__dirname, "src/overlay/index.html"),
+        admin: resolve(__dirname, "src/admin/admin.html"),
       },
     },
   },
