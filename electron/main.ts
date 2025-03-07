@@ -1,13 +1,13 @@
 import { app, BrowserWindow, ipcMain } from "electron";
 import * as path from "path";
-import * as express from "express";
+import express from "express";
 import { WebSocketServer } from "ws";
 import * as http from "http";
 
 // Keep a global reference of the mainWindow object
 let mainWindow: BrowserWindow | null = null;
 let serverPort = 3030;
-const expressApp = express.default();
+const expressApp = express();
 const server = http.createServer(expressApp);
 const wss = new WebSocketServer({ server });
 

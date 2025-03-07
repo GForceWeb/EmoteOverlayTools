@@ -75,7 +75,7 @@ export default defineConfig({
 
   // Development server options
   server: {
-    open: true,
+    open: false, // Prevents the browser from opening automatically
     port: 3000,
   },
 });

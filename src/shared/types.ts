@@ -1,30 +1,59 @@
 // Common Type Definitions
 
-export interface GlobalVars {
-  channelsub?: boolean;
-  hypetrainCache: string[];
-  BotChat?: boolean;
-  hypetimer?: ReturnType<typeof setTimeout>;
-  HypeTrainWrapper?: HTMLElement;
-  HypeCart?: HTMLElement;
-  divnumber: number;
+export interface AnimationToggles {
+  rain: boolean;
+  rise: boolean;
+  explode: boolean;
+  volcano: boolean;
+  firework: boolean;
+  rightwave: boolean;
+  leftwave: boolean;
+  carousel: boolean;
+  spiral: boolean;
+  comets: boolean;
+  dvd: boolean;
+  text: boolean;
+  cyclone: boolean;
+  tetris: boolean;
+  bounce: boolean;
+  cube: boolean;
+  fade: boolean;
+  invaders: boolean;
 }
 
-export interface GlobalConst {
+export interface FeatureToggles {
+  lurk: boolean;
+  welcome: boolean;
+  kappagen: boolean;
+  cheers: boolean;
+  hypetrain: boolean;
+  emoterain: boolean;
+  choon: boolean;
+}
+
+export interface Settings {
+  serverUrl: string;
+  serverPort: number;
+  twitchUsername: string;
+  allAnimations: boolean;
+  allFeatures: boolean;
+  selectedFeatures: string[];
+  selectedAnimations: AnimationToggles;
+  features: FeatureToggles;
+  maxEmotes: number;
+  subOnly: boolean;
+  defaultEmotes: number;
+  debug: boolean;
+}
+
+export interface GlobalVars {
+  channelsub?: boolean; // TODO: Check if the channel is a gforce sub
+  hypetrainCache: string[];
+  BotChat?: boolean;
+  divnumber: number;
   defaultemotes: number;
-  maxemotes: number;
   ws: WebSocket;
   warp: HTMLElement;
-  subonly: boolean;
-  emoterain: boolean;
-  welcome: boolean;
-  all: boolean;
-  lurk: boolean;
-  kappagen: boolean;
-  debug: boolean;
-  hypetrain: boolean;
-  cheers: boolean;
-  choon: boolean;
 }
 
 export interface EmoteData {
