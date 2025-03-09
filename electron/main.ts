@@ -3,6 +3,8 @@ import * as path from "path";
 import express from "express";
 import { WebSocketServer } from "ws";
 import * as http from "http";
+import fs from "fs";
+import { defaultConfig } from "../src/shared/defaultConfig";
 
 // Keep a global reference of the mainWindow object
 let mainWindow: BrowserWindow | null = null;
