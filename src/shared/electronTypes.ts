@@ -8,7 +8,7 @@ interface ElectronAPI {
     settings: any
   ) => Promise<{ success: boolean; settings: any }>;
   getOBSUrl: () => Promise<string>;
-  changeServerPort: (
+  changeoverlayServerPort: (
     port: number
   ) => Promise<{ success: boolean; port: number }>;
   onWebSocketMessage: (callback: (data: any) => void) => () => void;

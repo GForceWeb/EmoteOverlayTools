@@ -14,7 +14,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   },
 
   // Change the server port
-  changeServerPort: (port: number) => {
+  changeoverlayServerPort: (port: number) => {
     return ipcRenderer.invoke("change-server-port", port);
   },
 

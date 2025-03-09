@@ -1,8 +1,8 @@
 import { Settings } from "./types";
 
 export const defaultConfig: Settings = {
-  serverUrl: "ws://localhost:8080/",
-  serverPort: 3030,
+  streamerBotWebsocketUrl: "ws://localhost:8080/",
+  overlayServerPort: 3030,
   twitchUsername: "",
   enableAllAnimations: true,
   enableAllFeatures: true,
@@ -39,4 +39,5 @@ export const defaultConfig: Settings = {
   subOnly: false,
   defaultEmotes: 100,
   debug: false,
+  configFilePath: "",
 };

@@ -3,6 +3,9 @@ import { defineConfig } from "vite";
 import { resolve } from "path";
 import electron from "vite-plugin-electron";
 import renderer from "vite-plugin-electron-renderer";
+import tailwindcss from "@tailwindcss/vite";
+import react from "@vitejs/plugin-react";
+import path from "path";
 
 export default defineConfig({
   // Specify base path if your site is deployed in a subdirectory
@@ -57,6 +60,12 @@ export default defineConfig({
     ]),
     renderer(),
   ],
+
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
 
   // Configure build options
   build: {

@@ -8,7 +8,7 @@ import { defaultConfig } from "../src/shared/defaultConfig";
 
 // Keep a global reference of the mainWindow object
 let mainWindow: BrowserWindow | null = null;
-let serverPort = 3030;
+let overlayServerPort = 3030;
 const expressApp = express();
 const server = http.createServer(expressApp);
 const wss = new WebSocketServer({ server });
@@ -62,9 +62,37 @@ function setupExpressServer() {
     }
   );
 
+  // Add API endpoint to save settings
+  expressApp.use(express.json()); // Add this to parse JSON request bodies
+
+  expressApp.post(
+    "/api/settings",
+    (req: express.Request, res: express.Response) => {
+      try {
+        const newSettings = req.body;
+        // Update current settings in memory
+        currentSettings = newSettings;
+
+        // Save to the settings file
+        fs.writeFileSync(settingsPath, JSON.stringify(newSettings, null, 2));
+
+        console.log("Settings saved to:", settingsPath);
+        res.json({ success: true });
+      } catch (error) {
+        console.error("Error saving settings:", error);
+        res.status(500).json({
+          error: "Failed to save settings file",
+          message: (error as Error).message,
+        });
+      }
+    }
+  );
+
   // Start the server
-  server.listen(serverPort, () => {
-    console.log(`Animation server running at http://localhost:${serverPort}`);
+  server.listen(overlayServerPort, () => {
+    console.log(
+      `Animation server running at http://localhost:${overlayServerPort}`
+    );
   });
 }
 
@@ -115,7 +143,9 @@ function createWindow() {
 
   // Load the admin interface in development or production
   if (process.env.NODE_ENV === "development") {
-    mainWindow.loadURL("http://localhost:3000/admin/admin.html");
+    const devURL = "http://localhost:3000/admin/admin.html";
+    console.log("Loading URL in development mode:", devURL);
+    mainWindow.loadURL(devURL);
     mainWindow.webContents.openDevTools();
   } else {
     mainWindow.loadFile(path.join(__dirname, "../renderer/admin/admin.html"));
@@ -162,7 +192,7 @@ ipcMain.handle("test-animation", async (event, animType, params) => {
 });
 
 ipcMain.handle("get-obs-url", () => {
-  return `http://localhost:${serverPort}`;
+  return `http://localhost:${overlayServerPort}`;
 });
 
 ipcMain.handle("change-server-port", async (event, newPort) => {
@@ -171,16 +201,21 @@ ipcMain.handle("change-server-port", async (event, newPort) => {
     server.close();
 
     // Update port
-    serverPort = parseInt(newPort);
+    overlayServerPort = parseInt(newPort);
 
     // Restart server on new port
-    server.listen(serverPort, () => {
-      console.log(`Animation server restarted on port ${serverPort}`);
+    server.listen(overlayServerPort, () => {
+      console.log(`Animation server restarted on port ${overlayServerPort}`);
     });
 
-    return { success: true, port: serverPort };
+    return { success: true, port: overlayServerPort };
   } catch (error) {
     console.error("Failed to change port:", error);
     return { success: false, error: (error as Error).message };
   }
+});
+
+// Add this to your existing IPC handlers
+ipcMain.handle("get-settings-path", () => {
+  return settingsPath;
 });

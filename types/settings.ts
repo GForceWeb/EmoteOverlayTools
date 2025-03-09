@@ -1,5 +1,3 @@
-// Common Type Definitions
-
 export interface AnimationSettings {
   enabled: boolean;
   count?: number;
@@ -54,52 +52,17 @@ export interface Settings {
   subOnly: boolean;
   defaultEmotes: number;
   debug: boolean;
-  configFilePath: string;
+  configFilePath?: string;
 }
 
 export interface GlobalVars {
-  channelsub?: boolean; // TODO: Check if the channel is a gforce sub
+  channelsub?: boolean;
   hypetrainCache: string[];
   BotChat?: boolean;
   divnumber: number;
+  defaultemotes: number;
   ws: WebSocket;
   warp: HTMLElement;
-}
-
-export interface EmoteData {
-  name: string;
-  imageUrl: string;
-}
-
-export interface WSData {
-  event?: {
-    type?: string;
-  };
-  data?: {
-    message?: {
-      username?: string;
-      userId?: string;
-      message?: string;
-      role?: string;
-      subscriber?: boolean;
-      emotes?: EmoteData[];
-    };
-    userName?: string;
-    last_contribution?: {
-      user_id?: string;
-    };
-    name?: string;
-    coinFlipResult?: string;
-    from_broadcaster_user_id?: string;
-    from_broadcaster_user_name?: string;
-    viewers?: number;
-  };
-  actions?: any[];
-  id?: string;
-}
-
-export interface AnimationModule {
-  [key: string]: (images: string[], count?: any, interval?: number) => void;
 }
 
 export interface LogEntry {

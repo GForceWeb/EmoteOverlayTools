@@ -11,7 +11,7 @@ const wsAdmin = new WebSocket("ws://localhost:3030/");
 // // Check for URL parameters on initial load, before admin settings are received
 // const urlParams = new URLSearchParams(window.location.search);
 // if (urlParams.get("server") !== null) {
-//   settings.serverUrl = "ws://" + urlParams.get("server") + "/";
+//   settings.streamerBotWebsocketUrl = "ws://" + urlParams.get("server") + "/";
 // }
 // if (urlParams.get("debug") !== null) {
 //   settings.debug = true;
