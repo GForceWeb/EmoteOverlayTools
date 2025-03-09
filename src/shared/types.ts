@@ -61,7 +61,6 @@ export interface GlobalVars {
   hypetrainCache: string[];
   BotChat?: boolean;
   divnumber: number;
-  defaultemotes: number;
   ws: WebSocket;
   warp: HTMLElement;
 }

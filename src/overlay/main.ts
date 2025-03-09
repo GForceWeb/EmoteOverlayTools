@@ -1,13 +1,13 @@
-import websocketFunctions from "./websocket.ts";
+import websockets from "./websocket.ts";
 import animations from "./animations.ts";
+import config from "./config.ts";
+import OverlaySettings from "./settings";
 
-// Access the functions individually
-const { connectws, handleMessage } = websocketFunctions;
+const settings = OverlaySettings.settings;
 
 // Initialize the application
-function init(): void {
-  // gsap.registerPlugin(MotionPathPlugin);
-  connectws();
+async function init(): Promise<void> {
+  websockets.connectws();
 
   // Expose animations to the global window object for debugging
   window.animations = animations;

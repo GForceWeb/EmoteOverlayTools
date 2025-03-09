@@ -1,7 +1,7 @@
 import { globalVars } from "./config.ts";
 import { WSData } from "../shared/types.ts";
-import SettingsManager from "./SettingsManager";
-const settings = SettingsManager.settings;
+import OverlaySettings from "./settings";
+const settings = OverlaySettings.settings;
 
 import helpers from "./helpers.ts";
 import animations from "./animations.ts";
@@ -363,7 +363,7 @@ function shoutoutCommand(lowermessage: string): void {
 
       let avatar = [xhttp.responseText];
       //console.log(avatar);
-      animations.rain(avatar, globalVars.defaultemotes, 50);
+      animations.rain(avatar, settings.defaultEmotes, 50);
     }
   };
   xhttp.open("GET", "https://decapi.me/twitch/avatar/" + sousername, true);

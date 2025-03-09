@@ -1,9 +1,10 @@
-import Variables from "./config.ts";
+import { globalVars } from "./config.ts";
 import animations from "./animations.ts";
 import handlers from "./handlers.ts";
 import { WSData } from "../shared/types.ts";
+import OverlaySettings from "./settings.ts";
 
-const { globalVars, settings } = Variables;
+const settings = OverlaySettings.settings;
 
 let ws = globalVars.ws;
 let Botchat: boolean = false;

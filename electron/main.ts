@@ -10,6 +10,23 @@ let serverPort = 3030;
 const expressApp = express();
 const server = http.createServer(expressApp);
 const wss = new WebSocketServer({ server });
+const settingsPath = path.join(app.getPath("userData"), "settings.json");
+let currentSettings = defaultConfig;
+
+// Load settings on startup
+try {
+  if (!fs.existsSync(settingsPath)) {
+    // Create default settings file if it doesn't exist from DEFAULT_SETTINGS
+
+    fs.writeFileSync(settingsPath, JSON.stringify(defaultConfig, null, 2));
+    console.log("Created default settings file at:", settingsPath);
+  }
+  if (fs.existsSync(settingsPath)) {
+    currentSettings = JSON.parse(fs.readFileSync(settingsPath, "utf8"));
+  }
+} catch (error) {
+  console.error("Failed to load settings:", error);
+}
 
 // Set up the Express server for serving the animation content
 function setupExpressServer() {
@@ -20,6 +37,28 @@ function setupExpressServer() {
   expressApp.get("/", (req: express.Request, res: express.Response) => {
     res.sendFile(path.join(__dirname, "../renderer/overlay/index.html"));
   });
+
+  expressApp.get(
+    "/api/settings",
+    (req: express.Request, res: express.Response) => {
+      try {
+        if (fs.existsSync(settingsPath)) {
+          const fileSettings = fs.readFileSync(settingsPath, "utf8");
+          res.setHeader("Content-Type", "application/json");
+          res.send(fileSettings); // Send the raw file contents
+        } else {
+          // If file doesn't exist yet, fall back to current settings
+          res.json(currentSettings);
+        }
+      } catch (error) {
+        console.error("Error reading settings file:", error);
+        res.status(500).json({
+          error: "Failed to read settings file",
+          fallback: currentSettings,
+        });
+      }
+    }
+  );
 
   // Start the server
   server.listen(serverPort, () => {
