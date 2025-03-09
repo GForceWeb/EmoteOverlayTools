@@ -1,6 +1,4 @@
-import Variables from "../config.ts";
-import { GlobalVars, GlobalConst } from "../../shared/types.ts";
-const { globalVars, globalConst } = Variables;
+import { globalVars } from "../config.ts";
 import helpers from "../helpers.ts";
 import { gsap } from "gsap";
 
@@ -86,7 +84,7 @@ export function cube(images: string[], size: number = 150): void {
   container.appendChild(cube);
 
   // Append container to document
-  globalConst.warp.appendChild(container);
+  globalVars.warp.appendChild(container);
 
   // Animate the cube
   animateCube(cube);

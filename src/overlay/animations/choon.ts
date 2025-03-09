@@ -1,6 +1,4 @@
-import Variables from "../config.ts";
-import { GlobalVars, GlobalConst } from "../../shared/types.ts";
-const { globalVars, globalConst } = Variables;
+import { globalVars } from "../config.ts";
 import helpers from "../helpers.ts";
 import { gsap } from "gsap";
 
@@ -90,7 +88,7 @@ export function choon(image) {
       break;
   }
 
-  globalConst.warp.appendChild(SingingContainer);
+  globalVars.warp.appendChild(SingingContainer);
 
   // Add mouth animation to simulate singing
   animate_singing(Div);
@@ -107,7 +105,7 @@ function createNote(image) {
   MNoteDiv.style.background = "url(" + image + ")";
   MNoteDiv.style.backgroundSize = "100% 100%";
 
-  globalConst.warp.appendChild(MNoteDiv);
+  globalVars.warp.appendChild(MNoteDiv);
   setTimeout(() => {
     helpers.removeelement(MNoteDiv.id);
   }, 15000);

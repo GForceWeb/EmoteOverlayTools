@@ -3,9 +3,9 @@ import animations from "./animations.ts";
 import handlers from "./handlers.ts";
 import { WSData } from "../shared/types.ts";
 
-const { globalVars, globalConst } = Variables;
+const { globalVars, settings } = Variables;
 
-let ws = globalConst.ws;
+let ws = globalVars.ws;
 let Botchat: boolean = false;
 let isElectron = false;
 
@@ -152,12 +152,6 @@ function handleMessage(msg: string): void {
       }
     }
 
-    //Check if the channel is a gforce sub IN PROGRESS
-    // if(!globalConst.channelsub) {
-    //     //   let channelsub = true;
-    //     //console.log("I should only see this once");
-    // }
-
     //Check for Undefined WS Events
     if (typeof wsdata.event == "undefined") {
       console.log("Event undefined");
@@ -173,7 +167,7 @@ function handleMessage(msg: string): void {
     //Pass to ChatMessageHandler
     if (eventType == "ChatMessage") {
       handlers.chatMessageHandler(wsdata);
-      if (globalConst.debug) {
+      if (settings.debug) {
         console.log("Passed to ChatMessageHandler");
       }
       return;
@@ -208,43 +202,34 @@ function handleMessage(msg: string): void {
       }
     }
 
-    //Hype Train Start - Start the repeating train animation with the train head image and the first cart
-    if (
-      eventType == "HypeTrainStart" &&
-      (globalConst.hypetrain || globalConst.all)
-    ) {
-      animations.hypetrain.hypetrainstart();
-      return;
-    }
-
-    //Hype Train Level Up - Add a cart to the end of the train
-    if (
-      eventType == "HypeTrainLevelUp" &&
-      (globalConst.hypetrain || globalConst.all)
-    ) {
-      animations.hypetrain.hypetrainlevelup();
-      return;
-    }
-
-    //Hype Progression - Add a user to the current train cart
-    if (
-      eventType == "HypeTrainUpdate" &&
-      (globalConst.hypetrain || globalConst.all)
-    ) {
-      const userId = wsdata.data?.last_contribution?.user_id;
-      if (userId) {
-        animations.hypetrain.hypetrainprogression(userId);
+    //Hype Train Events
+    if (settings.features.hypetrain || settings.enableAllFeatures) {
+      //Hype Train Start - Start the repeating train animation with the train head image and the first cart
+      if (eventType == "HypeTrainStart") {
+        animations.hypetrain.hypetrainstart();
+        return;
       }
-      return;
-    }
 
-    //Hype Train Finish - Remove the Train
-    if (
-      eventType == "HypeTrainEnd" &&
-      (globalConst.hypetrain || globalConst.all)
-    ) {
-      animations.hypetrain.hypetrainfinish();
-      return;
+      //Hype Train Level Up - Add a cart to the end of the train
+      if (eventType == "HypeTrainLevelUp") {
+        animations.hypetrain.hypetrainlevelup();
+        return;
+      }
+
+      //Hype Progression - Add a user to the current train cart
+      if (eventType == "HypeTrainUpdate") {
+        const userId = wsdata.data?.last_contribution?.user_id;
+        if (userId) {
+          animations.hypetrain.hypetrainprogression(userId);
+        }
+        return;
+      }
+
+      //Hype Train Finish - Remove the Train
+      if (eventType == "HypeTrainEnd") {
+        animations.hypetrain.hypetrainfinish();
+        return;
+      }
     }
 
     //Incoming Raid
@@ -282,20 +267,3 @@ export default {
   connectws,
   handleMessage,
 };
-
-// Add a type declaration for window.electronAPI
-declare global {
-  interface Window {
-    electronAPI?: {
-      testAnimation: (
-        animationType: string,
-        params: any
-      ) => Promise<{ success: boolean }>;
-      getOBSUrl: () => Promise<string>;
-      changeServerPort: (
-        port: number
-      ) => Promise<{ success: boolean; port: number }>;
-      onWebSocketMessage: (callback: (data: any) => void) => () => void;
-    };
-  }
-}

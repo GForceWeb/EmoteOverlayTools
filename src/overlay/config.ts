@@ -1,113 +1,171 @@
-import { Settings, GlobalVars } from "../shared/types";
-
-const urlParams = new URLSearchParams(window.location.search);
-
-let server =
-  urlParams.get("server") === null
-    ? "ws://localhost:8080/"
-    : "ws://" + urlParams.get("server") + "/";
-
-// Initialize settings with URL parameters first
-let maxemotes: number =
-  urlParams.get("maxemotes") === null
-    ? 200
-    : parseInt(urlParams.get("maxemotes"));
-let subonly: boolean = urlParams.get("subonly") === null ? false : true;
-let emoterain: boolean = urlParams.get("emoterain") === null ? false : true;
-let welcome: boolean = urlParams.get("welcome") === null ? false : true;
-let all: boolean = urlParams.get("all") === null ? false : true;
-let lurk: boolean = urlParams.get("lurk") === null ? false : true;
-let kappagen: boolean = urlParams.get("kappagen") === null ? false : true;
-let debug: boolean = urlParams.get("debug") === null ? false : true;
-let hypetrain: boolean = urlParams.get("hypetrain") === null ? false : true;
-let cheers: boolean = urlParams.get("cheers") === null ? false : true;
-let choon: boolean = urlParams.get("choon") === null ? false : true;
+import { GlobalVars, FeatureList } from "../shared/types";
+import SettingsManager from "./SettingsManager";
 
 // Create WebSocket connection to StreamerBot
-const ws = new WebSocket(server);
+const ws = new WebSocket("ws://localhost:8080/");
 
 // Create Websocket connection to Admin
-const wsAdmin = new WebSocket("ws://localhost:3030/");
+let wsAdmin = new WebSocket("ws://localhost:3030/");
+
+// Get the singleton instance of settings
+const settings = SettingsManager.settings;
+
+// Function to request settings from the admin server
+function requestSettingsFromAdmin() {
+  if (wsAdmin.readyState === WebSocket.OPEN) {
+    console.log("Requesting settings from admin server...");
+    wsAdmin.send(JSON.stringify({ type: "get-settings" }));
+  } else {
+    console.log(
+      "Admin WebSocket not yet open, will request settings when connected"
+    );
+  }
+}
+
+// Setup admin WebSocket event handlers
+wsAdmin.addEventListener("open", () => {
+  console.log("Admin WebSocket connection established");
+  // Actively request settings as soon as the connection is established
+  requestSettingsFromAdmin();
+});
 
 // Listen for settings updates from admin
 wsAdmin.addEventListener("message", (event) => {
   try {
     const data = JSON.parse(event.data);
     if (data.settings) {
-      // Update settings
-      maxemotes = data.settings.maxEmotes ?? maxemotes;
-      subonly = data.settings.subOnly ?? subonly;
-      all = data.settings.allFeatures ?? all;
+      // Update settings from admin panel
+      settings.maxEmotes = data.settings.maxEmotes ?? settings.maxEmotes;
+      settings.subOnly = data.settings.subOnly ?? settings.subOnly;
+      settings.enableAllFeatures =
+        data.settings.allFeatures ?? settings.enableAllFeatures;
 
       if (data.settings.selectedFeatures) {
         // Reset feature flags first if not using all features
-        if (!data.settings.allFeatures) {
-          emoterain = false;
-          welcome = false;
-          lurk = false;
-          kappagen = false;
-          hypetrain = false;
-          cheers = false;
-          choon = false;
+        if (!settings.enableAllFeatures) {
+          settings.features = {
+            lurk: { enabled: false },
+            welcome: { enabled: false },
+            kappagen: { enabled: false },
+            cheers: { enabled: false },
+            hypetrain: { enabled: false },
+            emoterain: { enabled: false },
+            choon: { enabled: false },
+          };
 
           // Then enable only selected features
-          data.selectedFeatures.forEach((feature: string) => {
-            switch (feature) {
-              case "emoterain":
-                emoterain = true;
-                break;
-              case "welcome":
-                welcome = true;
-                break;
-              case "lurk":
-                lurk = true;
-                break;
-              case "kappagen":
-                kappagen = true;
-                break;
-              case "hypetrain":
-                hypetrain = true;
-                break;
-              case "cheers":
-                cheers = true;
-                break;
-              case "choon":
-                choon = true;
-                break;
+          data.settings.selectedFeatures.forEach((feature: string) => {
+            if (feature in settings.features) {
+              settings.features[feature as keyof FeatureList] = {
+                enabled: true,
+              };
             }
           });
         }
       }
 
       // If all features are enabled, set all feature flags
-      if (all) {
-        lurk = true;
-        emoterain = true;
-        kappagen = true;
-        welcome = true;
+      if (settings.enableAllFeatures) {
+        settings.features = {
+          lurk: { enabled: true },
+          welcome: { enabled: true },
+          kappagen: { enabled: true },
+          cheers: { enabled: true },
+          hypetrain: { enabled: true },
+          emoterain: { enabled: true },
+          choon: { enabled: true },
+        };
       }
 
-      if (debug) {
-        console.log("Settings updated:", {
-          maxemotes,
-          subonly,
-          all,
-          emoterain,
-          welcome,
-          lurk,
-          kappagen,
-          hypetrain,
-          cheers,
-          choon,
-        });
+      // Now check for URL parameters and override admin settings if present
+      const urlParams = new URLSearchParams(window.location.search);
+
+      // Server parameter has priority over admin settings
+      if (urlParams.get("server") !== null) {
+        settings.serverUrl = "ws://" + urlParams.get("server") + "/";
+      }
+
+      // Override settings from URL parameters if present
+      if (urlParams.get("maxemotes") !== null) {
+        settings.maxEmotes = parseInt(urlParams.get("maxemotes") || "200");
+        settings.defaultEmotes = settings.maxEmotes;
+      }
+
+      if (urlParams.get("subonly") !== null) {
+        settings.subOnly = true;
+      }
+
+      if (urlParams.get("emoterain") !== null) {
+        settings.features.emoterain.enabled = true;
+      }
+
+      if (urlParams.get("welcome") !== null) {
+        settings.features.welcome.enabled = true;
+      }
+
+      if (urlParams.get("all") !== null) {
+        settings.enableAllFeatures = true;
+      }
+
+      if (urlParams.get("lurk") !== null) {
+        settings.features.lurk.enabled = true;
+      }
+
+      if (urlParams.get("kappagen") !== null) {
+        settings.features.kappagen.enabled = true;
+      }
+
+      if (urlParams.get("debug") !== null) {
+        settings.debug = true;
+      }
+
+      if (urlParams.get("hypetrain") !== null) {
+        settings.features.hypetrain.enabled = true;
+      }
+
+      if (urlParams.get("cheers") !== null) {
+        settings.features.cheers.enabled = true;
+      }
+
+      if (urlParams.get("choon") !== null) {
+        settings.features.choon.enabled = true;
+      }
+
+      if (settings.debug) {
+        console.log("Settings after admin and URL updates:", settings);
       }
     }
   } catch (error) {
-    if (debug) {
-      console.error("Error processing WebSocket message:", error);
-    }
+    console.error("Error processing WebSocket message:", error);
   }
 });
+
+// Setup error handling for admin WebSocket
+wsAdmin.addEventListener("error", (error) => {
+  console.error("Admin WebSocket error:", error);
+});
+
+// Attempt to reconnect if admin WebSocket connection closes
+wsAdmin.addEventListener("close", () => {
+  console.log(
+    "Admin WebSocket connection closed, will attempt to reconnect in 5 seconds"
+  );
+  setTimeout(() => {
+    console.log("Attempting to reconnect to admin WebSocket...");
+    wsAdmin = new WebSocket("ws://localhost:3030/");
+    // Re-attach event listeners (simplified for brevity)
+    wsAdmin.addEventListener("open", () => requestSettingsFromAdmin());
+  }, 5000);
+});
+
+// Check for URL parameters on initial load, before admin settings are received
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get("server") !== null) {
+  settings.serverUrl = "ws://" + urlParams.get("server") + "/";
+}
+if (urlParams.get("debug") !== null) {
+  settings.debug = true;
+}
 
 // Initialize other variables
 let channelsub: boolean; //TODO: Build out the G-Force Sub Requirement
@@ -147,6 +205,14 @@ function setCSSVars(): void {
 window.addEventListener("load", setCSSVars);
 window.addEventListener("resize", setCSSVars);
 
+// Try to request settings on page load, in case WebSocket connects later
+window.addEventListener("load", () => {
+  // Short timeout to allow WebSocket to establish connection
+  setTimeout(() => {
+    requestSettingsFromAdmin();
+  }, 1000);
+});
+
 // Global variables
 export const globalVars: GlobalVars = {
   channelsub,
@@ -156,25 +222,6 @@ export const globalVars: GlobalVars = {
   defaultemotes: 50,
   ws: ws,
   warp: document.getElementById("confetti-container") as HTMLElement,
-};
-
-export const settings: Settings = {
-  serverUrl: server,
-  serverPort: 8080,
-  twitchUsername: "G-Force",
-  allFeatures: all,
-  selectedFeatures: [],
-  maxEmotes: maxemotes,
-  subOnly: subonly,
-  defaultEmotes: maxemotes,
-  debug: debug,
-  emoterain: emoterain,
-  welcome: welcome,
-  lurk: lurk,
-  kappagen: kappagen,
-  hypetrain: hypetrain,
-  cheers: cheers,
-  choon: choon,
 };
 
 if (settings.debug) {

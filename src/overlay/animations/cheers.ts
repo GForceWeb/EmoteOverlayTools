@@ -1,6 +1,4 @@
-import Variables from "../config";
-import { GlobalVars, GlobalConst } from "../../shared/types";
-const { globalVars, globalConst } = Variables;
+import { globalVars } from "../config";
 import helpers from "../helpers";
 import { gsap } from "gsap";
 
@@ -40,7 +38,7 @@ export function cheers(images: string[]): void {
     xPercent: -50,
   });
 
-  globalConst.warp.appendChild(BeerDiv);
+  globalVars.warp.appendChild(BeerDiv);
 
   beer_animation(BeerDiv);
 
@@ -78,7 +76,7 @@ function createAvatarDivs(image: string, xPos: number, drop: number): void {
     transformOrigin: "50% 50%",
   });
 
-  globalConst.warp.appendChild(Div);
+  globalVars.warp.appendChild(Div);
 
   drop_animation(Div, drop);
 

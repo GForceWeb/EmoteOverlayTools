@@ -1,4 +1,4 @@
-import Variables from "./config.ts";
+import { globalVars } from "./config.ts";
 import helpers from "./helpers.ts";
 
 // Dynamically import all animation modules

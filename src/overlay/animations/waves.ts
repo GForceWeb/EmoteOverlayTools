@@ -1,6 +1,4 @@
-import Variables from "../config.ts";
-import { GlobalVars, GlobalConst } from "../../shared/types.ts";
-const { globalVars, globalConst } = Variables;
+import { globalVars } from "../config.ts";
 import helpers from "../helpers.ts";
 import { gsap } from "gsap";
 
@@ -50,7 +48,7 @@ function createRightWave(image: string): void {
     backgroundImage: "url(" + image + ")",
   });
 
-  globalConst.warp.appendChild(Div);
+  globalVars.warp.appendChild(Div);
 
   // Run animation
   rightwave_animation(Div);
@@ -74,7 +72,7 @@ function createLeftWave(image: string): void {
     backgroundImage: "url(" + image + ")",
   });
 
-  globalConst.warp.appendChild(Div);
+  globalVars.warp.appendChild(Div);
 
   // Run animation
   leftwave_animation(Div);

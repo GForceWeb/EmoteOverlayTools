@@ -1,5 +1,4 @@
-import Variables from "../config.js";
-const { globalVars, globalConst } = Variables;
+import { globalVars } from "../config.ts";
 import helpers from "../helpers.js";
 import { gsap } from "gsap";
 
@@ -30,7 +29,7 @@ export async function incomingRaid(userId, displayName, viewers) {
   //     helpers.removeelement(raidWrapper.id);
   // }, 600000);
   // gsap.set(raidWrapper, { className: 'raid-wrapper', position: "absolute", height: innerHeight, width: innerWidth, x: 0, y: 0, z: helpers.Randomizer(-200, 200), });
-  // globalConst.warp.appendChild(raidWrapper);
+  // globalVars.warp.appendChild(raidWrapper);
 
   // Calculate the number of rows and columns in the pyramid
   let numRows = Math.ceil(Math.sqrt(viewers));
@@ -121,7 +120,7 @@ export function createRaider(image) {
     z: 100,
   });
 
-  globalConst.warp.appendChild(Div);
+  globalVars.warp.appendChild(Div);
 
   raiderAnimation(Div);
 

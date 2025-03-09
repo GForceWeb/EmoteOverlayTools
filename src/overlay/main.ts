@@ -1,8 +1,5 @@
 import websocketFunctions from "./websocket.ts";
-import Variables from "./config.ts";
 import animations from "./animations.ts";
-
-const { globalVars, globalConst } = Variables;
 
 // Access the functions individually
 const { connectws, handleMessage } = websocketFunctions;

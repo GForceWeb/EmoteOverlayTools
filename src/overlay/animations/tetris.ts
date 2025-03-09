@@ -1,5 +1,4 @@
-import Variables from "../config.js";
-const { globalVars, globalConst } = Variables;
+import { globalVars } from "../config.ts";
 import helpers from "../helpers.js";
 import { tetrominos } from "../lib/emotetetris.js";
 import { gsap } from "gsap";
@@ -28,7 +27,7 @@ export function tetris(
   const gridContainer = document.createElement("div");
   gridContainer.id = "tetris-grid-" + globalVars.divnumber++;
   gridContainer.className = "tetris-grid";
-  globalConst.warp.appendChild(gridContainer);
+  globalVars.warp.appendChild(gridContainer);
 
   // Style the grid container - align to bottom of screen
   gsap.set(gridContainer, {

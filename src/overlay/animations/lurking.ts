@@ -1,6 +1,4 @@
-import Variables from "../config.ts";
-import { GlobalVars, GlobalConst } from "../../shared/types.ts";
-const { globalVars, globalConst } = Variables;
+import { globalVars } from "../config.ts";
 import helpers from "../helpers.ts";
 import { gsap } from "gsap";
 
@@ -168,7 +166,7 @@ function createVisualLurk(image: string): void {
       });
       lurking_animation_bottom(Div);
   }
-  globalConst.warp.appendChild(Div);
+  globalVars.warp.appendChild(Div);
 
   // Run animation
   setTimeout(() => {

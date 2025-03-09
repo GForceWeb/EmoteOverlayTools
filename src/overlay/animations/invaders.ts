@@ -1,6 +1,4 @@
-import Variables from "../config.ts";
-import { GlobalVars, GlobalConst } from "../../shared/types.ts";
-const { globalVars, globalConst } = Variables;
+import { globalVars } from "../config.ts";
 import helpers from "../helpers.ts";
 import { gsap } from "gsap";
 
@@ -53,7 +51,7 @@ export function invaders(
       backgroundSize: cellHeight - 20,
       backgroundImage: "url(" + images[imagenum] + ")",
     });
-    globalConst.warp.appendChild(Div);
+    globalVars.warp.appendChild(Div);
     //var createcommand = 'createemoteInvaders("' + images[imagenum] + '")';
     //setTimeout(createcommand, (j * interval));
     setTimeout(() => {

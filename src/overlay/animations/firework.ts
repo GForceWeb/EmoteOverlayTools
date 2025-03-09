@@ -1,6 +1,4 @@
-import Variables from "../config.ts";
-import { GlobalVars, GlobalConst } from "../../shared/types.ts";
-const { globalVars, globalConst } = Variables;
+import { globalVars } from "../config.ts";
 import helpers from "../helpers.ts";
 import { gsap } from "gsap";
 
@@ -48,7 +46,7 @@ function createFireworkTravel(
     backgroundImage: "url(" + image + ")",
   });
 
-  globalConst.warp.appendChild(Div);
+  globalVars.warp.appendChild(Div);
 
   // Run animation
   firework_travel_animation(Div, explodeX, explodeY, travelTime);
@@ -77,7 +75,7 @@ function createFireworkExplode(
     opacity: 0,
   });
 
-  globalConst.warp.appendChild(Div);
+  globalVars.warp.appendChild(Div);
 
   // Run animation
   firework_explode_animation(Div, travelTime);

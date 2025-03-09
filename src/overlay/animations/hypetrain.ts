@@ -1,5 +1,4 @@
-import Variables from "../config";
-const { globalVars, globalConst } = Variables;
+import { globalVars } from "../config.ts";
 import helpers from "../helpers";
 import { gsap } from "gsap";
 
@@ -84,7 +83,7 @@ export function hypetrainstart(): void {
     backgroundImage: `url(${image})`,
   });
 
-  globalConst.warp.appendChild(HypeTrainWrapper);
+  globalVars.warp.appendChild(HypeTrainWrapper);
   HypeTrainWrapper.appendChild(HypeTrainHead);
 
   fade(HypeTrainWrapper, 1, 3);

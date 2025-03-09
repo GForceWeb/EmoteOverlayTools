@@ -1,45 +1,55 @@
 // Common Type Definitions
 
-export interface AnimationToggles {
-  rain: boolean;
-  rise: boolean;
-  explode: boolean;
-  volcano: boolean;
-  firework: boolean;
-  rightwave: boolean;
-  leftwave: boolean;
-  carousel: boolean;
-  spiral: boolean;
-  comets: boolean;
-  dvd: boolean;
-  text: boolean;
-  cyclone: boolean;
-  tetris: boolean;
-  bounce: boolean;
-  cube: boolean;
-  fade: boolean;
-  invaders: boolean;
+export interface AnimationSettings {
+  enabled: boolean;
+  count?: number;
+  interval?: number;
+  text?: string;
 }
 
-export interface FeatureToggles {
-  lurk: boolean;
-  welcome: boolean;
-  kappagen: boolean;
-  cheers: boolean;
-  hypetrain: boolean;
-  emoterain: boolean;
-  choon: boolean;
+export interface AnimationList {
+  rain: AnimationSettings;
+  rise: AnimationSettings;
+  explode: AnimationSettings;
+  volcano: AnimationSettings;
+  firework: AnimationSettings;
+  rightwave: AnimationSettings;
+  leftwave: AnimationSettings;
+  carousel: AnimationSettings;
+  spiral: AnimationSettings;
+  comets: AnimationSettings;
+  dvd: AnimationSettings;
+  text: AnimationSettings;
+  cyclone: AnimationSettings;
+  tetris: AnimationSettings;
+  bounce: AnimationSettings;
+  cube: AnimationSettings;
+  fade: AnimationSettings;
+  invaders: AnimationSettings;
+}
+
+export interface FeatureSettings {
+  enabled: boolean;
+}
+
+export interface FeatureList {
+  lurk: FeatureSettings;
+  welcome: FeatureSettings;
+  kappagen: FeatureSettings;
+  cheers: FeatureSettings;
+  hypetrain: FeatureSettings;
+  emoterain: FeatureSettings;
+  choon: FeatureSettings;
 }
 
 export interface Settings {
   serverUrl: string;
   serverPort: number;
   twitchUsername: string;
-  allAnimations: boolean;
-  allFeatures: boolean;
-  selectedFeatures: string[];
-  selectedAnimations: AnimationToggles;
-  features: FeatureToggles;
+  enableAllAnimations: boolean;
+  enableAllFeatures: boolean;
+  features: FeatureList;
+  animations: AnimationList;
   maxEmotes: number;
   subOnly: boolean;
   defaultEmotes: number;

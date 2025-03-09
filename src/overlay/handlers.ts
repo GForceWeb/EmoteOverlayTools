@@ -1,6 +1,7 @@
-import Variables from "./config.ts";
-import { WSData, EmoteData } from "../shared/types.ts";
-const { globalVars, globalConst } = Variables;
+import { globalVars } from "./config.ts";
+import { WSData } from "../shared/types.ts";
+import SettingsManager from "./SettingsManager";
+const settings = SettingsManager.settings;
 
 import helpers from "./helpers.ts";
 import animations from "./animations.ts";
@@ -16,7 +17,7 @@ function chatMessageHandler(wsdata: WSData): void {
 
   //Lurk
   if (lowermessage.includes("!lurk")) {
-    if (!globalConst.lurk && !globalConst.all) {
+    if (!settings.features.lurk && !settings.enableAllFeatures) {
       console.log("Lurk Not Enabled");
       return;
     }
@@ -25,7 +26,7 @@ function chatMessageHandler(wsdata: WSData): void {
 
   //Shoutout
   if (lowermessage.includes("!so")) {
-    if (!globalConst.welcome && !globalConst.all) {
+    if (!settings.features.welcome && !settings.enableAllFeatures) {
       console.log("Shoutout Not Enabled");
       return;
     }
@@ -34,7 +35,7 @@ function chatMessageHandler(wsdata: WSData): void {
 
   //Choon
   if (lowermessage.includes("!choon") || lowermessage.includes("!tune")) {
-    if (!globalConst.all && !globalConst.choon) {
+    if (!settings.enableAllFeatures && !settings.features.choon) {
       console.log("Choon Command Not Enabled");
       return;
     }
@@ -43,7 +44,7 @@ function chatMessageHandler(wsdata: WSData): void {
 
   //Cheers
   if (lowermessage.includes("!cheers")) {
-    if (!globalConst.all && !globalConst.cheers) {
+    if (!settings.enableAllFeatures && !settings.features.cheers) {
       console.log("Cheers Command Not Enabled");
       return;
     }
@@ -59,7 +60,7 @@ function chatMessageHandler(wsdata: WSData): void {
 
   //Join Hype Train Command for Testing
   if (lowermessage.includes("!jointrain")) {
-    if (!globalConst.debug) {
+    if (!settings.debug) {
       console.log("Join Train Command Not Enabled");
       return;
     }
@@ -98,8 +99,8 @@ function emoteMessageHandler(wsdata: WSData): void {
   let eCount: number = helpers.getCommandValue(lowermessage, "count");
 
   if (eCount != null) {
-    if (eCount > globalConst.maxemotes) {
-      eCount = globalConst.maxemotes;
+    if (eCount > settings.maxEmotes) {
+      eCount = settings.maxEmotes;
     }
   }
 
@@ -122,8 +123,8 @@ function emoteMessageHandler(wsdata: WSData): void {
   ];
 
   //Specific Animation Commands
-  if (globalConst.emoterain) {
-    if (globalConst.subonly && !sub) {
+  if (settings.features.emoterain) {
+    if (settings.subOnly && !sub) {
       console.log("Sub Only Mode enabled, Messsage was not from a Sub");
       return;
     }
@@ -192,8 +193,8 @@ function emoteMessageHandler(wsdata: WSData): void {
   });
 
   //Kappagen Animations
-  if (globalConst.kappagen) {
-    if (globalConst.subonly && !sub) {
+  if (settings.features.kappagen) {
+    if (settings.subOnly && !sub) {
       console.log("Sub Only Mode enabled, Messsage was not from a Sub");
       return;
     }
@@ -255,7 +256,7 @@ function emoteMessageHandler(wsdata: WSData): void {
 }
 
 function firstWordsHander(wsdata: WSData): void {
-  if (!globalConst.welcome && !globalConst.all) {
+  if (!settings.features.welcome && !settings.enableAllFeatures) {
     console.log("First Words Not Enabled");
     return;
   }
@@ -270,7 +271,7 @@ function firstWordsHander(wsdata: WSData): void {
 
       let avatar = [xhttp.responseText];
       //Trigger Animation
-      animations.rain(avatar, globalConst.defaultemotes, 50);
+      animations.rain(avatar, settings.defaultEmotes, 50);
     }
   };
   console.log(username);
@@ -362,7 +363,7 @@ function shoutoutCommand(lowermessage: string): void {
 
       let avatar = [xhttp.responseText];
       //console.log(avatar);
-      animations.rain(avatar, globalConst.defaultemotes, 50);
+      animations.rain(avatar, globalVars.defaultemotes, 50);
     }
   };
   xhttp.open("GET", "https://decapi.me/twitch/avatar/" + sousername, true);
@@ -370,7 +371,7 @@ function shoutoutCommand(lowermessage: string): void {
 }
 
 function botChat(message: string): void {
-  const ws = globalConst.ws;
+  const ws = globalVars.ws;
   ws.send(
     JSON.stringify({
       request: "DoAction",
