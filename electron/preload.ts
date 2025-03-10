@@ -13,6 +13,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
     return ipcRenderer.invoke("get-obs-url");
   },
 
+  saveSettings: (settings) => ipcRenderer.invoke("save-settings", settings),
+
   // Change the server port
   changeoverlayServerPort: (port: number) => {
     return ipcRenderer.invoke("change-server-port", port);

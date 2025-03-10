@@ -12,6 +12,9 @@ interface ElectronAPI {
     port: number
   ) => Promise<{ success: boolean; port: number }>;
   onWebSocketMessage: (callback: (data: any) => void) => () => void;
+  saveSettings: (
+    settings: any
+  ) => Promise<{ success: boolean; error?: string }>;
 }
 
 // Extend the window interface

@@ -112,31 +112,27 @@ export function AnimationSettings({ settings, setSettings, onPreview }: Animatio
         <Accordion type="multiple" value={expandedAnimations} onValueChange={setExpandedAnimations} className="w-full">
           {Object.entries(settings.animations).map(([animation, config]) => (
             <AccordionItem key={animation} value={animation}>
-              <AccordionTrigger className="py-4">
-                <div className="flex items-center justify-between w-full pr-4">
+              <div className="flex items-center justify-between w-full">
+                <AccordionTrigger className="py-4 flex-1">
                   <span className="capitalize">{animation}</span>
-                  <div className="flex items-center space-x-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        onPreview(animation)
-                      }}
-                    >
-                      Preview
-                    </Button>
-                    <Switch
-                      checked={settings.enableAllAnimations ? true : config.enabled}
-                      onCheckedChange={(checked) =>
-                        handleAnimationToggle(animation as keyof Settings["animations"], checked)
-                      }
-                      onClick={(e) => e.stopPropagation()}
-                      disabled={settings.enableAllAnimations}
-                    />
-                  </div>
+                </AccordionTrigger>
+                <div className="flex items-center space-x-2 pr-4">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onPreview(animation)}
+                  >
+                    Preview
+                  </Button>
+                  <Switch
+                    checked={settings.enableAllAnimations ? true : config.enabled}
+                    onCheckedChange={(checked) =>
+                      handleAnimationToggle(animation as keyof Settings["animations"], checked)
+                    }
+                    disabled={settings.enableAllAnimations}
+                  />
                 </div>
-              </AccordionTrigger>
+              </div>
               <AccordionContent className="space-y-4 px-1 pb-4">
                 <p className="text-sm text-muted-foreground mb-4">
                   {animationDescriptions[animation] || `Configure ${animation} animation settings`}

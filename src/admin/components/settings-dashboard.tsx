@@ -84,40 +84,26 @@ export function SettingsDashboard() {
 
   const saveSettings = async () => {
     try {
-      const streamerBotWebsocketUrl = 
-        settings.overlayServerPort
-          ? `http://localhost:${settings.overlayServerPort}`
-          : "http://localhost:3030";
-          
-      const response = await fetch(`${streamerBotWebsocketUrl}/api/settings`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(settings),
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Failed to save settings: ${response.statusText}`);
+      const result = await window.electronAPI.saveSettings(settings);
+      if (result.success) {
+        addLogEntry("info", "Settings saved successfully");
+        toast({
+          title: "Settings saved",
+          description: "Your settings have been saved successfully.",
+        });
+      } else {
+        throw new Error(result.error);
       }
-      
-      addLogEntry("info", "Settings saved to config file");
-      
-      toast({
-        title: "Settings saved",
-        description: "Your settings have been saved successfully.",
-      });
     } catch (error) {
       console.error("Failed to save settings:", error);
       addLogEntry("error", `Failed to save settings: ${error instanceof Error ? error.message : String(error)}`);
-      
       toast({
         title: "Save failed",
-        description: `Could not save settings: ${error instanceof Error ? error.message : "Unknown error"}`,
+        description: `Could not save settings: ${error instanceof Error ? error.message : String(error)}`,
         variant: "destructive",
       });
     }
-  }
+  };
 
   const resetSettings = () => {
     setSettings(defaultConfig)

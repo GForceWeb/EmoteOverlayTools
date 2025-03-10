@@ -1,9 +1,9 @@
 import { app, BrowserWindow, ipcMain } from "electron";
 import * as path from "path";
+import fs from "fs";
 import express from "express";
 import { WebSocketServer } from "ws";
 import * as http from "http";
-import fs from "fs";
 import { defaultConfig } from "../src/shared/defaultConfig";
 
 // Keep a global reference of the mainWindow object
@@ -32,6 +32,14 @@ try {
 
 // Set up the Express server for serving the animation content
 function setupExpressServer() {
+  // Middleware to add CORS headers
+  expressApp.use((req, res, next) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    next();
+  });
+
   // Serve static files from the dist directory
   expressApp.use(express.static(path.join(__dirname, "../renderer")));
 
@@ -64,29 +72,6 @@ function setupExpressServer() {
 
   // Add API endpoint to save settings
   expressApp.use(express.json()); // Add this to parse JSON request bodies
-
-  expressApp.post(
-    "/api/settings",
-    (req: express.Request, res: express.Response) => {
-      try {
-        const newSettings = req.body;
-        // Update current settings in memory
-        currentSettings = newSettings;
-
-        // Save to the settings file
-        fs.writeFileSync(settingsPath, JSON.stringify(newSettings, null, 2));
-
-        console.log("Settings saved to:", settingsPath);
-        res.json({ success: true });
-      } catch (error) {
-        console.error("Error saving settings:", error);
-        res.status(500).json({
-          error: "Failed to save settings file",
-          message: (error as Error).message,
-        });
-      }
-    }
-  );
 
   // Start the server
   server.listen(overlayServerPort, () => {
@@ -137,7 +122,7 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      preload: path.join(__dirname, "preload.js"),
+      preload: path.join(__dirname, "preload.cjs"),
     },
   });
 
@@ -193,6 +178,17 @@ ipcMain.handle("test-animation", async (event, animType, params) => {
 
 ipcMain.handle("get-obs-url", () => {
   return `http://localhost:${overlayServerPort}`;
+});
+
+ipcMain.handle("save-settings", async (event, newSettings) => {
+  try {
+    fs.writeFileSync(settingsPath, JSON.stringify(newSettings, null, 2));
+    currentSettings = newSettings;
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to save settings:", error);
+    return { success: false, error: (error as Error).message };
+  }
 });
 
 ipcMain.handle("change-server-port", async (event, newPort) => {

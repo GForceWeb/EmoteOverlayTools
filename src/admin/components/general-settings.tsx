@@ -76,9 +76,9 @@ export function GeneralSettings({ settings, setSettings, resetSettings }: Genera
                 id="serverPort"
                 name="serverPort"
                 type="number"
-                value={settings.overlayServerPort} //
+                value={settings.overlayServerPort}
                 onChange={handleInputChange}
-                placeholder="8080"
+                placeholder="3030"
               />
             </div>
           </div>
@@ -88,7 +88,7 @@ export function GeneralSettings({ settings, setSettings, resetSettings }: Genera
             <Input
               id="twitchUsername"
               name="twitchUsername"
-              value={settings.twitchUsername}
+              value={settings.twitchUsername }
               onChange={handleInputChange}
               placeholder="Your Twitch username"
             />
@@ -105,13 +105,13 @@ export function GeneralSettings({ settings, setSettings, resetSettings }: Genera
             </div>
             <Slider
               id="maxEmotes"
-              min={10}
-              max={200}
+              min={25}
+              max={400}
               step={5}
               value={[settings.maxEmotes]}
               onValueChange={(value) => handleSliderChange("maxEmotes", value[0])}
             />
-            <p className="text-xs text-muted-foreground">Maximum number of emotes to display at once</p>
+            <p className="text-xs text-muted-foreground">Maximum number of emotes to display per animation</p>
           </div>
 
           <div className="space-y-2">
@@ -120,13 +120,13 @@ export function GeneralSettings({ settings, setSettings, resetSettings }: Genera
             </div>
             <Slider
               id="defaultEmotes"
-              min={1}
-              max={50}
+              min={10}
+              max={100}
               step={1}
               value={[settings.defaultEmotes]}
               onValueChange={(value) => handleSliderChange("defaultEmotes", value[0])}
             />
-            <p className="text-xs text-muted-foreground">Default number of emotes to use when not specified</p>
+            <p className="text-xs text-muted-foreground">Default number of emotes to use for each animation when not specified</p>
           </div>
 
           <div className="flex items-center justify-between space-y-0 pt-4">
