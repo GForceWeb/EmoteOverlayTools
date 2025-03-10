@@ -9,6 +9,7 @@ import type { Settings } from "@/shared/types"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/admin/components/ui/accordion"
 import { Slider } from "@/admin/components/ui/slider"
 import { Button } from "@/admin/components/ui/button"
+import { WSData } from "@/shared/types"
 
 interface AnimationSettingsProps {
   settings: Settings
@@ -66,6 +67,60 @@ export function AnimationSettings({ settings, setSettings, onPreview }: Animatio
     }))
   }
 
+  const onPreviewAnimation = (animation: string) => {
+    // Get the iframe element
+    const overlayIframe = document.getElementById('overlay-iframe') as HTMLIFrameElement;
+    
+    if (overlayIframe && overlayIframe.contentWindow) {
+      // Construst the message following the WSData type
+      if(!settings.animations[animation].count) {
+        settings.animations[animation].count = settings.defaultEmotes
+      }
+      if(!settings.animations[animation].interval) {
+        settings.animations[animation].interval = "";
+      }
+      if(settings.animations[animation] === "text") {
+        settings.animations[animation].count = "Hype";
+      }
+
+      const WSmessage: WSData = {
+        event: {
+          source: "Twitch",
+          type: "ChatMessage",
+        },
+        data: {
+          message: {
+            username: settings.twitchUsername,
+            userId: "123456789", // Placeholder user ID
+            message: `!er ${animation} ${settings.animations[animation].count} ${settings.animations[animation].interval}`,
+            subscriber: true,
+            emotes: [
+              {
+                name: "test",
+                imageUrl: "https://static-cdn.jtvnw.net/emoticons/v1/425618/2.0",
+              },
+            ],
+          },
+        },
+      };
+
+
+      // Send message to the iframe with the animation to preview
+      overlayIframe.contentWindow.postMessage({
+        type: 'PREVIEW_ANIMATION',
+        animation: animation,
+        wsdata: WSmessage,
+      }, '*');
+
+      console.log(`Previewing animation: ${animation} with config:`, WSmessage);
+    } else {
+      console.error('Overlay iframe not found or not accessible');
+    }
+    
+    // Still call the original onPreview if needed
+    onPreview(animation);
+  }
+
   const animationDescriptions: Record<string, string> = {
     rain: "Emotes fall from top to bottom",
     rise: "Emotes rise from bottom to top",
@@ -120,7 +175,7 @@ export function AnimationSettings({ settings, setSettings, onPreview }: Animatio
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => onPreview(animation)}
+                    onClick={() => onPreviewAnimation(animation)}
                   >
                     Preview
                   </Button>

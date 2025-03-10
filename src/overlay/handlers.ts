@@ -104,22 +104,91 @@ function emoteMessageHandler(wsdata: WSData): void {
     }
   }
 
-  //TextCommand, FunctionName, DefaultEmotes, DefaultInterval
-  let animationMap: [string, string, number, number, string, string?][] = [
-    ["!er rain", "rain", 50, 50, "rain"],
-    ["!er rise", "rise", 100, 50, "rise"],
-    ["!er explode", "explode", 100, 20, "explode"],
-    ["!er volcano", "volcano", 100, 20, "volcano"],
-    ["!er firework", "firework", 100, 20, "firework"],
-    ["!er rightwave", "rightWave", 100, 20, "waves"],
-    ["!er leftwave", "leftWave", 100, 20, "waves"],
-    ["!er carousel", "carousel", 100, 150, "carousel"],
-    ["!er spiral", "spiral", 100, 170, "spiral"],
-    ["!er comets", "comets", 100, 50, "comets"],
-    ["!er dvd", "dvd", 8, 50, "dvd"],
-    ["!er text", "text", 1, 25, "text", "HYPE"],
-    ["!er cyclone", "cyclone", 100, 30, "cyclone"],
-    ["!er tetris", "tetris", 50, 40, "tetris"],
+  let animationMap: [string, string, number, number][] = [
+    [
+      "!er rain", // Command: The chat command that triggers the animation.
+      "rain", // FunctionName: The name of the animation function to be called.
+      settings.animations.rain.count ?? 50, // DefaultEmotes: The default number of emotes for the animation.
+      settings.animations.rain.interval ?? 50, // DefaultInterval: The default interval (in milliseconds) between emotes for the animation.
+    ],
+    [
+      "!er rise",
+      "rise",
+      settings.animations.rise.count ?? 100,
+      settings.animations.rise.interval ?? 50,
+    ],
+    [
+      "!er explode",
+      "explode",
+      settings.animations.explode.count ?? 100,
+      settings.animations.explode.interval ?? 20,
+    ],
+    [
+      "!er volcano",
+      "volcano",
+      settings.animations.volcano.count ?? 100,
+      settings.animations.volcano.interval ?? 20,
+    ],
+    [
+      "!er firework",
+      "firework",
+      settings.animations.firework.count ?? 100,
+      settings.animations.firework.interval ?? 20,
+    ],
+    [
+      "!er rightwave",
+      "rightWave",
+      settings.animations.rightwave.count ?? 100,
+      settings.animations.rightwave.interval ?? 20,
+    ],
+    [
+      "!er leftwave",
+      "leftWave",
+      settings.animations.leftwave.count ?? 100,
+      settings.animations.leftwave.interval ?? 20,
+    ],
+    [
+      "!er carousel",
+      "carousel",
+      settings.animations.carousel.count ?? 100,
+      settings.animations.carousel.interval ?? 150,
+    ],
+    [
+      "!er spiral",
+      "spiral",
+      settings.animations.spiral.count ?? 100,
+      settings.animations.spiral.interval ?? 170,
+    ],
+    [
+      "!er comets",
+      "comets",
+      settings.animations.comets.count ?? 100,
+      settings.animations.comets.interval ?? 50,
+    ],
+    [
+      "!er dvd",
+      "dvd",
+      settings.animations.dvd.count ?? 8,
+      settings.animations.dvd.interval ?? 50,
+    ],
+    [
+      "!er text",
+      "text",
+      settings.animations.text.count ?? 1,
+      settings.animations.text.interval ?? 25,
+    ],
+    [
+      "!er cyclone",
+      "cyclone",
+      settings.animations.cyclone.count ?? 100,
+      settings.animations.cyclone.interval ?? 30,
+    ],
+    [
+      "!er tetris",
+      "tetris",
+      settings.animations.tetris.count ?? 50,
+      settings.animations.tetris.interval ?? 40,
+    ],
   ];
 
   //Specific Animation Commands
@@ -169,7 +238,7 @@ function emoteMessageHandler(wsdata: WSData): void {
         emotenames = emotenames + emote["name"] + " ";
       }
 
-      console.log("running emoteText:  " + text + ". module: " + animation[4]);
+      console.log("running emoteText:  " + text);
       animations[animation[1]](images, text, eInterval);
       return;
     }
@@ -181,9 +250,7 @@ function emoteMessageHandler(wsdata: WSData): void {
         eCount +
         " emote(s)" +
         " and interval " +
-        eInterval +
-        ". module: " +
-        animation[4]
+        eInterval
     );
     if (animations.hasOwnProperty(animation[1])) {
       animations[animation[1]](images, eCount, eInterval);

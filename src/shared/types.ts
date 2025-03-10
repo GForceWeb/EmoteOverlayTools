@@ -74,6 +74,7 @@ export interface EmoteData {
 export interface WSData {
   event?: {
     type?: string;
+    source?: string;
   };
   data?: {
     message?: {

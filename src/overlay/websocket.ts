@@ -10,6 +10,21 @@ let ws = globalVars.ws;
 let Botchat: boolean = false;
 let isElectron = false;
 
+const handleElectronMessage = (event: MessageEvent) => {
+  // Optional: Validate the origin for security
+  // if (event.origin !== "your-expected-origin") return;
+
+  const { type, animation, wsdata } = event.data;
+
+  let test = JSON.stringify(wsdata);
+  if (type === "PREVIEW_ANIMATION") {
+    console.log(`Previewing animation: ${animation}`);
+    console.log(`Previewing animation: ${test}`);
+    // Call your animation function here
+    handleMessage(JSON.stringify(wsdata));
+  }
+};
+
 // Check if running in Electron
 function checkElectron(): boolean {
   // Check if window.electronAPI exists (defined in our preload script)
@@ -35,6 +50,8 @@ function connectws(): void {
   if (isElectron) {
     console.log("Running in Electron environment, using IPC for messages");
     setupElectronCommunication();
+
+    window.addEventListener("message", handleElectronMessage);
     return;
   }
 

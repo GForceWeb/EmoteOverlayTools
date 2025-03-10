@@ -121,55 +121,57 @@ export function SettingsDashboard() {
         ? `http://localhost:${settings.overlayServerPort}/api/preview`
         : "http://localhost:3030/api/preview"
 
-    try {
-      // Use the custom config if provided, otherwise use the one from settings
-      const config =
-        customConfig ||
-        (type === "feature"
-          ? settings.features[name as keyof Settings["features"]]
-          : settings.animations[name as keyof Settings["animations"]])
+        console.log("Preview URL:", previewUrl);
 
-      const payload = {
-        type,
-        name,
-        config,
-        twitchUsername: settings.twitchUsername,
-      }
+    // try {
+    //   // Use the custom config if provided, otherwise use the one from settings
+    //   const config =
+    //     customConfig ||
+    //     (type === "feature"
+    //       ? settings.features[name as keyof Settings["features"]]
+    //       : settings.animations[name as keyof Settings["animations"]])
 
-      addLogEntry("info", `Previewing ${type}: ${name} (${JSON.stringify(payload.config)})`)
+    //   const payload = {
+    //     type,
+    //     name,
+    //     config,
+    //     twitchUsername: settings.twitchUsername,
+    //   }
 
-      const response = await fetch(previewUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      })
+    //   addLogEntry("info", `Previewing ${type}: ${name} (${JSON.stringify(payload.config)})`)
 
-      if (!response.ok) {
-        throw new Error(`Failed to send preview: ${response.statusText}`)
-      }
+    //   const response = await fetch(previewUrl, {
+    //     method: "POST",
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //     },
+    //     body: JSON.stringify(payload),
+    //   })
 
-      toast({
-        title: "Preview sent",
-        description: `Previewing ${type}: ${name}`,
-      })
-    } catch (error) {
-      console.error("Preview error:", error)
-      addLogEntry("error", `Preview failed: ${error instanceof Error ? error.message : String(error)}`)
+    //   if (!response.ok) {
+    //     throw new Error(`Failed to send preview: ${response.statusText}`)
+    //   }
 
-      toast({
-        title: "Preview failed",
-        description: `Could not send preview to ${previewUrl}`,
-        variant: "destructive",
-      })
-    }
+    //   toast({
+    //     title: "Preview sent",
+    //     description: `Previewing ${type}: ${name}`,
+    //   })
+    // } catch (error) {
+    //   console.error("Preview error:", error)
+    //   addLogEntry("error", `Preview failed: ${error instanceof Error ? error.message : String(error)}`)
+
+    //   toast({
+    //     title: "Preview failed",
+    //     description: `Could not send preview to ${previewUrl}`,
+    //     variant: "destructive",
+    //   })
+    // }
   }
 
   return (
     <div className="container mx-auto max-w-5xl">
       <div className="mb-8 text-center">
-        <h1 className="text-3xl font-bold tracking-tight">Twitch Overlay Settings</h1>
+        <h1 className="text-3xl font-bold tracking-tight fill-white">Twitch Overlay Settings</h1>
         <p className="text-muted-foreground mt-2">Configure your stream overlay animations and features</p>
       </div>
 

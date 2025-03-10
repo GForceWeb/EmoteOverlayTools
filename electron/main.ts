@@ -182,8 +182,10 @@ ipcMain.handle("get-obs-url", () => {
 
 ipcMain.handle("save-settings", async (event, newSettings) => {
   try {
-    fs.writeFileSync(settingsPath, JSON.stringify(newSettings, null, 2));
-    currentSettings = newSettings;
+    // Merge new settings with default config to ensure new fields aren't lost
+    const mergedSettings = { ...defaultConfig, ...newSettings };
+    fs.writeFileSync(settingsPath, JSON.stringify(mergedSettings, null, 2));
+    currentSettings = mergedSettings;
     return { success: true };
   } catch (error) {
     console.error("Failed to save settings:", error);

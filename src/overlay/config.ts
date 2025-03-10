@@ -1,4 +1,5 @@
 import { GlobalVars } from "../shared/types";
+import animations from "./animations";
 import OverlaySettings from "./settings";
 const settings = OverlaySettings.settings;
 
