@@ -15,14 +15,9 @@ import type { Settings } from "@/shared/types";
 interface PreviewPaneProps {
   previewUrl: string;
   settings: Settings;
-  onPreview: (type: "feature" | "animation", name: string, config: any) => void;
 }
 
-export function PreviewPane({
-  previewUrl,
-  settings,
-  onPreview,
-}: PreviewPaneProps) {
+export function PreviewPane({ previewUrl, settings }: PreviewPaneProps) {
   const [url, setUrl] = useState(previewUrl);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [iframeLoaded, setIframeLoaded] = useState(false);
@@ -198,7 +193,6 @@ export function PreviewPane({
         onRefresh={refreshPreview}
         sidebarPlaceholderRef={sidebarPlaceholderRef}
         settings={settings}
-        onPreview={onPreview}
       />
     </>
   );

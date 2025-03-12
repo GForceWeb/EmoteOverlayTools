@@ -1,64 +1,99 @@
-"use client"
+"use client";
 
-import React from "react"
-import { useState, useEffect } from "react"
-import { Button } from "@/admin/components/ui/button"
-import { Label } from "@/admin/components/ui/label"
-import { Input } from "@/admin/components/ui/input"
-import { Slider } from "@/admin/components/ui/slider"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/admin/components/ui/tabs"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/admin/components/ui/select"
-import { PlayIcon } from "lucide-react"
-import type { Settings } from "@/shared/types"
+import React from "react";
+import { useState, useEffect } from "react";
+import { Button } from "@/admin/components/ui/button";
+import { Label } from "@/admin/components/ui/label";
+import { Input } from "@/admin/components/ui/input";
+import { Slider } from "@/admin/components/ui/slider";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/admin/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/admin/components/ui/select";
+import { PlayIcon } from "lucide-react";
+import type { Settings } from "@/shared/types";
+import {
+  previewAnimation,
+  previewFeature,
+} from "@/admin/utils/preview-helpers";
 
 interface PreviewControlsProps {
-  settings: Settings
-  onPreview: (type: "feature" | "animation", name: string, config: any) => void
+  settings: Settings;
 }
 
-export function PreviewControls({ settings, onPreview }: PreviewControlsProps) {
-  const [activeTab, setActiveTab] = useState<"feature" | "animation">("animation")
-  const [selectedItem, setSelectedItem] = useState<string>("")
-  const [tempConfig, setTempConfig] = useState<any>(null)
+export function PreviewControls({ settings }: PreviewControlsProps) {
+  const [activeTab, setActiveTab] = useState<"feature" | "animation">(
+    "animation"
+  );
+  const [selectedItem, setSelectedItem] = useState<string>("");
+  const [tempConfig, setTempConfig] = useState<any>(null);
 
   // Reset selected item when tab changes
   useEffect(() => {
-    setSelectedItem("")
-    setTempConfig(null)
-  }, [activeTab])
+    setSelectedItem("");
+    setTempConfig(null);
+  }, [activeTab]);
 
   // Update temp config when selected item changes
   useEffect(() => {
     if (!selectedItem) {
-      setTempConfig(null)
-      return
+      setTempConfig(null);
+      return;
     }
 
     if (activeTab === "feature" && selectedItem in settings.features) {
-      setTempConfig({ ...settings.features[selectedItem as keyof Settings["features"]] })
-    } else if (activeTab === "animation" && selectedItem in settings.animations) {
-      setTempConfig({ ...settings.animations[selectedItem as keyof Settings["animations"]] })
+      setTempConfig({
+        ...settings.features[selectedItem as keyof Settings["features"]],
+      });
+    } else if (
+      activeTab === "animation" &&
+      selectedItem in settings.animations
+    ) {
+      setTempConfig({
+        ...settings.animations[selectedItem as keyof Settings["animations"]],
+      });
     }
-  }, [selectedItem, activeTab, settings])
+  }, [selectedItem, activeTab, settings]);
 
   const handlePreview = () => {
-    if (!selectedItem || !tempConfig) return
-    onPreview(activeTab, selectedItem, tempConfig)
-  }
+    if (!selectedItem || !tempConfig) return;
+
+    if (activeTab === "animation") {
+      previewAnimation(selectedItem, tempConfig, settings);
+    } else if (activeTab === "feature") {
+      previewFeature(selectedItem, tempConfig, settings);
+    }
+  };
 
   const updateTempConfig = (key: string, value: any) => {
     setTempConfig((prev) => ({
       ...prev,
       [key]: value,
-    }))
-  }
+    }));
+  };
 
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-medium">Preview Controls</h3>
-      <p className="text-sm text-muted-foreground">Select and customize a feature or animation to preview</p>
+      <p className="text-sm text-muted-foreground">
+        Select and customize a feature or animation to preview
+      </p>
 
-      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "feature" | "animation")}>
+      <Tabs
+        value={activeTab}
+        onValueChange={(value) =>
+          setActiveTab(value as "feature" | "animation")
+        }
+      >
         <TabsList className="grid grid-cols-2 w-full">
           <TabsTrigger value="feature">Features</TabsTrigger>
           <TabsTrigger value="animation">Animations</TabsTrigger>
@@ -72,20 +107,30 @@ export function PreviewControls({ settings, onPreview }: PreviewControlsProps) {
                 <SelectValue placeholder="Select a feature" />
               </SelectTrigger>
               <SelectContent>
-                {Object.keys(settings.features).map((feature) => (
-                  <SelectItem key={feature} value={feature}>
-                    {feature.charAt(0).toUpperCase() + feature.slice(1)}
-                  </SelectItem>
-                ))}
+                {Object.keys(settings.features)
+                  .filter(
+                    (feature) =>
+                      feature !== "emoterain" && feature !== "kappagen"
+                  )
+                  .map((feature) => (
+                    <SelectItem key={feature} value={feature}>
+                      {feature.charAt(0).toUpperCase() + feature.slice(1)}
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
           </div>
 
           {tempConfig && (
             <div className="pt-2">
-              <Button className="w-full" onClick={handlePreview} disabled={!selectedItem}>
+              <Button
+                className="w-full"
+                onClick={handlePreview}
+                disabled={!selectedItem}
+              >
                 <PlayIcon className="mr-2 h-4 w-4" />
-                Preview {selectedItem}
+                Preview{" "}
+                {selectedItem.charAt(0).toUpperCase() + selectedItem.slice(1)}
               </Button>
             </div>
           )}
@@ -138,7 +183,9 @@ export function PreviewControls({ settings, onPreview }: PreviewControlsProps) {
 
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <Label htmlFor="interval-value">Interval: {tempConfig.interval}ms</Label>
+                  <Label htmlFor="interval-value">
+                    Interval: {tempConfig.interval}ms
+                  </Label>
                 </div>
                 <Slider
                   id="interval-value"
@@ -146,7 +193,9 @@ export function PreviewControls({ settings, onPreview }: PreviewControlsProps) {
                   max={1000}
                   step={10}
                   value={[tempConfig.interval || 100]}
-                  onValueChange={(value) => updateTempConfig("interval", value[0])}
+                  onValueChange={(value) =>
+                    updateTempConfig("interval", value[0])
+                  }
                 />
               </div>
             </>
@@ -154,15 +203,19 @@ export function PreviewControls({ settings, onPreview }: PreviewControlsProps) {
 
           {tempConfig && (
             <div className="pt-2">
-              <Button className="w-full" onClick={handlePreview} disabled={!selectedItem}>
+              <Button
+                className="w-full"
+                onClick={handlePreview}
+                disabled={!selectedItem}
+              >
                 <PlayIcon className="mr-2 h-4 w-4" />
-                Preview {selectedItem}
+                Preview{" "}
+                {selectedItem.charAt(0).toUpperCase() + selectedItem.slice(1)}
               </Button>
             </div>
           )}
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }
-

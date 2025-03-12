@@ -18,7 +18,6 @@ interface PreviewModalProps {
   onRefresh: () => void;
   sidebarPlaceholderRef: RefObject<HTMLDivElement>;
   settings: Settings;
-  onPreview: (type: "feature" | "animation", name: string, config: any) => void;
 }
 
 export function PreviewModal({
@@ -28,7 +27,6 @@ export function PreviewModal({
   onRefresh,
   sidebarPlaceholderRef,
   settings,
-  onPreview,
 }: PreviewModalProps) {
   const modalContentRef = useRef<HTMLDivElement>(null);
   const modalPlaceholderRef = useRef<HTMLDivElement>(null);
@@ -192,7 +190,7 @@ export function PreviewModal({
         <div className="flex flex-col md:flex-row w-full h-full">
           {showControls && (
             <div className="w-full md:w-64 border-r border-border bg-card p-4 overflow-y-auto">
-              <PreviewControls settings={settings} onPreview={onPreview} />
+              <PreviewControls settings={settings} />
             </div>
           )}
           {/* This is a placeholder that helps position our fixed iframe */}

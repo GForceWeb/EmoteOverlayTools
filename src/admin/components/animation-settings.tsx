@@ -1,5 +1,4 @@
 import React from "react";
-
 import { useState } from "react";
 import { Switch } from "@/admin/components/ui/switch";
 import { Input } from "@/admin/components/ui/input";
@@ -19,18 +18,16 @@ import {
 } from "@/admin/components/ui/accordion";
 import { Slider } from "@/admin/components/ui/slider";
 import { Button } from "@/admin/components/ui/button";
-import { WSData } from "@/shared/types";
+import { previewAnimation } from "@/admin/utils/preview-helpers";
 
 interface AnimationSettingsProps {
   settings: Settings;
   setSettings: React.Dispatch<React.SetStateAction<Settings>>;
-  onPreview: (animation: string) => void;
 }
 
 export function AnimationSettings({
   settings,
   setSettings,
-  onPreview,
 }: AnimationSettingsProps) {
   const [expandedAnimations, setExpandedAnimations] = useState<string[]>([]);
 
@@ -94,62 +91,8 @@ export function AnimationSettings({
   };
 
   const onPreviewAnimation = (animation: string) => {
-    // Get the iframe element
-    const overlayIframe = document.getElementById(
-      "overlay-iframe"
-    ) as HTMLIFrameElement;
-
-    if (overlayIframe && overlayIframe.contentWindow) {
-      // Construst the message following the WSData type
-      if (!settings.animations[animation].count) {
-        settings.animations[animation].count = settings.defaultEmotes;
-      }
-      if (!settings.animations[animation].interval) {
-        settings.animations[animation].interval = "";
-      }
-      if (settings.animations[animation] === "text") {
-        settings.animations[animation].count = "Hype";
-      }
-
-      const WSmessage: WSData = {
-        event: {
-          source: "Twitch",
-          type: "ChatMessage",
-        },
-        data: {
-          message: {
-            username: settings.twitchUsername,
-            userId: "123456789", // Placeholder user ID
-            message: `!er ${animation} ${settings.animations[animation].count} ${settings.animations[animation].interval}`,
-            subscriber: true,
-            emotes: [
-              {
-                name: "test",
-                imageUrl:
-                  "https://static-cdn.jtvnw.net/emoticons/v1/425618/2.0",
-              },
-            ],
-          },
-        },
-      };
-
-      // Send message to the iframe with the animation to preview
-      overlayIframe.contentWindow.postMessage(
-        {
-          type: "PREVIEW_ANIMATION",
-          animation: animation,
-          wsdata: WSmessage,
-        },
-        "*"
-      );
-
-      console.log(`Previewing animation: ${animation} with config:`, WSmessage);
-    } else {
-      console.error("Overlay iframe not found or not accessible");
-    }
-
-    // Still call the original onPreview if needed
-    onPreview(animation);
+    const animationConfig = settings.animations[animation];
+    previewAnimation(animation, animationConfig, settings);
   };
 
   const animationDescriptions: Record<string, string> = {
