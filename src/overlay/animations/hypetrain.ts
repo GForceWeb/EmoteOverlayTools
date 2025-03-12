@@ -3,20 +3,16 @@ import helpers from "../helpers";
 import { gsap } from "gsap";
 
 // Add user avatar to current train car
-export function hypetrainprogression(userId: string): void {
-  const xhttp = new XMLHttpRequest();
-  console.log("created xmlhttp object");
-  xhttp.onreadystatechange = function (): void {
-    if (this.readyState === 4 && this.status === 200) {
-      // get display image for the userId
-      console.log("got a user image response back");
-      const image = [xhttp.responseText];
+export function hypetrainprogression(username: string): void {
+  helpers
+    .getTwitchAvatar(username)
+    .then((avatarUrl) => {
+      const image = [avatarUrl];
       createhypetrainprogression(image);
-    }
-  };
-
-  xhttp.open("GET", `https://decapi.me/twitch/avatar/${userId}?id=true`, true);
-  xhttp.send();
+    })
+    .catch((error) => {
+      console.error("Error fetching avatar:", error);
+    });
 }
 
 function createhypetrainprogression(image: string[]): void {
@@ -56,6 +52,31 @@ export function hypetrainfinish(): void {
   }, 5000);
 }
 
+// Preview function that demonstrates the hypetrain animation sequence
+export function hypetrainpreview(username: string): void {
+  // Start the hype train
+  hypetrainstart();
+
+  // First level: Add 3 progressions
+  setTimeout(() => hypetrainprogression(username), 5000);
+  setTimeout(() => hypetrainprogression(username), 10000);
+  setTimeout(() => hypetrainprogression(username), 15000);
+
+  // Level up after the first batch
+  setTimeout(() => hypetrainlevelup(), 25000);
+
+  // Second level: Add 3 more progressions
+  setTimeout(() => hypetrainprogression(username), 35000);
+  setTimeout(() => hypetrainprogression(username), 45000);
+  setTimeout(() => hypetrainprogression(username), 55000);
+
+  // Level up after the second batch
+  setTimeout(() => hypetrainlevelup(), 65000);
+
+  // Finish the hype train after about 2 minutes
+  setTimeout(() => hypetrainfinish(), 115000);
+}
+
 export function hypetrainstart(): void {
   const image = "img/trainhead.png";
   const HypeTrainWrapper = document.createElement("div");
@@ -92,8 +113,8 @@ export function hypetrainstart(): void {
 
   let delayTime = 1000;
   if (globalVars.hypetrainCache) {
-    globalVars.hypetrainCache.forEach((userId: string) => {
-      delay(delayTime).then(() => hypetrainprogression(userId));
+    globalVars.hypetrainCache.forEach((username: string) => {
+      delay(delayTime).then(() => hypetrainprogression(username));
       delayTime = delayTime + 3000;
     });
   }
