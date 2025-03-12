@@ -1,0 +1,29 @@
+/* Styles for the floating preview iframe */
+
+#floating-preview-container {
+  pointer-events: none; /* Allow clicking through the container */
+  z-index: 9999; /* Ensure it's above other content */
+}
+
+#floating-preview-container iframe {
+  pointer-events: auto; /* But enable interactions with the iframe itself */
+  transform-origin: top left;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+  will-change: transform; /* Optimize for animations */
+  transition: transform 0.3s ease-in-out, opacity 0.2s ease-in-out;
+  
+  /* Default position in case calculations fail */
+  transform: translate(0, 0) scale(0.3);
+}
+
+/* Enhanced modal styles */
+#floating-preview-container.modal-active {
+  z-index: 10000; /* Ensure it appears above everything in modal state */
+}
+
+#floating-preview-container.modal-active iframe {
+  box-shadow: none; /* Remove shadow in modal */
+  border-radius: 0; /* Remove border radius in modal */
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); /* More polished animation */
+}

@@ -1,85 +1,113 @@
-import React from "react"
+import React from "react";
 
-import { useState } from "react"
-import { Switch } from "@/admin/components/ui/switch"
-import { Input } from "@/admin/components/ui/input"
-import { Label } from "@/admin/components/ui/label"
-import { CardContent, CardDescription, CardHeader, CardTitle } from "@/admin/components/ui/card"
-import type { Settings } from "@/shared/types"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/admin/components/ui/accordion"
-import { Slider } from "@/admin/components/ui/slider"
-import { Button } from "@/admin/components/ui/button"
-import { WSData } from "@/shared/types"
+import { useState } from "react";
+import { Switch } from "@/admin/components/ui/switch";
+import { Input } from "@/admin/components/ui/input";
+import { Label } from "@/admin/components/ui/label";
+import {
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/admin/components/ui/card";
+import type { Settings } from "@/shared/types";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/admin/components/ui/accordion";
+import { Slider } from "@/admin/components/ui/slider";
+import { Button } from "@/admin/components/ui/button";
+import { WSData } from "@/shared/types";
 
 interface AnimationSettingsProps {
-  settings: Settings
-  setSettings: React.Dispatch<React.SetStateAction<Settings>>
-  onPreview: (animation: string) => void
+  settings: Settings;
+  setSettings: React.Dispatch<React.SetStateAction<Settings>>;
+  onPreview: (animation: string) => void;
 }
 
-export function AnimationSettings({ settings, setSettings, onPreview }: AnimationSettingsProps) {
-  const [expandedAnimations, setExpandedAnimations] = useState<string[]>([])
+export function AnimationSettings({
+  settings,
+  setSettings,
+  onPreview,
+}: AnimationSettingsProps) {
+  const [expandedAnimations, setExpandedAnimations] = useState<string[]>([]);
 
-  const handleAnimationToggle = (animation: keyof Settings["animations"], enabled: boolean) => {
+  const handleAnimationToggle = (
+    animation: keyof Settings["animations"],
+    enabled: boolean
+  ) => {
     setSettings((prev) => ({
       ...prev,
       animations: {
         ...prev.animations,
         [animation]: { ...prev.animations[animation], enabled },
       },
-    }))
-  }
+    }));
+  };
 
   const handleEnableAllAnimationsToggle = (enabled: boolean) => {
     setSettings((prev) => ({
       ...prev,
       enableAllAnimations: enabled,
-    }))
-  }
+    }));
+  };
 
-  const handleAnimationCountChange = (animation: keyof Settings["animations"], count: number) => {
+  const handleAnimationCountChange = (
+    animation: keyof Settings["animations"],
+    count: number
+  ) => {
     setSettings((prev) => ({
       ...prev,
       animations: {
         ...prev.animations,
         [animation]: { ...prev.animations[animation], count },
       },
-    }))
-  }
+    }));
+  };
 
-  const handleAnimationIntervalChange = (animation: keyof Settings["animations"], interval: number) => {
+  const handleAnimationIntervalChange = (
+    animation: keyof Settings["animations"],
+    interval: number
+  ) => {
     setSettings((prev) => ({
       ...prev,
       animations: {
         ...prev.animations,
         [animation]: { ...prev.animations[animation], interval },
       },
-    }))
-  }
+    }));
+  };
 
-  const handleAnimationTextChange = (animation: keyof Settings["animations"], text: string) => {
+  const handleAnimationTextChange = (
+    animation: keyof Settings["animations"],
+    text: string
+  ) => {
     setSettings((prev) => ({
       ...prev,
       animations: {
         ...prev.animations,
         [animation]: { ...prev.animations[animation], text },
       },
-    }))
-  }
+    }));
+  };
 
   const onPreviewAnimation = (animation: string) => {
     // Get the iframe element
-    const overlayIframe = document.getElementById('overlay-iframe') as HTMLIFrameElement;
-    
+    const overlayIframe = document.getElementById(
+      "overlay-iframe"
+    ) as HTMLIFrameElement;
+
     if (overlayIframe && overlayIframe.contentWindow) {
       // Construst the message following the WSData type
-      if(!settings.animations[animation].count) {
-        settings.animations[animation].count = settings.defaultEmotes
+      if (!settings.animations[animation].count) {
+        settings.animations[animation].count = settings.defaultEmotes;
       }
-      if(!settings.animations[animation].interval) {
+      if (!settings.animations[animation].interval) {
         settings.animations[animation].interval = "";
       }
-      if(settings.animations[animation] === "text") {
+      if (settings.animations[animation] === "text") {
         settings.animations[animation].count = "Hype";
       }
 
@@ -97,29 +125,32 @@ export function AnimationSettings({ settings, setSettings, onPreview }: Animatio
             emotes: [
               {
                 name: "test",
-                imageUrl: "https://static-cdn.jtvnw.net/emoticons/v1/425618/2.0",
+                imageUrl:
+                  "https://static-cdn.jtvnw.net/emoticons/v1/425618/2.0",
               },
             ],
           },
         },
       };
 
-
       // Send message to the iframe with the animation to preview
-      overlayIframe.contentWindow.postMessage({
-        type: 'PREVIEW_ANIMATION',
-        animation: animation,
-        wsdata: WSmessage,
-      }, '*');
+      overlayIframe.contentWindow.postMessage(
+        {
+          type: "PREVIEW_ANIMATION",
+          animation: animation,
+          wsdata: WSmessage,
+        },
+        "*"
+      );
 
       console.log(`Previewing animation: ${animation} with config:`, WSmessage);
     } else {
-      console.error('Overlay iframe not found or not accessible');
+      console.error("Overlay iframe not found or not accessible");
     }
-    
+
     // Still call the original onPreview if needed
     onPreview(animation);
-  }
+  };
 
   const animationDescriptions: Record<string, string> = {
     rain: "Emotes fall from top to bottom",
@@ -140,22 +171,29 @@ export function AnimationSettings({ settings, setSettings, onPreview }: Animatio
     cube: "Emotes form a 3D cube",
     fade: "Emotes fade in and out",
     invaders: "Emotes move like Space Invaders",
-  }
+  };
 
   return (
     <>
       <CardHeader>
         <CardTitle>Animation Settings</CardTitle>
-        <CardDescription>Configure the behavior of each animation type</CardDescription>
+        <CardDescription>
+          Configure the behavior of each animation type
+        </CardDescription>
       </CardHeader>
       <CardContent>
         {/* Enable All Animations Toggle */}
         <div className="flex items-center justify-between p-4 bg-secondary/50 rounded-lg mb-6">
           <div className="space-y-0.5">
-            <Label htmlFor="enableAllAnimations" className="text-base font-medium">
+            <Label
+              htmlFor="enableAllAnimations"
+              className="text-base font-medium"
+            >
               Enable All Animations
             </Label>
-            <p className="text-sm text-muted-foreground">Turn on all available animations at once</p>
+            <p className="text-sm text-muted-foreground">
+              Turn on all available animations at once
+            </p>
           </div>
           <Switch
             id="enableAllAnimations"
@@ -164,7 +202,12 @@ export function AnimationSettings({ settings, setSettings, onPreview }: Animatio
           />
         </div>
 
-        <Accordion type="multiple" value={expandedAnimations} onValueChange={setExpandedAnimations} className="w-full">
+        <Accordion
+          type="multiple"
+          value={expandedAnimations}
+          onValueChange={setExpandedAnimations}
+          className="w-full"
+        >
           {Object.entries(settings.animations).map(([animation, config]) => (
             <AccordionItem key={animation} value={animation}>
               <div className="flex items-center justify-between w-full">
@@ -180,9 +223,14 @@ export function AnimationSettings({ settings, setSettings, onPreview }: Animatio
                     Preview
                   </Button>
                   <Switch
-                    checked={settings.enableAllAnimations ? true : config.enabled}
+                    checked={
+                      settings.enableAllAnimations ? true : config.enabled
+                    }
                     onCheckedChange={(checked) =>
-                      handleAnimationToggle(animation as keyof Settings["animations"], checked)
+                      handleAnimationToggle(
+                        animation as keyof Settings["animations"],
+                        checked
+                      )
                     }
                     disabled={settings.enableAllAnimations}
                   />
@@ -190,7 +238,8 @@ export function AnimationSettings({ settings, setSettings, onPreview }: Animatio
               </div>
               <AccordionContent className="space-y-4 px-1 pb-4">
                 <p className="text-sm text-muted-foreground mb-4">
-                  {animationDescriptions[animation] || `Configure ${animation} animation settings`}
+                  {animationDescriptions[animation] ||
+                    `Configure ${animation} animation settings`}
                 </p>
 
                 {animation === "text" ? (
@@ -200,7 +249,10 @@ export function AnimationSettings({ settings, setSettings, onPreview }: Animatio
                       id={`${animation}-text`}
                       value={config.text || ""}
                       onChange={(e) =>
-                        handleAnimationTextChange(animation as keyof Settings["animations"], e.target.value)
+                        handleAnimationTextChange(
+                          animation as keyof Settings["animations"],
+                          e.target.value
+                        )
                       }
                       placeholder="Enter text to display"
                     />
@@ -209,7 +261,9 @@ export function AnimationSettings({ settings, setSettings, onPreview }: Animatio
                   <>
                     <div className="space-y-2">
                       <div className="flex justify-between">
-                        <Label htmlFor={`${animation}-count`}>Count: {config.count}</Label>
+                        <Label htmlFor={`${animation}-count`}>
+                          Count: {config.count}
+                        </Label>
                       </div>
                       <Slider
                         id={`${animation}-count`}
@@ -218,14 +272,19 @@ export function AnimationSettings({ settings, setSettings, onPreview }: Animatio
                         step={1}
                         value={[config.count || 10]}
                         onValueChange={(value) =>
-                          handleAnimationCountChange(animation as keyof Settings["animations"], value[0])
+                          handleAnimationCountChange(
+                            animation as keyof Settings["animations"],
+                            value[0]
+                          )
                         }
                       />
                     </div>
 
                     <div className="space-y-2">
                       <div className="flex justify-between">
-                        <Label htmlFor={`${animation}-interval`}>Interval: {config.interval}ms</Label>
+                        <Label htmlFor={`${animation}-interval`}>
+                          Interval: {config.interval}ms
+                        </Label>
                       </div>
                       <Slider
                         id={`${animation}-interval`}
@@ -234,7 +293,10 @@ export function AnimationSettings({ settings, setSettings, onPreview }: Animatio
                         step={10}
                         value={[config.interval || 100]}
                         onValueChange={(value) =>
-                          handleAnimationIntervalChange(animation as keyof Settings["animations"], value[0])
+                          handleAnimationIntervalChange(
+                            animation as keyof Settings["animations"],
+                            value[0]
+                          )
                         }
                       />
                     </div>
@@ -246,6 +308,5 @@ export function AnimationSettings({ settings, setSettings, onPreview }: Animatio
         </Accordion>
       </CardContent>
     </>
-  )
+  );
 }
-
