@@ -2,7 +2,7 @@ import { globalVars } from "../config.ts";
 import helpers from "../helpers.ts";
 import { gsap } from "gsap";
 
-export function rightWave(
+export function rightwave(
   images: string[],
   count: number = 100,
   interval: number = 20
@@ -18,7 +18,7 @@ export function rightWave(
   }
 }
 
-export function leftWave(
+export function leftwave(
   images: string[],
   count: number = 100,
   interval: number = 20
