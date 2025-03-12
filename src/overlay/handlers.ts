@@ -108,6 +108,19 @@ function chatMessageHandler(wsdata: WSData): void {
         console.log("KappaGen Not Enabled or User Not Subscribed");
       }
       break;
+    case lowermessage.includes("!hypetrainpreview"):
+      //Only run if debug is enabled OR message comes from the admin panel
+      if (
+        isFeatureEnabled(
+          "kappagen",
+          (subbedCheck && settings.debug) || wsdata.event?.source == "Admin"
+        )
+      ) {
+        animations.hypetrainpreview(username);
+      } else {
+        console.log("KappaGen Not Enabled or User Not Subscribed");
+      }
+      break;
 
     default:
       if (typeof wsdata.data?.message?.emotes != "undefined") {

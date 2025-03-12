@@ -15,12 +15,7 @@ const handleElectronMessage = (event: MessageEvent) => {
   // if (event.origin !== "your-expected-origin") return;
 
   const { type, animation, wsdata } = event.data;
-
-  let test = JSON.stringify(wsdata);
-  if (type === "PREVIEW_ANIMATION") {
-    console.log(`Previewing animation: ${animation}`);
-    console.log(`Previewing animation: ${test}`);
-    // Call your animation function here
+  if (type === "PREVIEW_ANIMATION" || type === "PREVIEW_FEATURE") {
     handleMessage(JSON.stringify(wsdata));
   }
 };
