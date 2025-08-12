@@ -23,6 +23,30 @@ export function tetris(
     .fill(null)
     .map(() => Array(GRID_WIDTH).fill(null));
 
+  // Calculate dynamic cell size based on page dimensions
+  // Use a similar approach to the config.ts setCSSVars function
+  const windowHeight = window.innerHeight;
+  const windowWidth = window.innerWidth;
+  
+  // Calculate cell size to fit the grid nicely on screen
+  // Target: grid should take up roughly 2/3rds of screen height and 1/4 of screen width
+  const targetGridHeight = windowHeight / 1.3;
+  const targetGridWidth = windowWidth / 4;
+  
+  // Use the smaller of the two to maintain aspect ratio
+  const cellSize = Math.min(
+    targetGridHeight / GRID_HEIGHT,
+    targetGridWidth / GRID_WIDTH
+  );
+  
+  // Ensure minimum and maximum cell sizes for usability
+  const minCellSize = 20;
+  const maxCellSize = 60;
+  const finalCellSize = Math.max(minCellSize, Math.min(maxCellSize, cellSize));
+  
+  // Log the calculated cell size for debugging
+  console.log(`Tetris animation: Window ${windowWidth}x${windowHeight}, Cell size: ${finalCellSize}px`);
+
   // Create grid container
   const gridContainer = document.createElement("div");
   gridContainer.id = "tetris-grid-" + globalVars.divnumber++;
@@ -33,13 +57,13 @@ export function tetris(
   gsap.set(gridContainer, {
     position: "absolute",
     left: "50%",
-    bottom: "32px", // Add some padding from bottom
+    bottom: finalCellSize + "px", // Dynamic padding from bottom
     transform: "translateX(-50%)",
-    width: GRID_WIDTH * 32 + "px", // 32px per cell
-    height: GRID_HEIGHT * 32 + "px",
+    width: GRID_WIDTH * finalCellSize + "px", // Dynamic cell size
+    height: GRID_HEIGHT * finalCellSize + "px",
     display: "grid",
-    gridTemplateColumns: `repeat(${GRID_WIDTH}, 32px)`,
-    gridTemplateRows: `repeat(${GRID_HEIGHT}, 32px)`,
+    gridTemplateColumns: `repeat(${GRID_WIDTH}, ${finalCellSize}px)`,
+    gridTemplateRows: `repeat(${GRID_HEIGHT}, ${finalCellSize}px)`,
     gap: "0px",
   });
 
@@ -52,8 +76,8 @@ export function tetris(
       gridContainer.appendChild(cell);
 
       gsap.set(cell, {
-        width: "32px",
-        height: "32px",
+        width: finalCellSize + "px",
+        height: finalCellSize + "px",
         backgroundColor: "transparent",
       });
     }
