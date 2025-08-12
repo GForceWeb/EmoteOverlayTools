@@ -11,22 +11,39 @@ interface CubeSide {
   bottom: HTMLElement;
 }
 
-export function cube(images: string[], size: number = 150): void {
+export function cube(
+  images: string[],
+  sizeParam: number = 67,
+  speedPercent: number = 50
+): void {
   const container = document.createElement("div");
   container.id = "cube-container-" + globalVars.divnumber;
   globalVars.divnumber++;
   container.className = "cube-container";
 
+  // Compute size: if <= 200 treat as percentage of min viewport, else treat as absolute px
+  const minViewportDimension = Math.min(window.innerWidth, window.innerHeight);
+  let size: number;
+  if (sizeParam <= 200) {
+    const clampedPercent = Math.max(1, Math.min(200, Math.floor(sizeParam)));
+    const fraction = 0.05 + 0.90 * (clampedPercent / 200); // range ~5% .. 95%
+    size = Math.floor(minViewportDimension * fraction);
+  } else {
+    size = Math.floor(sizeParam);
+  }
+
   // Set container styles
   gsap.set(container, {
-    perspective: 1000,
+    perspective: 1200,
     width: size,
     height: size,
     position: "absolute",
     top: "50%",
-    left: "42%",
-    //transform: "translate(-50%, -50%)",
+    left: "50%",
+    xPercent: -50,
+    yPercent: -50,
     zIndex: 100,
+    pointerEvents: "none",
   });
 
   // Create cube
@@ -38,22 +55,17 @@ export function cube(images: string[], size: number = 150): void {
     transformStyle: "preserve-3d",
   });
 
+  // Decide which images to use for the 6 faces
+  const faceImages = getFaceImages(images);
+
   // Create sides
   const sides: CubeSide = {
-    front: createCubeSide("front", size, images[0] || ""),
-    back: createCubeSide("back", size, images[1] || images[0] || ""),
-    right: createCubeSide("right", size, images[2] || images[0] || ""),
-    left: createCubeSide(
-      "left",
-      size,
-      images[3] || images[1] || images[0] || ""
-    ),
-    top: createCubeSide("top", size, images[4] || images[2] || images[0] || ""),
-    bottom: createCubeSide(
-      "bottom",
-      size,
-      images[5] || images[3] || images[1] || images[0] || ""
-    ),
+    front: createCubeSide("front", size, faceImages[0]),
+    back: createCubeSide("back", size, faceImages[1]),
+    right: createCubeSide("right", size, faceImages[2]),
+    left: createCubeSide("left", size, faceImages[3]),
+    top: createCubeSide("top", size, faceImages[4]),
+    bottom: createCubeSide("bottom", size, faceImages[5]),
   };
 
   // Position sides
@@ -86,12 +98,16 @@ export function cube(images: string[], size: number = 150): void {
   // Append container to document
   globalVars.warp.appendChild(container);
 
-  // Animate the cube
-  animateCube(cube);
+  // Animate the cube (continuous center rotation)
+  const spinTween = animateCube(cube, speedPercent);
 
   // Remove after animation
   setTimeout(() => {
     if (container.parentNode) {
+      // Stop animation to avoid leaks
+      if (spinTween) {
+        spinTween.kill();
+      }
       container.parentNode.removeChild(container);
     }
   }, 10000);
@@ -109,31 +125,52 @@ function createCubeSide(
     position: "absolute",
     width: size,
     height: size,
-    backgroundImage: `url(${imageUrl})`,
-    backgroundSize: "cover",
+    backgroundImage: imageUrl ? `url(${imageUrl})` : "none",
+    backgroundSize: "contain",
     backgroundPosition: "center",
     backgroundRepeat: "no-repeat",
-    backfaceVisibility: "visible",
+    backfaceVisibility: "hidden",
   });
 
   return side;
 }
 
-function animateCube(cube: HTMLElement): void {
-  gsap.to(cube, {
-    rotationX: `+=${helpers.Randomizer(360, 720)}`,
-    rotationY: `+=${helpers.Randomizer(360, 720)}`,
-    rotationZ: `+=${helpers.Randomizer(360, 720)}`,
-    duration: 10,
-    ease: "power1.inOut",
-  });
+function animateCube(cube: HTMLElement, speedPercent: number): gsap.core.Tween {
+  // Clamp and map speed (1-100) so higher is faster. Keep 50 => 20s (previous default)
+  const clamped = Math.max(1, Math.min(100, Math.floor(speedPercent)));
+  const durationSeconds = 1000 / clamped; // 50 -> 20s, 100 -> 10s, 25 -> 40s, etc.
 
-  // Add some bounce
-  gsap.to(cube, {
-    y: `-=${helpers.Randomizer(50, 150)}`,
-    duration: 1,
-    repeat: 9,
-    yoyo: true,
-    ease: "power1.inOut",
+  return gsap.to(cube, {
+    rotationX: "+=360",
+    rotationY: "+=360",
+    duration: durationSeconds,
+    ease: "none",
+    repeat: -1,
+    transformOrigin: "50% 50%",
   });
+}
+
+function getFaceImages(images: string[]): string[] {
+  // Use up to the first 6 images
+  const trimmed = images.slice(0, 6);
+
+  if (trimmed.length === 0) {
+    return ["", "", "", "", "", ""];
+  }
+
+  if (trimmed.length === 1) {
+    return Array(6).fill(trimmed[0]);
+  }
+
+  if (trimmed.length === 2) {
+    // Alternate to ensure 3 faces each
+    return [trimmed[0], trimmed[1], trimmed[0], trimmed[1], trimmed[0], trimmed[1]];
+  }
+
+  // 3-6 images: cycle through provided list to fill 6 faces
+  const faces: string[] = [];
+  for (let i = 0; i < 6; i++) {
+    faces.push(trimmed[i % trimmed.length]);
+  }
+  return faces;
 }
