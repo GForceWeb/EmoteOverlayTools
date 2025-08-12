@@ -54,15 +54,17 @@ export function PreviewPane({ previewUrl, settings }: PreviewPaneProps) {
       }
 
       // Calculate scale to fit 1920x1080 into the sidebar placeholder
+      // Use the actual available height instead of the padding-based height
+      const availableHeight = sidebarRect.height;
       const scaleX = sidebarRect.width / 1920;
-      const scaleY = sidebarRect.height / 1080;
-      const scale = Math.min(scaleX, scaleY);
+      const scaleY = availableHeight / 1080;
+      const scale = Math.min(scaleX, scaleY, 1); // Don't scale up beyond 100%
 
       // Center the iframe in the placeholder
       const leftOffset =
         sidebarRect.left + (sidebarRect.width - 1920 * scale) / 2;
       const topOffset =
-        sidebarRect.top + (sidebarRect.height - 1080 * scale) / 2;
+        sidebarRect.top + (availableHeight - 1080 * scale) / 2;
 
       // Apply the transformation - make sure to set explicit initial values
       iframe.style.transform = `translate(${leftOffset}px, ${topOffset}px) scale(${scale})`;
@@ -117,8 +119,8 @@ export function PreviewPane({ previewUrl, settings }: PreviewPaneProps) {
 
   return (
     <>
-      <Card className="h-full">
-        <CardHeader className="pb-3">
+      <Card className="flex flex-col min-h-0">
+        <CardHeader className="pb-3 flex-shrink-0">
           <div className="flex justify-between items-center">
             <CardTitle>Live Preview</CardTitle>
             <div className="flex space-x-1">
@@ -144,17 +146,20 @@ export function PreviewPane({ previewUrl, settings }: PreviewPaneProps) {
             Preview your overlay animations and features
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex-1 min-h-0 flex flex-col">
           {/* This is a placeholder that helps position our fixed iframe */}
           <div
             ref={sidebarPlaceholderRef}
-            className="relative w-full"
-            style={{ paddingTop: "56.25%" /* 16:9 Aspect Ratio */ }}
+            className="relative w-full flex-1 min-h-0"
+            style={{ 
+              paddingTop: "56.25%", /* 16:9 Aspect Ratio */
+              maxHeight: "calc(100vh - 400px)" /* Limit maximum height */
+            }}
             data-testid="sidebar-preview-placeholder"
           >
             {/* Content will be positioned here via the fixed iframe */}
           </div>
-          <p className="text-xs text-muted-foreground mt-2 text-center">
+          <p className="text-xs text-muted-foreground mt-2 text-center flex-shrink-0">
             Preview URL: {url}
           </p>
         </CardContent>

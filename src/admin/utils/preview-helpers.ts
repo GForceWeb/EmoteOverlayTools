@@ -80,7 +80,7 @@ export const previewFeature = (
   let featureCommand = "";
   switch (feature) {
     case "welcome":
-      featureCommand = `!so @${settings.twitchUsername || "PreviewUser"}`;
+      featureCommand = `!so @${settings.twitchUsername || "GForce_Bot"}`;
       break;
     case "lurk":
       featureCommand = "!lurk";

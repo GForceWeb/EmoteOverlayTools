@@ -174,7 +174,7 @@ export function PreviewControls({ settings }: PreviewControlsProps) {
                 <Slider
                   id="count-value"
                   min={1}
-                  max={100}
+                  max={500}
                   step={1}
                   value={[tempConfig.count || 10]}
                   onValueChange={(value) => updateTempConfig("count", value[0])}
@@ -189,10 +189,10 @@ export function PreviewControls({ settings }: PreviewControlsProps) {
                 </div>
                 <Slider
                   id="interval-value"
-                  min={50}
-                  max={1000}
-                  step={10}
-                  value={[tempConfig.interval || 100]}
+                  min={5}
+                  max={settings.maxEmotes || 500}
+                  step={5}
+                  value={[tempConfig.interval || 50]}
                   onValueChange={(value) =>
                     updateTempConfig("interval", value[0])
                   }

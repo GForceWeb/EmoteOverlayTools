@@ -211,7 +211,7 @@ export function AnimationSettings({
                       <Slider
                         id={`${animation}-count`}
                         min={1}
-                        max={100}
+                        max={settings.maxEmotes || 500}
                         step={1}
                         value={[config.count || 10]}
                         onValueChange={(value) =>
@@ -231,7 +231,7 @@ export function AnimationSettings({
                       </div>
                       <Slider
                         id={`${animation}-interval`}
-                        min={50}
+                        min={10}
                         max={1000}
                         step={10}
                         value={[config.interval || 100]}

@@ -111,7 +111,7 @@ export function PreviewModal({
         window.removeEventListener("scroll", positionIframeInModal);
       };
     }
-  }, [isOpen, sidebarPlaceholderRef]);
+  }, [isOpen, sidebarPlaceholderRef, showControls]); // Added showControls as dependency
 
   // Function to return the iframe to sidebar position
   const returnIframeToSidebar = () => {
@@ -144,6 +144,36 @@ export function PreviewModal({
     }
   };
 
+  // Function to handle control visibility toggle
+  const handleToggleControls = () => {
+    setShowControls(!showControls);
+    // Add small delay to allow DOM to update before repositioning
+    setTimeout(() => {
+      const iframe = document.getElementById("overlay-iframe");
+      const container = document.getElementById("floating-preview-container");
+
+      if (iframe && container && modalPlaceholderRef.current) {
+        // Force recalculation of iframe position
+        const modalRect = modalPlaceholderRef.current.getBoundingClientRect();
+
+        const scaleX = modalRect.width / 1920;
+        const scaleY = modalRect.height / 1080;
+        const scale = Math.min(scaleX, scaleY);
+
+        const leftOffset =
+          modalRect.left + (modalRect.width - 1920 * scale) / 2;
+        const topOffset = modalRect.top + (modalRect.height - 1080 * scale) / 2;
+
+        iframe.style.transform = `translate(${leftOffset}px, ${topOffset}px) scale(${scale})`;
+
+        // Update stored positioning data
+        container.dataset.modalScale = String(scale);
+        container.dataset.modalLeft = String(leftOffset);
+        container.dataset.modalTop = String(topOffset);
+      }
+    }, 100);
+  };
+
   return (
     <Dialog
       open={isOpen}
@@ -154,6 +184,7 @@ export function PreviewModal({
       <DialogContent
         ref={modalContentRef}
         className="max-w-[90vw] w-[1200px] max-h-[90vh] flex flex-col p-0 gap-0 rounded-lg overflow-hidden"
+        hideCloseButton={true}
       >
         <DialogHeader className="px-4 py-2 flex flex-row items-center justify-between border-b bg-background">
           <DialogTitle className="text-foreground">
@@ -163,7 +194,7 @@ export function PreviewModal({
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setShowControls(!showControls)}
+              onClick={handleToggleControls}
               className="mr-2"
             >
               {showControls ? "Hide Controls" : "Show Controls"}
