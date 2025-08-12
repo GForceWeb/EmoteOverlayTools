@@ -20,12 +20,14 @@ import { useToast } from "@/admin/hooks/use-toast";
 
 import { SaveIcon } from "lucide-react";
 import { PreviewPane } from "@/admin/components/preview-pane";
+import { ConnectionStatus } from "@/admin/components/connection-status";
 
 import { defaultConfig } from "@/shared/defaultConfig";
 
 export function SettingsDashboard() {
   const [settings, setSettings] = useState<Settings>(defaultConfig);
   const [isLoading, setIsLoading] = useState(true);
+  const [settingsSaved, setSettingsSaved] = useState(false);
 
   // Load settings from config file when component mounts
   useEffect(() => {
@@ -98,6 +100,8 @@ export function SettingsDashboard() {
           title: "Settings saved",
           description: "Your settings have been saved successfully.",
         });
+        // Trigger reconnection test after settings are saved
+        setSettingsSaved(prev => !prev);
       } else {
         throw new Error(result.error);
       }
@@ -140,7 +144,7 @@ export function SettingsDashboard() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full">
         <div className="lg:col-span-2">
           <Tabs defaultValue="general" className="w-full">
             <TabsList className="grid grid-cols-4 mb-8">
@@ -189,15 +193,21 @@ export function SettingsDashboard() {
           </Tabs>
         </div>
 
-        <div className="lg:col-span-1">
-          <PreviewPane
-            previewUrl={
-              settings.overlayServerPort
-                ? `http://localhost:${settings.overlayServerPort}`
-                : "http://localhost:3030"
-            }
-            settings={settings}
+        <div className="lg:col-span-1 flex flex-col space-y-6 min-h-0">
+          <ConnectionStatus 
+            settings={settings} 
+            key={settingsSaved ? "saved" : "not-saved"} // Force re-render when settings are saved
           />
+          <div className="flex-1 min-h-0">
+            <PreviewPane
+              previewUrl={
+                settings.overlayServerPort
+                  ? `http://localhost:${settings.overlayServerPort}`
+                  : "http://localhost:3030"
+              }
+              settings={settings}
+            />
+          </div>
         </div>
       </div>
     </div>
