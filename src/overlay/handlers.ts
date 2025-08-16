@@ -270,9 +270,11 @@ async function cheersCommand(
   try {
     const images = [
       await helpers.getTwitchAvatar(username),
-      targetuser
-        ? await helpers.getTwitchAvatar(targetuser)
-        : "https://static-cdn.jtvnw.net/jtv_user_pictures/8e051a26-051f-4abe-bcfa-e13a5d13fad0-profile_image-300x300.png",
+      (
+        (targetuser && (await helpers.getTwitchAvatar(targetuser))) ||
+        (settings.twitchUsername && (await helpers.getTwitchAvatar(settings.twitchUsername))) ||
+        "https://static-cdn.jtvnw.net/jtv_user_pictures/8e051a26-051f-4abe-bcfa-e13a5d13fad0-profile_image-300x300.png"
+      ),
     ];
 
     const delayedFunction = helpers.executeWithInterval(
