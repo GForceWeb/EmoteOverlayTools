@@ -15,6 +15,7 @@ import { GeneralSettings } from "@/admin/components/general-settings";
 import { FeatureSettings } from "@/admin/components/feature-settings";
 import { AnimationSettings } from "@/admin/components/animation-settings";
 import { LogsView } from "@/admin/components/logs-view";
+import { Support } from "@/admin/components/support";
 import type { Settings, LogEntry } from "@/shared/types";
 import { useToast } from "@/admin/hooks/use-toast";
 
@@ -29,6 +30,7 @@ export function SettingsDashboard() {
   const [settings, setSettings] = useState<Settings>(defaultConfig);
   const [isLoading, setIsLoading] = useState(true);
   const [settingsSaved, setSettingsSaved] = useState(false);
+  const [activeTab, setActiveTab] = useState("general");
 
   // Load settings from config file when component mounts
   useEffect(() => {
@@ -137,8 +139,8 @@ export function SettingsDashboard() {
   return (
     <div className="container mx-auto max-w-7xl">
       <div className="mb-8 text-center">
-        <h1 className="text-3xl font-bold tracking-tight fill-white">
-          Twitch Overlay Settings
+        <h1 className="text-3xl font-bold tracking-tight text-white">
+          Emote Overlay Tools
         </h1>
         <p className="text-muted-foreground mt-2">
           Configure your stream overlay animations and features
@@ -147,12 +149,13 @@ export function SettingsDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 h-full">
         <div className="lg:col-span-3">
-          <Tabs defaultValue="general" className="w-full">
-            <TabsList className="grid grid-cols-4 mb-8">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid grid-cols-5 mb-8">
               <TabsTrigger value="general">General</TabsTrigger>
               <TabsTrigger value="features">Features</TabsTrigger>
               <TabsTrigger value="animations">Animations</TabsTrigger>
               <TabsTrigger value="logs">Logs</TabsTrigger>
+              <TabsTrigger value="support">Support</TabsTrigger>
             </TabsList>
 
             <Card>
@@ -182,14 +185,20 @@ export function SettingsDashboard() {
                 <LogsView logs={logs} onClearLogs={clearLogs} />
               </TabsContent>
 
-              <CardFooter className="flex justify-between border-t p-6">
-                <div></div>{" "}
-                {/* Empty div to maintain the justify-between spacing */}
-                <Button onClick={saveSettings}>
-                  <SaveIcon className="mr-2 h-4 w-4" />
-                  Save Settings
-                </Button>
-              </CardFooter>
+              <TabsContent value="support" className="mt-0">
+                <Support />
+              </TabsContent>
+
+              {activeTab !== "support" && (
+                <CardFooter className="flex justify-between border-t p-6">
+                  <div></div>{" "}
+                  {/* Empty div to maintain the justify-between spacing */}
+                  <Button onClick={saveSettings}>
+                    <SaveIcon className="mr-2 h-4 w-4" />
+                    Save Settings
+                  </Button>
+                </CardFooter>
+              )}
             </Card>
           </Tabs>
         </div>
