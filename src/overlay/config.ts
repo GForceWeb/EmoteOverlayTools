@@ -3,11 +3,8 @@ import animations from "./animations";
 import OverlaySettings from "./settings";
 const settings = OverlaySettings.settings;
 
-// Create WebSocket connection to StreamerBot
-const ws = new WebSocket("ws://localhost:8080/");
-
-// Create Websocket connection to Admin
-const wsAdmin = new WebSocket("ws://localhost:3030/");
+// Create WebSocket connection to StreamerBot using configured URL
+const ws = new WebSocket(settings.streamerBotWebsocketUrl);
 
 // // Check for URL parameters on initial load, before admin settings are received
 // const urlParams = new URLSearchParams(window.location.search);

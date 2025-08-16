@@ -10,6 +10,28 @@ class OverlaySettings {
     // Copy all properties from defaultConfig to this instance
     this.settings = { ...defaultConfig };
 
+    // Synchronously apply limited URL parameter overrides for GitHub-hosted usage
+    // Supported params: streamerBotWebsocketUrl, overlayServerPort, twitchUsername, debug
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+
+      const streamerBotWSUrl = urlParams.get("server");
+      if (streamerBotWSUrl) {
+        this.settings.streamerBotWebsocketUrl = streamerBotWSUrl;
+      }
+
+      const twitchUser = urlParams.get("user");
+      if (twitchUser) {
+        this.settings.twitchUsername = twitchUser;
+      }
+
+      if (urlParams.get("debug") !== null) {
+        this.settings.debug = true;
+      }
+    } catch (e) {
+      // No-op: if URL parsing fails, continue with defaults
+    }
+
     // Load settings from server
     this.fetchSettings()
       .then(() => {
