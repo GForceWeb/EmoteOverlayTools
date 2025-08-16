@@ -1,6 +1,6 @@
 {
     "name": "emote-overlay-tools",
-    "version": "1.0.0",
+    "version": "0.1.0",
     "description": "G-Force's Emote Overlay Tools for OBS",
     "type": "module",
     "main": "dist/electron/main.cjs",
