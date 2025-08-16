@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, Tray, Menu, nativeImage } from "electron";
+import { app, BrowserWindow, ipcMain, Tray, Menu, nativeImage, shell } from "electron";
 import * as path from "path";
 import fs from "fs";
 import express from "express";
@@ -418,5 +418,16 @@ ipcMain.handle("show-window", () => {
   if (mainWindow) {
     mainWindow.show();
     mainWindow.focus();
+  }
+});
+
+// Open external URLs in user's default browser
+ipcMain.handle("open-external", async (_event, url: string) => {
+  try {
+    await shell.openExternal(url);
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to open external URL:", url, error);
+    return { success: false, error: (error as Error).message };
   }
 });

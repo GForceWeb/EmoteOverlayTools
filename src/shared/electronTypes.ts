@@ -19,6 +19,7 @@ interface ElectronAPI {
   minimizeToTray: () => Promise<void>;
   showWindow: () => Promise<void>;
   onCloseConfirmation: (callback: () => void) => () => void;
+  openExternal: (url: string) => Promise<{ success: boolean; error?: string }>;
 }
 
 // Extend the window interface

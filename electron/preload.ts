@@ -56,4 +56,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
       ipcRenderer.removeListener("ws-message", subscription);
     };
   },
+
+  // Open external URLs in the user's default browser
+  openExternal: (url: string) => ipcRenderer.invoke("open-external", url),
 });
