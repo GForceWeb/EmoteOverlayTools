@@ -35,6 +35,27 @@ function getTrayIconPath(): string | undefined {
   return undefined; // No icon file found
 }
 
+// Helper function to get the correct icon path for the application window (taskbar/titlebar)
+function getWindowIconPath(): string | undefined {
+  const possibleIconPaths = [
+    // Prefer ICO when available
+    path.join(__dirname, "../renderer/img/favicon.ico"),
+    path.join(process.cwd(), "dist/renderer/img/favicon.ico"),
+    path.join(process.cwd(), "assets/img/favicon.ico"),
+    // Fallback to PNG
+    path.join(__dirname, "../renderer/img/icon_draft.png"),
+    path.join(process.cwd(), "dist/renderer/img/icon_draft.png"),
+    path.join(process.cwd(), "assets/img/icon_draft.png"),
+  ];
+
+  for (const testPath of possibleIconPaths) {
+    if (fs.existsSync(testPath)) {
+      return testPath;
+    }
+  }
+  return undefined;
+}
+
 // Load settings on startup
 try {
   if (!fs.existsSync(settingsPath)) {
@@ -181,13 +202,6 @@ function createTray() {
         if (mainWindow) {
           mainWindow.show();
           mainWindow.focus();
-          
-          // Show notification that app is restored
-          tray?.displayBalloon({
-            title: 'Emote Overlay Tools',
-            content: 'Application restored from system tray.',
-            icon: getTrayIconPath()
-          });
         }
       }
     },
@@ -223,20 +237,15 @@ function createTray() {
     if (mainWindow) {
       mainWindow.show();
       mainWindow.focus();
-      
-      // Show notification that app is restored
-      tray?.displayBalloon({
-        title: 'Emote Overlay Tools',
-        content: 'Application restored from system tray.',
-        icon: getTrayIconPath()
-      });
     }
   });
 }
 
 // Create the Electron application window
 function createWindow() {
-  mainWindow = new BrowserWindow({
+  const windowIconPath = getWindowIconPath();
+
+  const browserWindowOptions: Electron.BrowserWindowConstructorOptions = {
     width: 1200,
     height: 800,
     webPreferences: {
@@ -244,7 +253,13 @@ function createWindow() {
       contextIsolation: true,
       preload: path.join(__dirname, "preload.cjs"),
     },
-  });
+  };
+
+  if (windowIconPath) {
+    browserWindowOptions.icon = windowIconPath;
+  }
+
+  mainWindow = new BrowserWindow(browserWindowOptions);
 
   // Load the admin interface in development or production
   if (process.env.NODE_ENV === "development") {
@@ -287,6 +302,14 @@ function createWindow() {
 
 // App lifecycle events
 app.whenReady().then(() => {
+  // Ensure proper taskbar grouping and icon usage on Windows during development
+  if (process.platform === 'win32') {
+    try {
+      app.setAppUserModelId('com.gforce.emoteoverlaytools');
+    } catch (err) {
+      console.warn('Failed to set AppUserModelId:', err);
+    }
+  }
   setupExpressServer();
   setupWebSocketServer();
   createWindow();

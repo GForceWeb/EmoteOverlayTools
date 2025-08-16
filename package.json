@@ -74,7 +74,13 @@
             "category": "public.app-category.utilities"
         },
         "win": {
-            "target": "nsis"
+            "target": "nsis",
+            "icon": "assets/img/favicon.ico"
+        },
+        "nsis": {
+            "installerIcon": "assets/img/favicon.ico",
+            "uninstallerIcon": "assets/img/favicon.ico",
+            "shortcutName": "Emote Overlay Tools"
         },
         "linux": {
             "target": "deb"
