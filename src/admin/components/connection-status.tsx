@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/admin/components/ui/card";
 import { Badge } from "@/admin/components/ui/badge";
 import { Button } from "@/admin/components/ui/button";
-import { RefreshCw, Wifi, WifiOff } from "lucide-react";
+import { RefreshCw, Wifi, WifiOff, ChevronDown, ChevronUp } from "lucide-react";
 import type { Settings } from "@/shared/types";
 import { useToast } from "@/admin/hooks/use-toast";
 
@@ -19,7 +19,17 @@ export function ConnectionStatus({ settings }: ConnectionStatusProps) {
   const [lastAttempt, setLastAttempt] = useState<Date | null>(null);
   const [nextAutoTest, setNextAutoTest] = useState<Date | null>(null);
   const [ws, setWs] = useState<WebSocket | null>(null);
+  const [showInstructions, setShowInstructions] = useState(true);
   const { toast } = useToast();
+
+  const handleToggleInstructions = () => {
+    setShowInstructions(!showInstructions);
+    
+    // Trigger layout change event for preview iframe repositioning
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('layout-change'));
+    }, 50);
+  };
 
   const getWebSocketUrl = useCallback(() => {
     // Extract the WebSocket URL from the settings
@@ -229,9 +239,34 @@ export function ConnectionStatus({ settings }: ConnectionStatusProps) {
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle className="text-lg">Streamer.Bot Connection</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg">Step 1: Streamer.Bot Connection</CardTitle>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleToggleInstructions}
+            className="h-8 w-8 p-0"
+          >
+            {showInstructions ? (
+              <ChevronUp className="h-4 w-4" />
+            ) : (
+              <ChevronDown className="h-4 w-4" />
+            )}
+          </Button>
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        {showInstructions && (
+          <div className="text-sm text-muted-foreground mb-4">
+            <p className="mb-2">In Streamer.Bot:</p>
+            <ol className="list-decimal list-inside space-y-1 ml-2">
+              <li>Ensure the Websocket server is enabled in Streamer.Bot settings</li>
+              <li>If you're using a remote Streamer.Bot instance or a different websocket port, adjust the WebSocket URL under General Settings</li>
+              <li>Click "Test Connection" to verify the connection</li>
+            </ol>
+          </div>
+        )}
+
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className={`w-3 h-3 rounded-full ${getStatusColor()}`} />

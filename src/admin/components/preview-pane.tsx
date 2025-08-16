@@ -90,6 +90,13 @@ export function PreviewPane({ previewUrl, settings }: PreviewPaneProps) {
     window.addEventListener("resize", positionIframeInSidebar);
     window.addEventListener("scroll", positionIframeInSidebar);
 
+    // Watch for layout changes in the entire sidebar
+    let sidebarContainer: Element | null = null;
+    if (sidebarPlaceholderRef.current) {
+      // Find the sidebar container (parent of the preview pane)
+      sidebarContainer = sidebarPlaceholderRef.current.closest('.lg\\:col-span-2');
+    }
+
     // Check for ResizeObserver and use it if available
     if (sidebarPlaceholderRef.current && window.ResizeObserver) {
       const resizeObserver = new ResizeObserver((entries) => {
@@ -97,6 +104,11 @@ export function PreviewPane({ previewUrl, settings }: PreviewPaneProps) {
       });
 
       resizeObserver.observe(sidebarPlaceholderRef.current);
+
+      // Also observe the sidebar container to detect layout changes from other cards
+      if (sidebarContainer && sidebarContainer !== sidebarPlaceholderRef.current) {
+        resizeObserver.observe(sidebarContainer);
+      }
 
       return () => {
         window.removeEventListener("resize", positionIframeInSidebar);
@@ -109,6 +121,85 @@ export function PreviewPane({ previewUrl, settings }: PreviewPaneProps) {
       window.removeEventListener("resize", positionIframeInSidebar);
       window.removeEventListener("scroll", positionIframeInSidebar);
     };
+  }, [iframeLoaded]);
+
+  // Watch for DOM changes that might affect layout
+  useEffect(() => {
+    if (!iframeLoaded) return;
+
+    let sidebarContainer: Element | null = null;
+    if (sidebarPlaceholderRef.current) {
+      sidebarContainer = sidebarPlaceholderRef.current.closest('.lg\\:col-span-2');
+    }
+
+    if (sidebarContainer && window.MutationObserver) {
+      const mutationObserver = new MutationObserver((mutations) => {
+        // Check if any mutations might affect layout
+        const shouldReposition = mutations.some(mutation => {
+          // Reposition if nodes were added/removed or attributes changed
+          return mutation.type === 'childList' || 
+                 (mutation.type === 'attributes' && 
+                  (mutation.attributeName === 'class' || mutation.attributeName === 'style'));
+        });
+
+        if (shouldReposition) {
+          // Small delay to allow layout to settle
+          setTimeout(positionIframeInSidebar, 50);
+        }
+      });
+
+      mutationObserver.observe(sidebarContainer, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['class', 'style']
+      });
+
+      return () => {
+        mutationObserver.disconnect();
+      };
+    }
+  }, [iframeLoaded]);
+
+  // Additional effect to reposition iframe when URL changes (which might affect layout)
+  useEffect(() => {
+    if (iframeLoaded) {
+      // Small delay to allow layout to settle after URL change
+      setTimeout(positionIframeInSidebar, 100);
+    }
+  }, [url, iframeLoaded]);
+
+  // Listen for global layout change events
+  useEffect(() => {
+    if (!iframeLoaded) return;
+
+    const handleLayoutChange = () => {
+      // Small delay to allow layout to settle
+      setTimeout(positionIframeInSidebar, 100);
+    };
+
+    // Listen for custom layout change events
+    window.addEventListener('layout-change', handleLayoutChange);
+    
+    // Also listen for window focus which might indicate layout changes
+    window.addEventListener('focus', handleLayoutChange);
+
+    return () => {
+      window.removeEventListener('layout-change', handleLayoutChange);
+      window.removeEventListener('focus', handleLayoutChange);
+    };
+  }, [iframeLoaded]);
+
+  // Expose reposition function globally for manual triggering
+  useEffect(() => {
+    if (iframeLoaded) {
+      // Make the reposition function available globally
+      (window as any).repositionPreviewIframe = positionIframeInSidebar;
+      
+      return () => {
+        delete (window as any).repositionPreviewIframe;
+      };
+    }
   }, [iframeLoaded]);
 
   const refreshPreview = () => {
@@ -159,9 +250,6 @@ export function PreviewPane({ previewUrl, settings }: PreviewPaneProps) {
           >
             {/* Content will be positioned here via the fixed iframe */}
           </div>
-          <p className="text-xs text-muted-foreground mt-2 text-center flex-shrink-0">
-            Preview URL: {url}
-          </p>
         </CardContent>
       </Card>
 

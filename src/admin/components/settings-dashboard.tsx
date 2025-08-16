@@ -18,9 +18,10 @@ import { LogsView } from "@/admin/components/logs-view";
 import type { Settings, LogEntry } from "@/shared/types";
 import { useToast } from "@/admin/hooks/use-toast";
 
-import { SaveIcon } from "lucide-react";
+import { SaveIcon, Minimize2, Maximize2 } from "lucide-react";
 import { PreviewPane } from "@/admin/components/preview-pane";
 import { ConnectionStatus } from "@/admin/components/connection-status";
+import { OverlayUrl } from "@/admin/components/overlay-url";
 
 import { defaultConfig } from "@/shared/defaultConfig";
 
@@ -134,7 +135,7 @@ export function SettingsDashboard() {
   };
 
   return (
-    <div className="container mx-auto max-w-5xl">
+    <div className="container mx-auto max-w-7xl">
       <div className="mb-8 text-center">
         <h1 className="text-3xl font-bold tracking-tight fill-white">
           Twitch Overlay Settings
@@ -144,8 +145,8 @@ export function SettingsDashboard() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full">
-        <div className="lg:col-span-2">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 h-full">
+        <div className="lg:col-span-3">
           <Tabs defaultValue="general" className="w-full">
             <TabsList className="grid grid-cols-4 mb-8">
               <TabsTrigger value="general">General</TabsTrigger>
@@ -193,11 +194,19 @@ export function SettingsDashboard() {
           </Tabs>
         </div>
 
-        <div className="lg:col-span-1 flex flex-col space-y-6 min-h-0">
+        <div className="lg:col-span-2 flex flex-col space-y-6 min-h-0">
           <ConnectionStatus 
             settings={settings} 
             key={settingsSaved ? "saved" : "not-saved"} // Force re-render when settings are saved
           />
+          <OverlayUrl
+            url={
+              settings.overlayServerPort
+                ? `http://localhost:${settings.overlayServerPort}`
+                : "http://localhost:3030"
+            }
+          />
+
           <div className="flex-1 min-h-0">
             <PreviewPane
               previewUrl={
