@@ -255,8 +255,8 @@ export function PreviewPane({ previewUrl, settings }: PreviewPaneProps) {
 
       {/* Fixed position iframe that moves between sidebar and modal via CSS */}
       <div
-        className={`fixed top-0 left-0 w-0 h-0 z-[9999] pointer-events-none ${
-          isModalOpen ? "modal-active" : ""
+        className={`fixed top-0 left-0 w-0 h-0 pointer-events-none ${
+          isModalOpen ? "z-[60] modal-active" : "z-[40]"
         }`}
         id="floating-preview-container"
       >
