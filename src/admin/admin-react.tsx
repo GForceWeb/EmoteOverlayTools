@@ -2,8 +2,7 @@ import React from "react"
 import { createRoot } from 'react-dom/client';
 import { SettingsDashboard } from "@/admin/components/settings-dashboard"
 import { ThemeProvider } from "@/admin/components/theme-provider"
-
-
+import { CloseConfirmationDialog } from "@/admin/components/close-confirmation-dialog"
 
 // Mount the React application
 const container = document.getElementById('root');
@@ -13,6 +12,7 @@ if (container) {
   <ThemeProvider defaultTheme="dark" forcedTheme="dark">
     <main className="min-h-screen bg-background p-4 md:p-8 dark">
       <SettingsDashboard />
+      <CloseConfirmationDialog />
     </main>
   </ThemeProvider>
   );

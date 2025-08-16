@@ -20,6 +20,32 @@ contextBridge.exposeInMainWorld("electronAPI", {
     return ipcRenderer.invoke("change-server-port", port);
   },
 
+  // Confirm quit action
+  confirmQuit: () => {
+    return ipcRenderer.invoke("confirm-quit");
+  },
+
+  // Minimize to tray
+  minimizeToTray: () => {
+    return ipcRenderer.invoke("minimize-to-tray");
+  },
+
+  // Show window
+  showWindow: () => {
+    return ipcRenderer.invoke("show-window");
+  },
+
+  // Listen for close confirmation request
+  onCloseConfirmation: (callback: () => void) => {
+    const subscription = () => callback();
+    ipcRenderer.on("show-close-confirmation", subscription);
+
+    // Return a function to unsubscribe
+    return () => {
+      ipcRenderer.removeListener("show-close-confirmation", subscription);
+    };
+  },
+
   // Listen for WebSocket messages from the server
   onWebSocketMessage: (callback: (data: any) => void) => {
     const subscription = (_event: any, data: any) => callback(data);

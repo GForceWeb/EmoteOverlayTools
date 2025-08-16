@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from "electron";
+import { app, BrowserWindow, ipcMain, Tray, Menu, nativeImage } from "electron";
 import * as path from "path";
 import fs from "fs";
 import express from "express";
@@ -8,12 +8,32 @@ import { defaultConfig } from "../src/shared/defaultConfig";
 
 // Keep a global reference of the mainWindow object
 let mainWindow: BrowserWindow | null = null;
+let tray: Tray | null = null;
 let overlayServerPort = 3030;
+let isQuitting = false;
 const expressApp = express();
 const server = http.createServer(expressApp);
 const wss = new WebSocketServer({ server });
 const settingsPath = path.join(app.getPath("userData"), "settings.json");
 let currentSettings = defaultConfig;
+
+// Helper function to get the correct icon path for tray notifications
+function getTrayIconPath(): string | undefined {
+  const possibleIconPaths = [
+    path.join(__dirname, "../renderer/img/icon_draft.png"),       // Production: dist/renderer/img/
+    path.join(__dirname, "../assets/img/icon_draft.png"),         // Development: assets/img/
+    path.join(__dirname, "../../assets/img/icon_draft.png"),      // Alternative path
+    path.join(process.cwd(), "assets/img/icon_draft.png"),        // From project root
+    path.join(process.cwd(), "dist/renderer/img/icon_draft.png")  // From dist
+  ];
+  
+  for (const testPath of possibleIconPaths) {
+    if (fs.existsSync(testPath)) {
+      return testPath;
+    }
+  }
+  return undefined; // No icon file found
+}
 
 // Load settings on startup
 try {
@@ -114,6 +134,106 @@ function setupWebSocketServer() {
   });
 }
 
+// Create the system tray
+function createTray() {
+  // Try to use an icon file, fallback to a simple icon if not available
+  let icon: Electron.NativeImage;
+  
+  try {
+    // Try to load from assets if available - check multiple possible paths
+    const possibleIconPaths = [
+      path.join(__dirname, "../renderer/img/icon_draft.png"),       // Production: dist/renderer/img/
+      path.join(__dirname, "../assets/img/icon_draft.png"),         // Development: assets/img/
+      path.join(__dirname, "../../assets/img/icon_draft.png"),      // Alternative path
+      path.join(process.cwd(), "assets/img/icon_draft.png"),        // From project root
+      path.join(process.cwd(), "dist/renderer/img/icon_draft.png")  // From dist
+    ];
+    
+    let iconPath: string | null = null;
+    for (const testPath of possibleIconPaths) {
+      if (fs.existsSync(testPath)) {
+        iconPath = testPath;
+        break;
+      }
+    }
+    
+    if (iconPath) {
+      icon = nativeImage.createFromPath(iconPath);
+      console.log("Loaded tray icon from:", iconPath);
+    } else {
+      // Fallback to a simple icon
+      console.log("No icon file found, using fallback. Checked paths:", possibleIconPaths);
+      icon = nativeImage.createFromDataURL('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTggMUMxMS44NjYgMSAxNSA0LjEzNCAxNSA4QzE1IDExLjg2NiAxMS44NjYgMTUgOCAxNUM0LjEzNCAxNSAxIDExLjg2NiAxIDhDMSA0LjEzNCA0LjEzNCAxIDggMVoiIGZpbGw9IiM2NDY0NjQiLz4KPHBhdGggZD0iTTggM0M5LjY1Njg1IDMgMTEgNC4zNDMxNSAxMSA2QzExIDcuNjU2ODUgOS42NTY4NSA5IDggOUM2LjM0MzE1IDkgNSA3LjY1Njg1IDUgNkM1IDQuMzQzMTUgNi4zNDMxNSAzIDggM1oiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPgo=');
+    }
+  } catch (error) {
+    // Fallback to a simple icon if anything fails
+    console.error("Error loading tray icon:", error);
+    icon = nativeImage.createFromDataURL('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTggM0M5LjY1Njg1IDMgMTEgNC4zNDMxNSAxMSA2QzExIDcuNjU2ODUgOS42NTY4NSA5IDggOUM2LjM0MzE1IDkgNSA3LjY1Njg1IDUgNkM1IDQuMzQzMTUgNi4zNDMxNSAzIDggM1oiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPgo=');
+  }
+  
+  tray = new Tray(icon);
+  tray.setToolTip('Emote Overlay Tools');
+  
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: 'Show App',
+      click: () => {
+        if (mainWindow) {
+          mainWindow.show();
+          mainWindow.focus();
+          
+          // Show notification that app is restored
+          tray?.displayBalloon({
+            title: 'Emote Overlay Tools',
+            content: 'Application restored from system tray.',
+            icon: getTrayIconPath()
+          });
+        }
+      }
+    },
+    {
+      label: 'Minimize to Tray',
+      click: () => {
+        if (mainWindow) {
+          mainWindow.hide();
+          
+          // Show notification that app is in tray
+          tray?.displayBalloon({
+            title: 'Emote Overlay Tools',
+            content: 'Application minimized to system tray. Double-click the tray icon to restore.',
+            icon: getTrayIconPath()
+          });
+        }
+      }
+    },
+    { type: 'separator' },
+    {
+      label: 'Quit',
+      click: () => {
+        isQuitting = true;
+        app.quit();
+      }
+    }
+  ]);
+  
+  tray.setContextMenu(contextMenu);
+  
+  // Double click on tray icon to show the window
+  tray.on('double-click', () => {
+    if (mainWindow) {
+      mainWindow.show();
+      mainWindow.focus();
+      
+      // Show notification that app is restored
+      tray?.displayBalloon({
+        title: 'Emote Overlay Tools',
+        content: 'Application restored from system tray.',
+        icon: getTrayIconPath()
+      });
+    }
+  });
+}
+
 // Create the Electron application window
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -136,6 +256,29 @@ function createWindow() {
     mainWindow.loadFile(path.join(__dirname, "../renderer/admin/admin.html"));
   }
 
+  // Handle window minimize - hide to tray instead
+  mainWindow.on('minimize', (event) => {
+    event.preventDefault();
+    mainWindow?.hide();
+    
+    // Show notification that app is in tray
+    if (tray) {
+      tray.displayBalloon({
+        title: 'Emote Overlay Tools',
+        content: 'Application minimized to system tray. Double-click the tray icon to restore.',
+        icon: getTrayIconPath()
+      });
+    }
+  });
+
+  // Handle window close - show confirmation dialog
+  mainWindow.on('close', (event) => {
+    if (!isQuitting) {
+      event.preventDefault();
+      mainWindow?.webContents.send('show-close-confirmation');
+    }
+  });
+
   // Handle window being closed
   mainWindow.on("closed", () => {
     mainWindow = null;
@@ -147,6 +290,7 @@ app.whenReady().then(() => {
   setupExpressServer();
   setupWebSocketServer();
   createWindow();
+  createTray(); // Call createTray here
 
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
@@ -216,4 +360,40 @@ ipcMain.handle("change-server-port", async (event, newPort) => {
 // Add this to your existing IPC handlers
 ipcMain.handle("get-settings-path", () => {
   return settingsPath;
+});
+
+// Handle quit confirmation
+ipcMain.handle("confirm-quit", () => {
+  isQuitting = true;
+  app.quit();
+});
+
+// Handle tray quit
+ipcMain.handle("tray-quit", () => {
+  isQuitting = true;
+  app.quit();
+});
+
+// Handle minimize to tray
+ipcMain.handle("minimize-to-tray", () => {
+  if (mainWindow) {
+    mainWindow.hide();
+    
+    // Show notification that app is in tray
+    if (tray) {
+      tray.displayBalloon({
+        title: 'Emote Overlay Tools',
+        content: 'Application minimized to system tray. Double-click the tray icon to restore.',
+        icon: getTrayIconPath()
+      });
+    }
+  }
+});
+
+// Handle show window
+ipcMain.handle("show-window", () => {
+  if (mainWindow) {
+    mainWindow.show();
+    mainWindow.focus();
+  }
 });

@@ -15,6 +15,10 @@ interface ElectronAPI {
   saveSettings: (
     settings: any
   ) => Promise<{ success: boolean; error?: string }>;
+  confirmQuit: () => Promise<void>;
+  minimizeToTray: () => Promise<void>;
+  showWindow: () => Promise<void>;
+  onCloseConfirmation: (callback: () => void) => () => void;
 }
 
 // Extend the window interface
