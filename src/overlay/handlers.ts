@@ -29,7 +29,8 @@ let animationMap: [string, number, number][] = [
   ["text", ani.text.count ?? 1, ani.text.interval ?? 25],
   ["cyclone", ani.cyclone.count ?? 100, ani.cyclone.interval ?? 30],
   ["tetris", ani.tetris.count ?? 50, ani.tetris.interval ?? 40],
-  ["cube", ani.cube.count ?? 100, ani.cube.interval ?? 50]
+  ["cube", ani.cube.count ?? 100, ani.cube.interval ?? 50],
+  ["traffic", ani.traffic.count ?? 100, ani.traffic.interval ?? 250]
 ];
 
 function isFeatureEnabled(feature: string, subbedCheck: boolean): boolean {

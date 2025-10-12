@@ -34,6 +34,7 @@ export const defaultConfig: Settings = {
     cube: { enabled: true },
     fade: { enabled: true },
     invaders: { enabled: true },
+    traffic: { enabled: true },
   },
   maxEmotes: 200,
   subOnly: false,

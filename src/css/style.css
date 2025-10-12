@@ -107,6 +107,13 @@ body,
   background-size: 100%;
   z-index: 5; /* Increased z-index to make visible */
 }
+.traffic-element {
+  width: var(--emote-size-standard);
+  height: var(--emote-size-standard);
+  position: absolute;
+  background-size: 100%;
+  z-index: 5; /* Increased z-index to make visible */
+}
 
 /* Enhanced singing container styles */
 .singing-container {
