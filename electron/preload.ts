@@ -59,4 +59,45 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
   // Open external URLs in the user's default browser
   openExternal: (url: string) => ipcRenderer.invoke("open-external", url),
+
+  // Get app version
+  getVersion: () => ipcRenderer.invoke("get-version"),
+
+  // Updater controls
+  updaterCheck: () => ipcRenderer.invoke("updater-check"),
+  updaterDownload: () => ipcRenderer.invoke("updater-download"),
+  updaterQuitAndInstall: () => ipcRenderer.invoke("updater-quit-and-install"),
+  updaterSimulate: () => ipcRenderer.invoke("updater-simulate"),
+
+  // Updater events
+  onUpdaterChecking: (cb: () => void) => {
+    const sub = () => cb();
+    ipcRenderer.on("updater:checking", sub);
+    return () => ipcRenderer.removeListener("updater:checking", sub);
+  },
+  onUpdaterAvailable: (cb: (info: any) => void) => {
+    const sub = (_e: any, info: any) => cb(info);
+    ipcRenderer.on("updater:available", sub);
+    return () => ipcRenderer.removeListener("updater:available", sub);
+  },
+  onUpdaterNotAvailable: (cb: (info: any) => void) => {
+    const sub = (_e: any, info: any) => cb(info);
+    ipcRenderer.on("updater:not-available", sub);
+    return () => ipcRenderer.removeListener("updater:not-available", sub);
+  },
+  onUpdaterError: (cb: (message: string) => void) => {
+    const sub = (_e: any, msg: string) => cb(msg);
+    ipcRenderer.on("updater:error", sub);
+    return () => ipcRenderer.removeListener("updater:error", sub);
+  },
+  onUpdaterProgress: (cb: (progress: any) => void) => {
+    const sub = (_e: any, progress: any) => cb(progress);
+    ipcRenderer.on("updater:download-progress", sub);
+    return () => ipcRenderer.removeListener("updater:download-progress", sub);
+  },
+  onUpdaterDownloaded: (cb: (info: any) => void) => {
+    const sub = (_e: any, info: any) => cb(info);
+    ipcRenderer.on("updater:downloaded", sub);
+    return () => ipcRenderer.removeListener("updater:downloaded", sub);
+  },
 });

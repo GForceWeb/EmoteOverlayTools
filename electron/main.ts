@@ -17,6 +17,20 @@ const wss = new WebSocketServer({ server });
 const settingsPath = path.join(app.getPath("userData"), "settings.json");
 let currentSettings = defaultConfig;
 
+// Updater state
+let hasAttemptedInitialUpdateCheck = false;
+
+async function getAutoUpdater(): Promise<any | null> {
+  try {
+    // Dynamic import to avoid type resolution errors during dev without dependency
+    const mod = await import("electron-updater");
+    return (mod as any).autoUpdater as any;
+  } catch (error) {
+    console.warn("electron-updater not available:", (error as Error)?.message);
+    return null;
+  }
+}
+
 // Helper function to get the correct icon path for tray notifications
 function getTrayIconPath(): string | undefined {
   const possibleIconPaths = [
@@ -315,6 +329,26 @@ app.whenReady().then(() => {
   createWindow();
   createTray(); // Call createTray here
 
+  // Set up auto-updater and perform initial check
+  void setupAutoUpdater();
+  if (app.isPackaged) {
+    // Delay slightly to ensure renderer is ready to receive events
+    setTimeout(() => {
+      try {
+        hasAttemptedInitialUpdateCheck = true;
+        mainWindow?.webContents.send("updater:checking");
+        void getAutoUpdater().then((updater) => {
+          if (!updater) return;
+          updater.checkForUpdates().catch((err: any) => {
+            mainWindow?.webContents.send("updater:error", err?.message || String(err));
+          });
+        });
+      } catch (err) {
+        mainWindow?.webContents.send("updater:error", (err as Error).message);
+      }
+    }, 1500);
+  }
+
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
@@ -428,6 +462,116 @@ ipcMain.handle("open-external", async (_event, url: string) => {
     return { success: true };
   } catch (error) {
     console.error("Failed to open external URL:", url, error);
+    return { success: false, error: (error as Error).message };
+  }
+});
+
+// Provide application version to renderer
+ipcMain.handle("get-version", () => {
+  return app.getVersion();
+});
+
+// -------- Auto Updater: events and IPC --------
+async function setupAutoUpdater() {
+  try {
+    if (!app.isPackaged) return; // only wire in packaged app
+    const autoUpdater = await getAutoUpdater();
+    if (!autoUpdater) return;
+    autoUpdater.autoDownload = false; // we'll prompt first
+    autoUpdater.autoInstallOnAppQuit = true; // install after download on quit by default
+
+    autoUpdater.on("checking-for-update", () => {
+      mainWindow?.webContents.send("updater:checking");
+    });
+
+    autoUpdater.on("update-available", (info) => {
+      mainWindow?.webContents.send("updater:available", info);
+    });
+
+    autoUpdater.on("update-not-available", (info) => {
+      mainWindow?.webContents.send("updater:not-available", info);
+    });
+
+    autoUpdater.on("error", (error) => {
+      mainWindow?.webContents.send("updater:error", error?.message || String(error));
+    });
+
+    autoUpdater.on("download-progress", (progress) => {
+      mainWindow?.webContents.send("updater:download-progress", progress);
+    });
+
+    autoUpdater.on("update-downloaded", (info) => {
+      mainWindow?.webContents.send("updater:downloaded", info);
+    });
+  } catch (error) {
+    // Non-fatal
+    console.error("Failed to initialize autoUpdater", error);
+  }
+}
+
+ipcMain.handle("updater-check", async () => {
+  try {
+    if (!app.isPackaged) {
+      mainWindow?.webContents.send("updater:error", "Updater is only active in packaged builds.");
+      return { success: false };
+    }
+    mainWindow?.webContents.send("updater:checking");
+    const autoUpdater = await getAutoUpdater();
+    if (!autoUpdater) throw new Error("electron-updater not available");
+    await autoUpdater.checkForUpdates();
+    return { success: true };
+  } catch (error) {
+    mainWindow?.webContents.send("updater:error", (error as Error).message);
+    return { success: false, error: (error as Error).message };
+  }
+});
+
+ipcMain.handle("updater-download", async () => {
+  try {
+    if (!app.isPackaged) {
+      mainWindow?.webContents.send("updater:error", "Updater is only active in packaged builds.");
+      return { success: false };
+    }
+    const autoUpdater = await getAutoUpdater();
+    if (!autoUpdater) throw new Error("electron-updater not available");
+    const result = await autoUpdater.downloadUpdate();
+    return { success: true, file: result };
+  } catch (error) {
+    mainWindow?.webContents.send("updater:error", (error as Error).message);
+    return { success: false, error: (error as Error).message };
+  }
+});
+
+ipcMain.handle("updater-quit-and-install", () => {
+  try {
+    if (!app.isPackaged) {
+      mainWindow?.webContents.send("updater:error", "Updater is only active in packaged builds.");
+      return { success: false };
+    }
+    // This will close the app and run the installer on Windows (NSIS)
+    void getAutoUpdater().then((updater) => updater?.quitAndInstall());
+    return { success: true };
+  } catch (error) {
+    mainWindow?.webContents.send("updater:error", (error as Error).message);
+    return { success: false, error: (error as Error).message };
+  }
+});
+
+// Testing aid: simulate an update flow without GitHub
+ipcMain.handle("updater-simulate", async () => {
+  try {
+    const fakeInfo = { version: "0.2.0", releaseName: "Simulated", releaseNotes: "Test update", files: [] } as any;
+    mainWindow?.webContents.send("updater:checking");
+    await new Promise((r) => setTimeout(r, 600));
+    mainWindow?.webContents.send("updater:available", fakeInfo);
+    for (let p = 0; p <= 100; p += 10) {
+      await new Promise((r) => setTimeout(r, 150));
+      mainWindow?.webContents.send("updater:download-progress", { percent: p });
+    }
+    mainWindow?.webContents.send("updater:downloaded", fakeInfo);
+    return { success: true };
+  } catch (error) {
+    mainWindow?.webContents.send("updater:error", (error as Error).message);
     return { success: false, error: (error as Error).message };
   }
 });

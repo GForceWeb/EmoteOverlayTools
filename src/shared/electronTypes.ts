@@ -20,6 +20,20 @@ interface ElectronAPI {
   showWindow: () => Promise<void>;
   onCloseConfirmation: (callback: () => void) => () => void;
   openExternal: (url: string) => Promise<{ success: boolean; error?: string }>;
+  getVersion: () => Promise<string>;
+
+  // Updater
+  updaterCheck: () => Promise<{ success: boolean; error?: string }>;
+  updaterDownload: () => Promise<{ success: boolean; file?: string; error?: string }>;
+  updaterQuitAndInstall: () => Promise<{ success: boolean; error?: string }>;
+  updaterSimulate: () => Promise<{ success: boolean; error?: string }>;
+
+  onUpdaterChecking: (callback: () => void) => () => void;
+  onUpdaterAvailable: (callback: (info: any) => void) => () => void;
+  onUpdaterNotAvailable: (callback: (info: any) => void) => () => void;
+  onUpdaterError: (callback: (message: string) => void) => () => void;
+  onUpdaterProgress: (callback: (progress: { percent?: number }) => void) => () => void;
+  onUpdaterDownloaded: (callback: (info: any) => void) => () => void;
 }
 
 // Extend the window interface
