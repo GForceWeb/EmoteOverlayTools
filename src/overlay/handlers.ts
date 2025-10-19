@@ -193,9 +193,10 @@ function emoteRainHandler(lowermessage, images): void {
     if (animation == "text") {
       //Set Default Text if no text supplied
       let text = "Hype";
+      const textEntry = animationMap.find((item) => item[0] === "text");
       let interval =
         helpers.getCommandValue(lowermessage, "interval") ??
-        animationMap["text"][2];
+        (textEntry ? textEntry[2] : 25);
       //Get Text from Command
       let regexp = /text (\S*)/gm;
       let matches = regexp.exec(lowermessage);
