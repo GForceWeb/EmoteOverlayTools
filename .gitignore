@@ -12,7 +12,12 @@ node_modules
 dist-ssr
 *.local
 
-dist/
+
+# Build output
+dist/*
+# Exception
+!dist/renderer/
+
 
 # Editor directories and files
 .vscode/*
@@ -24,3 +29,6 @@ dist/
 *.njsproj
 *.sln
 *.sw?
+
+# Private environment variables
+.env
