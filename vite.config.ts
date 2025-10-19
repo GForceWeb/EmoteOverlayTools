@@ -3,7 +3,6 @@ import { defineConfig } from "vite";
 import { resolve } from "path";
 import electron from "vite-plugin-electron";
 import renderer from "vite-plugin-electron-renderer";
-import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 
@@ -75,6 +74,8 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, "src/overlay/index.html"),
         admin: resolve(__dirname, "src/admin/admin.html"),
+        // Build the legacy redirect page directly from src/overlay/dist
+        "overlay/dist/index": resolve(__dirname, "src/overlay/dist/index.html"),
       },
     },
   },
