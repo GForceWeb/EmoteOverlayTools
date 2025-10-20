@@ -76,6 +76,8 @@ export default defineConfig({
         admin: resolve(__dirname, "src/admin/admin.html"),
         // Build the legacy redirect page directly from src/overlay/dist
         "overlay/dist/index": resolve(__dirname, "src/overlay/dist/index.html"),
+        // Build the legacy config page directly from src/overlay/config
+        "overlay/config/index": resolve(__dirname, "src/overlay/config/index.html"),
       },
     },
   },
