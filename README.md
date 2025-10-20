@@ -1,23 +1,29 @@
 ## G-Force's Emote Overlay Tools
 
-Forked from [VRFlad's](https://vrflad.com) amazing work on [EmoteRain](https://codepen.io/vrflad/pen/VwMYaYo). I couldn't have built this without his code as a building block.
+Initially forked from [VRFlad's](https://vrflad.com) work on [EmoteRain](https://codepen.io/vrflad/pen/VwMYaYo). I couldn't have built this without his code as an inspiration and building block.
 
-Inspiration to work on this came from the lack of Twitch Animated emote support in StreamElements. Now I have more animation variation than before and Twitch animated emotes work great!
+My desire to work on this project came from the lack of Twitch Animated emote support in StreamElements. Now I have more animation variation than before and Twitch animated emotes work great!
+
+## Prerequisites
+
+- Streamer.Bot is required for all install types
+   - Ensure the WebSocket server is enabled and running in Streamer.Bot (Servers/Clients -> WebSocket Server -> Start Server)
 
 ## Installation Options
 
 ### Option 1: Desktop Application (Recommended)
 
+- Benefits: Most customizable experience, includes a built-in tester/preview, and runs a local self-contained web server for your OBS Browser Source.
 - Download and install the latest release of Emote Overlay Tools from the [releases page](https://github.com/gforceweb/EmoteOverlayTools/releases)
 - Launch the application
 - Copy the provided OBS Browser Source URL and add it as a Browser Source in OBS
 - Configure your settings in the app interface
 - Test animations directly from the app
 
-### Option 2: Browser Source (Streamer.Bot Required)
+### Option 2: Hosted Browser Source (no separate app install)
 
-- Ensure you have Streamer.Bot installed and running with the WebSocket server enabled (Servers/Clients -> WebSocket Server -> Start Server)
-- Head to [https://gforceweb.github.io/EmoteOverlayTools/dist/config.html](https://gforceweb.github.io/EmoteOverlayTools/dist/config.html) and select your settings
+- Benefits: Works without installing a separate desktop application; quick to try and easy to share.
+- Head to [https://gforceweb.github.io/EmoteOverlayTools/config](https://gforceweb.github.io/EmoteOverlayTools/config) and select your settings
 - Copy the URL from the address bar and add it as a Browser Source in OBS
 - Enjoy!
 
@@ -25,10 +31,10 @@ Inspiration to work on this came from the lack of Twitch Animated emote support 
 
 The desktop application provides several benefits:
 
-- No need for Streamer.Bot (though still compatible if you want to use both)
 - Built-in animation testing and preview
 - Easy configuration through a user-friendly interface
-- Self-contained web server for OBS browser source
+- Highly customizable settings
+- Self-contained local web server for OBS browser source
 
 ### Application Tabs
 
@@ -131,24 +137,27 @@ A Visual Train effect that drives along the top of the screen. The train will be
 
 ## Project Structure
 
-The application is structured as follows:
+The repository is structured as follows (key folders only):
 
-- `/src` - Main animation and frontend code
+- `/overlay` — Overlay runtime used in OBS (and by the desktop app)
+   - `index.html` — Overlay entry point loaded by OBS Browser Source
+   - `handlers.ts` — How chat messages get passed to actions
+   - `animations/` — Individual overlay animations (rain, rise, spiral, etc.)
 
-  - `/animations` - Individual animation modules
-  - `/css` - Styling for the application
-  - `/lib` - Utility libraries and helpers
-  - `index.html` - Main animation display (used in OBS)
-  - `admin.html` - Desktop application UI
-  - `config.html` - Configuration for browser source mode
-  - Various TypeScript files for handling animations, websockets, etc.
+- `/src/admin` — Desktop application admin UI (React)
+   - `admin.html` and `admin-react.tsx` — Entry for the admin interface used by the desktop app
+   - `components/` — Settings panels, preview, UI components
+   - `styles/`, `css/`, `hooks/`, `lib/` — Styling and utilities for the admin UI
 
-- `/electron` - Electron-specific code
+- `/electron` — Electron main process and preload bridge
+   - `main.ts` — Window management and local server wiring
+   - `preload.ts` — Secure IPC bridge between renderer and main
 
-  - `main.ts` - Main process for Electron (window management and Express server)
-  - `preload.ts` - Secure bridge between renderer and main processes
+- `/src/shared` and `/types` — Shared types and configuration used across overlay and app
+   - `src/shared` — Shared runtime utilities and default config
+   - `types/` — Type definitions (e.g., `settings.ts`)
 
-- `/assets` - Static assets (images, sounds, etc.)
+- `/assets` — Static assets (images, etc.)
 
 ## Development Setup
 
