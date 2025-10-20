@@ -15,6 +15,7 @@ dist-ssr
 
 # Build output
 dist/*
+release/*
 # Exception
 !dist/renderer/
 

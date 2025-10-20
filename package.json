@@ -1,5 +1,6 @@
 {
     "name": "emote-overlay-tools",
+    "author": "G-Force",
     "version": "2.0.0",
     "description": "G-Force's Emote Overlay Tools for OBS",
     "type": "module",
@@ -79,6 +80,10 @@
             "target": "nsis",
             "icon": "assets/img/favicon.ico"
         },
+        "directories": {
+            "output": "release",
+            "buildResources": "assets"
+        },
         "nsis": {
             "installerIcon": "assets/img/favicon.ico",
             "uninstallerIcon": "assets/img/favicon.ico",
@@ -87,16 +92,16 @@
         "linux": {
             "target": "deb"
         },
-    "files": [
-            "dist/**/*",
-            "electron/**/*"
-    ],
-    "publish": [
-      {
-        "provider": "github",
-        "owner": "gforceweb",
-        "repo": "EmoteOverlayTools"
-      }
-    ]
+        "files": [
+                "dist/**/*",
+                "!**/*.map"
+        ],
+        "publish": [
+        {
+            "provider": "github",
+            "owner": "gforceweb",
+            "repo": "EmoteOverlayTools"
+        }
+        ]
     }
 }
