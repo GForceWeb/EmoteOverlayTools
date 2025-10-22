@@ -69,9 +69,9 @@ export default defineConfig({
   // Configure build options
   build: {
     outDir: "../dist/renderer",
+    emptyOutDir: true,
     // Place built assets under overlay/ so the overlay artifact is self-contained for GitHub Pages
     assetsDir: "overlay/assets",
-    emptyOutDir: true,
     rollupOptions: {
       input: {
         main: resolve(__dirname, "src/overlay/index.html"),

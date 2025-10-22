@@ -49,6 +49,12 @@ jobs:
           mkdir -p dist/renderer/overlay/img
           cp -r assets/img/* dist/renderer/overlay/img/
 
+          # Fix asset paths in overlay HTML to be strictly relative
+          if [ -f dist/renderer/overlay/index.html ]; then
+            sed -i 's|../overlay/assets/|./assets/|g' dist/renderer/overlay/index.html
+            sed -i 's|/overlay/assets/|./assets/|g' dist/renderer/overlay/index.html
+          fi
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
