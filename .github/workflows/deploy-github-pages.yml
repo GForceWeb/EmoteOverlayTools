@@ -37,8 +37,18 @@ jobs:
         run: npm run build
       - name: Prepare Pages artifact
         run: |
-          mkdir -p dist/renderer
-          echo > dist/renderer/.nojekyll
+          # Ensure overlay folder exists and is treated as a static site (no Jekyll)
+          mkdir -p dist/renderer/overlay
+          echo > dist/renderer/overlay/.nojekyll
+
+          # Copy raw CSS used by overlay HTML (referenced as ./css/style.css)
+          mkdir -p dist/renderer/overlay/css
+          cp -r src/css/* dist/renderer/overlay/css/
+
+          # Copy public images so overlay references like "img/..." resolve
+          mkdir -p dist/renderer/overlay/img
+          cp -r assets/img/* dist/renderer/overlay/img/
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
