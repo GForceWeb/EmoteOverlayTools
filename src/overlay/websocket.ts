@@ -258,10 +258,10 @@ function handleMessage(msg: string): void {
       }
 
       if (wsdata.data?.coinFlipResult == "Heads") {
-        animations.coinflip.createCoins(1, "Heads");
+        animations.coinflip(1, "Heads");
       }
       if (wsdata.data?.coinFlipResult == "Tails") {
-        animations.coinflip.createCoins(1, "Tails");
+        animations.coinflip(1, "Tails");
       }
     }
 

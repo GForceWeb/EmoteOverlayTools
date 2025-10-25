@@ -17,7 +17,7 @@ type CoinResult = "Heads" | "Tails";
  * @param count Number of coins to flip sequentially
  * @param result Optional result (Heads or Tails). If not provided, result is random
  */
-export function coinFlip(count: number = 1, result?: string): void {
+export function coinflip(count: number = 1, result?: string): void {
   for (let i = 0; i < count; i++) {
     setTimeout(() => {
       // If no result provided, randomize between Heads and Tails
