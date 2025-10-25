@@ -1,3 +1,6 @@
+import pkg from '../../package.json';
+const appVersion = pkg.version as string;
+
 // Check if user is NOT using the desktop app
 export function notAppUser(): boolean {
   const urlParams = new URLSearchParams(window.location.search);
@@ -10,7 +13,6 @@ export function notAppUser(): boolean {
   return isGitHubPages || hasUrlParams || !isLocalhost;
 }
 
-// Create and show notice banner for non-app users
 export function showNoticeBanner(): void {
   if (!notAppUser()) return;
 
@@ -21,10 +23,12 @@ export function showNoticeBanner(): void {
     <div class="banner-content">
       <div class="banner-icon">🎉</div>
       <div class="banner-text">
-        <strong>Emote Overlay Tools v0.1.0</strong>
-        <span class="banner-subtitle">Visit our <a href="https://github.com/gforceweb/EmoteOverlayTools" target="_blank">GitHub</a> for updates and downloads!</span>
+        <strong>Emote Overlay Tools v${appVersion}</strong>
+        <span class="banner-subtitle">Visit https://github.com/gforceweb/EmoteOverlayTools for updates and downloads.</span>
       </div>
-      <button class="banner-close" onclick="this.parentElement.parentElement.remove()">×</button>
+      <div class="banner-countdown" role="status" aria-label="Notice will close automatically">
+        <span class="countdown-number">10</span>
+      </div>
     </div>
   `;
 
@@ -82,25 +86,37 @@ export function showNoticeBanner(): void {
     .banner-subtitle a:hover {
       text-decoration: underline;
     }
-    
-    .banner-close {
-      background: none;
-      border: none;
-      color: white;
-      font-size: 1.5em;
-      cursor: pointer;
-      padding: 0;
-      width: 24px;
-      height: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+
+    .banner-countdown {
+      --deg: 0deg;
+      position: relative;
+      width: 26px;
+      height: 26px;
+      flex: 0 0 26px;
       border-radius: 50%;
-      transition: background 0.2s ease;
+      background:
+        conic-gradient(rgba(255,255,255,0.95) var(--deg), rgba(255,255,255,0.25) 0deg);
+      display: grid;
+      place-items: center;
+      margin-left: 12px;
     }
-    
-    .banner-close:hover {
-      background: rgba(255, 255, 255, 0.2);
+
+    .banner-countdown::after {
+      content: '';
+      position: absolute;
+      inset: 2px;
+      background: rgba(0,0,0,0.25);
+      border-radius: 50%;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.25);
+    }
+
+    .countdown-number {
+      position: relative;
+      font-size: 0.7rem;
+      font-weight: 700;
+      line-height: 1;
+      color: #fff;
+      text-shadow: 0 1px 1px rgba(0,0,0,0.4);
     }
     
     @keyframes slideDown {
@@ -128,15 +144,35 @@ export function showNoticeBanner(): void {
   document.head.appendChild(style);
   document.body.appendChild(banner);
 
-  // Auto-hide after 10 seconds
-  setTimeout(() => {
-    if (banner.parentElement) {
-      banner.style.animation = 'fadeOut 0.5s ease-in forwards';
-      setTimeout(() => {
-        if (banner.parentElement) {
-          banner.remove();
-        }
-      }, 500);
+  // Countdown and auto-hide logic (10 seconds)
+  const duration = 10; // seconds
+  let remaining = duration;
+  const countdownEl = banner.querySelector('.banner-countdown') as HTMLDivElement | null;
+  const numberEl = banner.querySelector('.countdown-number') as HTMLSpanElement | null;
+
+  const updateCountdown = () => {
+    if (!countdownEl || !numberEl) return;
+    numberEl.textContent = String(remaining);
+    const progress = Math.max(0, Math.min(1, (duration - remaining) / duration));
+    const deg = Math.round(progress * 360);
+    countdownEl.style.setProperty('--deg', `${deg}deg`);
+  };
+
+  updateCountdown();
+
+  const interval = window.setInterval(() => {
+    remaining -= 1;
+    if (remaining <= 0) {
+      window.clearInterval(interval);
+      // Final full progress
+      if (countdownEl) countdownEl.style.setProperty('--deg', '360deg');
+      // Trigger fade out and remove
+      if (banner.parentElement) {
+        banner.style.animation = 'fadeOut 0.5s ease-in forwards';
+        window.setTimeout(() => banner.remove(), 500);
+      }
+      return;
     }
-  }, 10000);
+    updateCountdown();
+  }, 1000);
 }

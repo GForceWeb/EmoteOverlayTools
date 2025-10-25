@@ -24,6 +24,7 @@ export interface AnimationList {
   cube: AnimationSettings;
   fade: AnimationSettings;
   invaders: AnimationSettings;
+  traffic: AnimationSettings;
 }
 
 export interface FeatureSettings {

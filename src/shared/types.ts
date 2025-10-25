@@ -25,7 +25,7 @@ export interface AnimationList {
   bounce: AnimationSettings;
   cube: AnimationSettings;
   fade: AnimationSettings;
-  invaders: AnimationSettings;
+  // invaders: AnimationSettings;
   traffic: AnimationSettings;
 }
 
