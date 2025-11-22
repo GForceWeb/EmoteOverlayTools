@@ -33,7 +33,6 @@ export const defaultConfig: Settings = {
     bounce: { enabled: true },
     cube: { enabled: true },
     fade: { enabled: true },
-    // invaders: { enabled: true },
     traffic: { enabled: true },
   },
   maxEmotes: 200,
