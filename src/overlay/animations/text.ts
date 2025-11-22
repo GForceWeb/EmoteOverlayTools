@@ -21,6 +21,8 @@ export function text(
     let char = text.charAt(i);
     let pattern = alnumDist[char];
 
+    if (!pattern) continue; // Skip character if no pattern found
+
     //Iterate over each line of the letter
     for (let j = 0; j < pattern.length; j++) {
       let line = j + 1;

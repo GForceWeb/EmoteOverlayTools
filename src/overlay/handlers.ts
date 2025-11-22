@@ -97,7 +97,7 @@ function chatMessageHandler(wsdata: WSData): void {
 
     case lowermessage.includes("!er"):
       if (isFeatureEnabled("emoterain", subbedCheck)) {
-        emoteRainHandler(lowermessage, emotes);
+        emoteRainHandler(message, emotes);
       } else {
         console.log("EmoteRain Not Enabled or User Not Subscribed");
       }
@@ -183,10 +183,11 @@ function kappagenHandler(lowermessage, images): void {
   }
 }
 
-function emoteRainHandler(lowermessage, images): void {
+function emoteRainHandler(message, images): void {
   //Get !er animation with regex from lowermessage
-  let regexp = /!er (\w*)/gm;
-  let matches = regexp.exec(lowermessage);
+  const lowermessage = message.toLowerCase();
+  const regexp = /!er (\w*)/gm;
+  const matches = regexp.exec(lowermessage);
   if (matches && matches[1]) {
     let animation = matches[1];
     console.log("Running emoteRain: " + animation);
@@ -198,10 +199,10 @@ function emoteRainHandler(lowermessage, images): void {
         helpers.getCommandValue(lowermessage, "interval") ??
         (textEntry ? textEntry[2] : 25);
       //Get Text from Command
-      let regexp = /text (\S*)/gm;
-      let matches = regexp.exec(lowermessage);
-      if (matches && matches[1]) {
-        text = matches[1];
+      const textRegexp = /text (\S*)/i;
+      const textMatches = textRegexp.exec(message);
+      if (textMatches && textMatches[1]) {
+        text = textMatches[1];
       }
 
       animations.text(images, text, interval);
