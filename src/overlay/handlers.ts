@@ -29,9 +29,14 @@ let animationMap: [string, number, number][] = [
   ["text", ani.text.count ?? 1, ani.text.interval ?? 25],
   ["cyclone", ani.cyclone.count ?? 100, ani.cyclone.interval ?? 30],
   ["tetris", ani.tetris.count ?? 50, ani.tetris.interval ?? 40],
+  ["shapes", ani.cube.count ?? 100, ani.cube.interval ?? 50], // Randomly picks between cube and dodecahedron
   ["traffic", ani.traffic.count ?? 100, ani.traffic.interval ?? 250],
-  ["snake", ani.snake.count ?? 20, ani.snake.interval ?? 75],
+  ["snake", ani.snake.count ?? 20, ani.snake.interval ?? 150],
   ["solitaire", ani.solitaire.count ?? 50, ani.solitaire.interval ?? 50]
+];
+
+// Shape animations that "shapes" can randomly select from
+const shapeAnimations = ["cube", "dodecahedron"];
 
 function isFeatureEnabled(feature: string, subbedCheck: boolean): boolean {
   return (
@@ -169,7 +174,11 @@ async function kappagenHandler(lowermessage: string, images: string[], username:
     animationMap[rAnimation][2];
   let animation = animationMap[rAnimation][0];
 
-  console.log(
+  // If "shapes" was selected, randomly pick between available shape animations
+  if (animation === "shapes") {
+    const shapeIndex = Math.round(helpers.Randomizer(0, shapeAnimations.length - 1));
+    animation = shapeAnimations[shapeIndex];
+  }
     `Rolled: ${rAnimation}. Running: ${animation} with ${count} emote(s) every ${interval} ms`
   );
 
@@ -228,6 +237,14 @@ async function emoteRainHandler(message: string, images: string[], username: str
       count = checkCountMaximum(count);
       let interval =
         helpers.getCommandValue(lowermessage, "interval") ?? animationCheck[2];
+      
+      // If "shapes" was selected via !er, randomly pick between available shape animations
+      let finalAnimation = animation;
+      if (animation === "shapes") {
+        const shapeIndex = Math.round(helpers.Randomizer(0, shapeAnimations.length - 1));
+        finalAnimation = shapeAnimations[shapeIndex];
+      }
+      
       // Special handling for snake animation to use user's avatar as head
       if (finalAnimation === "snake") {
         try {
