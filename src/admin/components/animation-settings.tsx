@@ -19,7 +19,7 @@ import {
 import { Slider } from "@/admin/components/ui/slider";
 import { Button } from "@/admin/components/ui/button";
 import { previewAnimation } from "@/admin/utils/preview-helpers";
-import { RotateCcw } from "lucide-react";
+import { Play, RotateCcw } from "lucide-react";
 import {
   animationRegistry,
   getTopLevelAnimations,
@@ -210,7 +210,19 @@ export function AnimationSettings({
                 onPreviewAnimation(def.name);
               }}
             >
+              <Play className="mr-2 h-4 w-4" />
               Preview
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleResetToDefaults(def.name);
+              }}
+            >
+              <RotateCcw className="mr-2 h-4 w-4" />
+              Reset to Defaults
             </Button>
           </div>
         </div>
@@ -219,82 +231,96 @@ export function AnimationSettings({
             {def.description}
           </p>
 
-          {/* Dual toggle switches */}
-          <div className="grid grid-cols-2 gap-4 p-4 bg-secondary/30 rounded-lg">
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label className="text-sm font-medium">Enable for !er</Label>
-                <p className="text-xs text-muted-foreground">Manual trigger</p>
+          <div className="grid gap-6 md:grid-cols-2">
+            {/* Left column: enable toggles */}
+            <div className="space-y-3 rounded-lg bg-secondary/30 p-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="text-sm font-medium">Enable for !er</Label>
+                  <p className="text-xs text-muted-foreground">Manual trigger</p>
+                </div>
+                <Switch
+                  checked={isManualEnabled}
+                  onCheckedChange={(checked) =>
+                    handleManualToggle(def.name, checked)
+                  }
+                  disabled={settings.enableAllAnimations}
+                />
               </div>
-              <Switch
-                checked={isManualEnabled}
-                onCheckedChange={(checked) => handleManualToggle(def.name, checked)}
-                disabled={settings.enableAllAnimations}
-              />
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="text-sm font-medium">Include in !k</Label>
+                  <p className="text-xs text-muted-foreground">Kappagen pool</p>
+                </div>
+                <Switch
+                  checked={isKappagenEnabled}
+                  onCheckedChange={(checked) =>
+                    handleKappagenToggle(def.name, checked)
+                  }
+                  disabled={settings.enableAllAnimations}
+                />
+              </div>
             </div>
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label className="text-sm font-medium">Include in !k</Label>
-                <p className="text-xs text-muted-foreground">Kappagen pool</p>
-              </div>
-              <Switch
-                checked={isKappagenEnabled}
-                onCheckedChange={(checked) => handleKappagenToggle(def.name, checked)}
-                disabled={settings.enableAllAnimations}
-              />
+
+            {/* Right column: sliders / text */}
+            <div className="space-y-4">
+              {def.requiresText ? (
+                <div className="space-y-2">
+                  <Label htmlFor={`${def.name}-text`}>Default Text</Label>
+                  <Input
+                    id={`${def.name}-text`}
+                    value={config.text || ""}
+                    onChange={(e) =>
+                      handleAnimationTextChange(def.name, e.target.value)
+                    }
+                    placeholder="Enter text to display"
+                  />
+                </div>
+              ) : !def.isGroup ? (
+                <>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor={`${def.name}-count`}>{countLabel}</Label>
+                      <span className="text-sm text-muted-foreground">
+                        {config.count}
+                      </span>
+                    </div>
+                    <Slider
+                      id={`${def.name}-count`}
+                      min={1}
+                      max={settings.maxEmotes || 500}
+                      step={1}
+                      value={[config.count || 10]}
+                      onValueChange={(value) =>
+                        handleAnimationCountChange(def.name, value[0])
+                      }
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor={`${def.name}-interval`}>
+                        {intervalLabel}
+                      </Label>
+                      <span className="text-sm text-muted-foreground">
+                        {config.interval}ms
+                      </span>
+                    </div>
+                    <Slider
+                      id={`${def.name}-interval`}
+                      min={10}
+                      max={1000}
+                      step={10}
+                      value={[config.interval || 100]}
+                      onValueChange={(value) =>
+                        handleAnimationIntervalChange(def.name, value[0])
+                      }
+                    />
+                  </div>
+                </>
+              ) : null}
             </div>
           </div>
-
-          {/* Animation-specific settings */}
-          {def.requiresText ? (
-            <div className="space-y-2">
-              <Label htmlFor={`${def.name}-text`}>Default Text</Label>
-              <Input
-                id={`${def.name}-text`}
-                value={config.text || ""}
-                onChange={(e) => handleAnimationTextChange(def.name, e.target.value)}
-                placeholder="Enter text to display"
-              />
-            </div>
-          ) : !def.isGroup ? (
-            <>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <Label htmlFor={`${def.name}-count`}>
-                    {countLabel}: {config.count}
-                  </Label>
-                </div>
-                <Slider
-                  id={`${def.name}-count`}
-                  min={1}
-                  max={settings.maxEmotes || 500}
-                  step={1}
-                  value={[config.count || 10]}
-                  onValueChange={(value) =>
-                    handleAnimationCountChange(def.name, value[0])
-                  }
-                />
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <Label htmlFor={`${def.name}-interval`}>
-                    {intervalLabel}: {config.interval}ms
-                  </Label>
-                </div>
-                <Slider
-                  id={`${def.name}-interval`}
-                  min={10}
-                  max={1000}
-                  step={10}
-                  value={[config.interval || 100]}
-                  onValueChange={(value) =>
-                    handleAnimationIntervalChange(def.name, value[0])
-                  }
-                />
-              </div>
-            </>
-          ) : null}
 
           {/* Group children */}
           {def.isGroup && def.children && (
@@ -312,19 +338,6 @@ export function AnimationSettings({
               </Accordion>
             </div>
           )}
-
-          {/* Reset to Defaults button */}
-          <div className="pt-2 border-t">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleResetToDefaults(def.name)}
-              className="text-muted-foreground hover:text-foreground"
-            >
-              <RotateCcw className="mr-2 h-4 w-4" />
-              Reset to Defaults
-            </Button>
-          </div>
         </AccordionContent>
       </AccordionItem>
     );
