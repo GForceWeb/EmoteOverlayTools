@@ -25,8 +25,11 @@ export interface AnimationList {
   bounce: AnimationSettings;
   cube: AnimationSettings;
   fade: AnimationSettings;
+  dodecahedron: AnimationSettings;
   // invaders: AnimationSettings;
   traffic: AnimationSettings;
+  snake: AnimationSettings;
+  solitaire: AnimationSettings;
 }
 
 export interface FeatureSettings {
