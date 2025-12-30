@@ -5,7 +5,8 @@ import { gsap } from "gsap";
 export function snake(
   images: string[],
   count: number = 20,
-  speed: number = 100
+  speed: number = 75,
+  headUrl?: string
 ): void {
   // Configuration
   const gridSize = 80; // Size of each grid cell
@@ -52,7 +53,8 @@ export function snake(
   
   // Create Head Elements (Split for chomping)
   const headSize = gridSize;
-  const headUrl = "https://static-cdn.jtvnw.net/jtv_user_pictures/8e051a26-051f-4abe-bcfa-e13a5d13fad0-profile_image-70x70.png";
+  // Use provided headUrl (user avatar) or fall back to default
+  const snakeHeadUrl = headUrl || "https://static-cdn.jtvnw.net/jtv_user_pictures/8e051a26-051f-4abe-bcfa-e13a5d13fad0-profile_image-70x70.png";
   
   const headDiv = document.createElement("div");
   headDiv.style.width = `${headSize}px`;
@@ -74,7 +76,7 @@ export function snake(
   const headTopImg = document.createElement("div");
   headTopImg.style.width = "100%";
   headTopImg.style.height = "200%"; // Double height to show full image
-  headTopImg.style.backgroundImage = `url(${headUrl})`;
+  headTopImg.style.backgroundImage = `url(${snakeHeadUrl})`;
   headTopImg.style.backgroundSize = "cover";
   headTopImg.style.backgroundPosition = "top";
   headTop.appendChild(headTopImg);
@@ -91,7 +93,7 @@ export function snake(
   const headBottomImg = document.createElement("div");
   headBottomImg.style.width = "100%";
   headBottomImg.style.height = "200%";
-  headBottomImg.style.backgroundImage = `url(${headUrl})`;
+  headBottomImg.style.backgroundImage = `url(${snakeHeadUrl})`;
   headBottomImg.style.backgroundSize = "cover";
   headBottomImg.style.backgroundPosition = "bottom";
   headBottomImg.style.position = "absolute";
@@ -124,7 +126,7 @@ export function snake(
       
       // Use a default image or color for initial body
       // Let's use the head image but smaller or just a circle
-      const bgImage = images.length > 0 ? images[0] : headUrl;
+      const bgImage = images.length > 0 ? images[0] : snakeHeadUrl;
       bodyPart.style.backgroundImage = `url(${bgImage})`;
       bodyPart.style.backgroundSize = "contain";
       bodyPart.style.backgroundRepeat = "no-repeat";

@@ -29,9 +29,9 @@ let animationMap: [string, number, number][] = [
   ["text", ani.text.count ?? 1, ani.text.interval ?? 25],
   ["cyclone", ani.cyclone.count ?? 100, ani.cyclone.interval ?? 30],
   ["tetris", ani.tetris.count ?? 50, ani.tetris.interval ?? 40],
-  ["cube", ani.cube.count ?? 100, ani.cube.interval ?? 50],
-  ["traffic", ani.traffic.count ?? 100, ani.traffic.interval ?? 250]
-];
+  ["traffic", ani.traffic.count ?? 100, ani.traffic.interval ?? 250],
+  ["snake", ani.snake.count ?? 20, ani.snake.interval ?? 75],
+  ["solitaire", ani.solitaire.count ?? 50, ani.solitaire.interval ?? 50]
 
 function isFeatureEnabled(feature: string, subbedCheck: boolean): boolean {
   return (
@@ -97,7 +97,7 @@ function chatMessageHandler(wsdata: WSData): void {
 
     case lowermessage.includes("!er"):
       if (isFeatureEnabled("emoterain", subbedCheck)) {
-        emoteRainHandler(message, emotes);
+        emoteRainHandler(message, emotes, username);
       } else {
         console.log("EmoteRain Not Enabled or User Not Subscribed");
       }
@@ -105,7 +105,7 @@ function chatMessageHandler(wsdata: WSData): void {
 
     case lowermessage.includes("!k"):
       if (isFeatureEnabled("kappagen", subbedCheck)) {
-        kappagenHandler(lowermessage, emotes);
+        kappagenHandler(lowermessage, emotes, username);
       } else {
         console.log("KappaGen Not Enabled or User Not Subscribed");
       }
@@ -158,7 +158,7 @@ function checkCountMaximum(count): number {
   return count;
 }
 
-function kappagenHandler(lowermessage, images): void {
+async function kappagenHandler(lowermessage: string, images: string[], username: string): Promise<void> {
   let rAnimation = Math.round(helpers.Randomizer(0, animationMap.length - 1));
   let count =
     helpers.getCommandValue(lowermessage, "count") ??
@@ -177,13 +177,24 @@ function kappagenHandler(lowermessage, images): void {
     animations.hasOwnProperty(animation) &&
     typeof animations[animation] === "function"
   ) {
-    animations[animation](images, count, interval);
+    // Special handling for snake animation to use user's avatar as head
+    if (animation === "snake") {
+      try {
+        const avatar = await helpers.getTwitchAvatar(username);
+        animations.snake(images, count, interval, avatar);
+      } catch (error) {
+        console.error("Error getting avatar for snake:", error);
+        animations.snake(images, count, interval);
+      }
+    } else {
+      animations[animation](images, count, interval);
+    }
   } else {
     console.log("Animation Function Mapping Failed");
   }
 }
 
-function emoteRainHandler(message, images): void {
+async function emoteRainHandler(message: string, images: string[], username: string): Promise<void> {
   //Get !er animation with regex from lowermessage
   const lowermessage = message.toLowerCase();
   const regexp = /!er (\w*)/gm;
@@ -217,7 +228,18 @@ function emoteRainHandler(message, images): void {
       count = checkCountMaximum(count);
       let interval =
         helpers.getCommandValue(lowermessage, "interval") ?? animationCheck[2];
-      animations[animation](images, count, interval);
+      // Special handling for snake animation to use user's avatar as head
+      if (finalAnimation === "snake") {
+        try {
+          const avatar = await helpers.getTwitchAvatar(username);
+          animations.snake(images, count, interval, avatar);
+        } catch (error) {
+          console.error("Error getting avatar for snake:", error);
+          animations.snake(images, count, interval);
+        }
+      } else {
+        animations[finalAnimation](images, count, interval);
+      }
     } else {
       console.log(`Animation ${animation} Not Found in animationMap`);
     }
