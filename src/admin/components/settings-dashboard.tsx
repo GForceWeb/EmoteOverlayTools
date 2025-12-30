@@ -75,6 +75,22 @@ export function SettingsDashboard() {
 
   const { toast } = useToast();
 
+  // Listen for log messages from main process
+  useEffect(() => {
+    const unsubscribe = window.electronAPI.onMainLog((log) => {
+      const newEntry: LogEntry = {
+        timestamp: new Date(log.timestamp),
+        type: log.type,
+        message: log.message,
+      };
+      setLogs((prev) => [newEntry, ...prev]);
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
   const addLogEntry = (type: "info" | "warning" | "error", message: string) => {
     const newEntry: LogEntry = {
       timestamp: new Date(),

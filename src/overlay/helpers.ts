@@ -44,32 +44,24 @@ async function getTwitchAvatar(
   user: string,
   id: boolean = false
 ): Promise<string> {
-  let url = "https://decapi.me/twitch/avatar/" + user;
-  let avatar: string;
-
-  if (id) {
-    url += "?id=true";
-  }
-
-  // Usage example
+  // Try the local cached API first (served by Electron)
   try {
-    avatar = await makeRequest(url)
-      .then(function (response) {
-        // Handle the response here
-        console.log(response);
-        return response;
-      })
-      .catch(function (error) {
-        // Handle any errors that occurred during the request
-        console.error(error);
-        throw error;
-      });
+    const localUrl = `/api/twitch-avatar/${encodeURIComponent(user)}${id ? "?id=true" : ""}`;
+    const response = await fetch(localUrl);
+    
+    if (response.ok) {
+      const data = await response.json();
+      console.log(`Avatar for ${user}:`, data.avatar, data.cached ? "(cached)" : "(fresh)");
+      return data.avatar;
+    }
   } catch (error) {
-    // Handle any errors that occurred during the request
-    console.error(error);
-    throw error;
+    console.warn("Local avatar API unavailable, falling back to decapi.me:", error);
   }
-
+  
+  // Fallback to direct decapi.me call (when running without Electron)
+  const decapiUrl = `https://decapi.me/twitch/avatar/${encodeURIComponent(user)}${id ? "?id=true" : ""}`;
+  const avatar = await makeRequest(decapiUrl);
+  console.log(`Avatar for ${user} (direct):`, avatar);
   return avatar;
 }
 

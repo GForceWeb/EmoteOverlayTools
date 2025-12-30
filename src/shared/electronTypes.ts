@@ -34,6 +34,9 @@ interface ElectronAPI {
   onUpdaterError: (callback: (message: string) => void) => () => void;
   onUpdaterProgress: (callback: (progress: { percent?: number }) => void) => () => void;
   onUpdaterDownloaded: (callback: (info: any) => void) => () => void;
+
+  // Main process logging
+  onMainLog: (callback: (log: { type: "info" | "warning" | "error"; message: string; timestamp: string }) => void) => () => void;
 }
 
 // Extend the window interface

@@ -5,6 +5,7 @@ import express from "express";
 import { WebSocketServer } from "ws";
 import * as http from "http";
 import { defaultConfig } from "../src/shared/defaultConfig";
+import { setupAvatarCacheEndpoint, setLogCallback } from "./avatar-cache";
 
 // Keep a global reference of the mainWindow object
 let mainWindow: BrowserWindow | null = null;
@@ -19,6 +20,16 @@ let currentSettings = defaultConfig;
 
 // Updater state
 let hasAttemptedInitialUpdateCheck = false;
+
+// Send log entry to renderer process for display in System Logs
+function sendLogToRenderer(type: "info" | "warning" | "error", message: string): void {
+  if (mainWindow) {
+    mainWindow.webContents.send("main-log", { type, message, timestamp: new Date().toISOString() });
+  }
+}
+
+// Set up the avatar cache log callback to send logs to renderer
+setLogCallback(sendLogToRenderer);
 
 async function getAutoUpdater(): Promise<any | null> {
   try {
@@ -124,6 +135,9 @@ function setupExpressServer() {
       }
     }
   );
+
+  // API endpoint to get Twitch avatar with caching
+  setupAvatarCacheEndpoint(expressApp);
 
   // Add API endpoint to save settings
   expressApp.use(express.json()); // Add this to parse JSON request bodies
