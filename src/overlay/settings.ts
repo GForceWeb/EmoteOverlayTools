@@ -1,5 +1,6 @@
 import { Settings } from "../shared/types";
 import { defaultConfig } from "../shared/defaultConfig";
+import logger from "./lib/logger";
 
 class OverlaySettings {
   private static instance: OverlaySettings;
@@ -35,10 +36,10 @@ class OverlaySettings {
     // Load settings from server
     this.fetchSettings()
       .then(() => {
-        console.log("Settings loaded successfully");
+        logger.info("Settings loaded successfully");
       })
       .catch((error) => {
-        console.error("Error loading settings:", error);
+        logger.error(`Error loading settings: ${(error as Error).message}`);
       });
   }
 
@@ -60,13 +61,13 @@ class OverlaySettings {
       const response = await fetch(`${window.location.origin}/api/settings`);
       if (response.ok) {
         const data = await response.json();
-        console.log("Settings loaded from HTTP API:", data);
+        logger.info("Settings loaded from HTTP API");
         this.updateSettings(data);
       } else {
-        console.error("Failed to load settings via HTTP:", response.statusText);
+        logger.error(`Failed to load settings via HTTP: ${response.statusText}`);
       }
     } catch (error) {
-      console.error("Error fetching settings:", error);
+      logger.error(`Error fetching settings: ${(error as Error).message}`);
     }
   }
 }

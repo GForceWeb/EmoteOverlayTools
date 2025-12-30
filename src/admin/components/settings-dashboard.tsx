@@ -16,10 +16,10 @@ import { FeatureSettings } from "@/admin/components/feature-settings";
 import { AnimationSettings } from "@/admin/components/animation-settings";
 import { LogsView } from "@/admin/components/logs-view";
 import { Support } from "@/admin/components/support";
-import type { Settings, LogEntry } from "@/shared/types";
+import type { Settings } from "@/shared/types";
 import { useToast } from "@/admin/hooks/use-toast";
 
-import { SaveIcon, Minimize2, Maximize2 } from "lucide-react";
+import { SaveIcon } from "lucide-react";
 import { PreviewPane } from "@/admin/components/preview-pane";
 import { ConnectionStatus } from "@/admin/components/connection-status";
 import { OverlayUrl } from "@/admin/components/overlay-url";
@@ -32,15 +32,26 @@ export function SettingsDashboard() {
   const [settingsSaved, setSettingsSaved] = useState(false);
   const [activeTab, setActiveTab] = useState("general");
 
+  const getBaseUrl = () => {
+    return settings.overlayServerPort
+      ? `http://localhost:${settings.overlayServerPort}`
+      : "http://localhost:3030";
+  };
+
+  // Send log entry to file-based logging system
+  const sendLog = (type: "info" | "warning" | "error", message: string) => {
+    fetch(`${getBaseUrl()}/api/log`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type, message, source: "admin" }),
+    }).catch((err) => console.error("Failed to send log:", err));
+  };
+
   // Load settings from config file when component mounts
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const streamerBotWebsocketUrl = settings.overlayServerPort
-          ? `http://localhost:${settings.overlayServerPort}`
-          : "http://localhost:3030";
-
-        const response = await fetch(`${streamerBotWebsocketUrl}/api/settings`);
+        const response = await fetch(`${getBaseUrl()}/api/settings`);
 
         if (!response.ok) {
           throw new Error(`Failed to fetch settings: ${response.statusText}`);
@@ -48,10 +59,10 @@ export function SettingsDashboard() {
 
         const data = await response.json();
         setSettings(data);
-        addLogEntry("info", "Settings loaded from config file");
+        sendLog("info", "Settings loaded from config file");
       } catch (error) {
         console.error("Failed to load settings:", error);
-        addLogEntry(
+        sendLog(
           "error",
           `Failed to load settings: ${
             error instanceof Error ? error.message : String(error)
@@ -65,56 +76,13 @@ export function SettingsDashboard() {
     fetchSettings();
   }, []);
 
-  const [logs, setLogs] = useState<LogEntry[]>([
-    {
-      timestamp: new Date(),
-      type: "info",
-      message: "Settings dashboard initialized",
-    },
-  ]);
-
   const { toast } = useToast();
-
-  // Listen for log messages from main process
-  useEffect(() => {
-    const unsubscribe = window.electronAPI.onMainLog((log) => {
-      const newEntry: LogEntry = {
-        timestamp: new Date(log.timestamp),
-        type: log.type,
-        message: log.message,
-      };
-      setLogs((prev) => [newEntry, ...prev]);
-    });
-
-    return () => {
-      unsubscribe();
-    };
-  }, []);
-
-  const addLogEntry = (type: "info" | "warning" | "error", message: string) => {
-    const newEntry: LogEntry = {
-      timestamp: new Date(),
-      type,
-      message,
-    };
-    setLogs((prev) => [newEntry, ...prev]);
-  };
-
-  const clearLogs = () => {
-    setLogs([
-      {
-        timestamp: new Date(),
-        type: "info",
-        message: "Logs cleared",
-      },
-    ]);
-  };
 
   const saveSettings = async () => {
     try {
       const result = await window.electronAPI.saveSettings(settings);
       if (result.success) {
-        addLogEntry("info", "Settings saved successfully");
+        sendLog("info", "Settings saved successfully");
         toast({
           title: "Settings saved",
           description: "Your settings have been saved successfully.",
@@ -126,7 +94,7 @@ export function SettingsDashboard() {
       }
     } catch (error) {
       console.error("Failed to save settings:", error);
-      addLogEntry(
+      sendLog(
         "error",
         `Failed to save settings: ${
           error instanceof Error ? error.message : String(error)
@@ -144,7 +112,7 @@ export function SettingsDashboard() {
 
   const resetSettings = () => {
     setSettings(defaultConfig);
-    addLogEntry("warning", "Settings reset to defaults");
+    sendLog("warning", "Settings reset to defaults");
 
     toast({
       title: "Settings reset",
@@ -198,7 +166,7 @@ export function SettingsDashboard() {
               </TabsContent>
 
               <TabsContent value="logs" className="mt-0">
-                <LogsView logs={logs} onClearLogs={clearLogs} />
+                <LogsView overlayServerPort={settings.overlayServerPort} />
               </TabsContent>
 
               <TabsContent value="support" className="mt-0">

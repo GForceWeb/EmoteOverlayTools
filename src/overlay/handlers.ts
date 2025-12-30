@@ -5,6 +5,7 @@ const settings = OverlaySettings.settings;
 
 import helpers from "./helpers.ts";
 import animations from "./animations.ts";
+import logger from "./lib/logger.ts";
 
 // Variable to track if bot chat is enabled
 let Botchat: boolean = false;
@@ -59,7 +60,7 @@ function chatMessageHandler(wsdata: WSData): void {
       if (isFeatureEnabled("lurk", subbedCheck)) {
         lurkCommand(username);
       } else {
-        console.log("Lurk Not Enabled or User Not Subscribed");
+        logger.info("Lurk Not Enabled or User Not Subscribed");
       }
       break;
 
@@ -67,7 +68,7 @@ function chatMessageHandler(wsdata: WSData): void {
       if (isFeatureEnabled("welcome", subbedCheck)) {
         shoutoutCommand(lowermessage);
       } else {
-        console.log("Shoutout Not Enabled or User Not Subscribed");
+        logger.info("Shoutout Not Enabled or User Not Subscribed");
       }
       break;
 
@@ -75,7 +76,7 @@ function chatMessageHandler(wsdata: WSData): void {
       if (isFeatureEnabled("choon", subbedCheck)) {
         choonCommand(username);
       } else {
-        console.log("Choon Command Not Enabled or User Not Subscribed");
+        logger.info("Choon Command Not Enabled or User Not Subscribed");
       }
       break;
 
@@ -88,7 +89,7 @@ function chatMessageHandler(wsdata: WSData): void {
         }
         cheersCommand(username, targetuser);
       } else {
-        console.log("Cheers Command Not Enabled or User Not Subscribed");
+        logger.info("Cheers Command Not Enabled or User Not Subscribed");
       }
       break;
 
@@ -96,7 +97,7 @@ function chatMessageHandler(wsdata: WSData): void {
       if (settings.debug) {
         animations.hypetrainprogression(userId);
       } else {
-        console.log("Join Train Command Not Enabled");
+        logger.info("Join Train Command Not Enabled");
       }
       break;
 
@@ -104,7 +105,7 @@ function chatMessageHandler(wsdata: WSData): void {
       if (isFeatureEnabled("emoterain", subbedCheck)) {
         emoteRainHandler(message, emotes, username);
       } else {
-        console.log("EmoteRain Not Enabled or User Not Subscribed");
+        logger.info("EmoteRain Not Enabled or User Not Subscribed");
       }
       break;
 
@@ -112,7 +113,7 @@ function chatMessageHandler(wsdata: WSData): void {
       if (isFeatureEnabled("kappagen", subbedCheck)) {
         kappagenHandler(lowermessage, emotes, username);
       } else {
-        console.log("KappaGen Not Enabled or User Not Subscribed");
+        logger.info("KappaGen Not Enabled or User Not Subscribed");
       }
       break;
     case lowermessage.includes("!hypetrainpreview"):
@@ -125,7 +126,7 @@ function chatMessageHandler(wsdata: WSData): void {
       ) {
         animations.hypetrainpreview(username);
       } else {
-        console.log("KappaGen Not Enabled or User Not Subscribed");
+        logger.info("KappaGen Not Enabled or User Not Subscribed");
       }
       break;
 
@@ -179,6 +180,8 @@ async function kappagenHandler(lowermessage: string, images: string[], username:
     const shapeIndex = Math.round(helpers.Randomizer(0, shapeAnimations.length - 1));
     animation = shapeAnimations[shapeIndex];
   }
+
+  logger.info(
     `Rolled: ${rAnimation}. Running: ${animation} with ${count} emote(s) every ${interval} ms`
   );
 
@@ -192,14 +195,14 @@ async function kappagenHandler(lowermessage: string, images: string[], username:
         const avatar = await helpers.getTwitchAvatar(username);
         animations.snake(images, count, interval, avatar);
       } catch (error) {
-        console.error("Error getting avatar for snake:", error);
+        logger.error(`Error getting avatar for snake: ${(error as Error).message}`);
         animations.snake(images, count, interval);
       }
     } else {
       animations[animation](images, count, interval);
     }
   } else {
-    console.log("Animation Function Mapping Failed");
+    logger.info("Animation Function Mapping Failed");
   }
 }
 
@@ -210,7 +213,7 @@ async function emoteRainHandler(message: string, images: string[], username: str
   const matches = regexp.exec(lowermessage);
   if (matches && matches[1]) {
     let animation = matches[1];
-    console.log("Running emoteRain: " + animation);
+    logger.info("Running emoteRain: " + animation);
     if (animation == "text") {
       //Set Default Text if no text supplied
       let text = "Hype";
@@ -251,14 +254,14 @@ async function emoteRainHandler(message: string, images: string[], username: str
           const avatar = await helpers.getTwitchAvatar(username);
           animations.snake(images, count, interval, avatar);
         } catch (error) {
-          console.error("Error getting avatar for snake:", error);
+          logger.error(`Error getting avatar for snake: ${(error as Error).message}`);
           animations.snake(images, count, interval);
         }
       } else {
         animations[finalAnimation](images, count, interval);
       }
     } else {
-      console.log(`Animation ${animation} Not Found in animationMap`);
+      logger.info(`Animation ${animation} Not Found in animationMap`);
     }
   }
 }
@@ -289,7 +292,7 @@ async function firstWordsHander(wsdata: WSData): Promise<void> {
   const subbedCheck =
     !settings.subOnly || (settings.subOnly && wsdata.data?.message?.subscriber);
   if (!isFeatureEnabled("firstwords", subbedCheck)) {
-    console.log("First Words Not Enabled");
+    logger.info("First Words Detected but Not Enabled");
     return;
   }
 
@@ -299,7 +302,7 @@ async function firstWordsHander(wsdata: WSData): Promise<void> {
     const avatar = await helpers.getTwitchAvatar(username);
     animations.rain([avatar], settings.defaultEmotes, 50);
   } catch (error) {
-    console.error("Error getting avatar:", error);
+    logger.error(`Error getting avatar: ${(error as Error).message}`);
   }
 }
 
@@ -307,7 +310,7 @@ async function cheersCommand(
   username: string,
   targetuser?: string
 ): Promise<void> {
-  console.log("Cheers: " + username + (targetuser || ""));
+  logger.info("Cheers: " + username + (targetuser || ""));
 
   try {
     const images = [
@@ -325,7 +328,7 @@ async function cheersCommand(
     );
     delayedFunction();
   } catch (error) {
-    console.error("Error in cheers command:", error);
+    logger.error(`Error in cheers command: ${(error as Error).message}`);
   }
 }
 
@@ -334,7 +337,7 @@ async function choonCommand(username: string): Promise<void> {
     const avatar = await helpers.getTwitchAvatar(username);
     animations.choon([avatar]);
   } catch (error) {
-    console.error("Error getting avatar:", error);
+    logger.error(`Error getting avatar: ${(error as Error).message}`);
   }
 }
 
@@ -343,7 +346,7 @@ async function lurkCommand(username: string): Promise<void> {
     const avatar = await helpers.getTwitchAvatar(username);
     animations.lurking(avatar, 3);
   } catch (error) {
-    console.error("Error getting avatar:", error);
+    logger.error(`Error getting avatar: ${(error as Error).message}`);
   }
 }
 
@@ -354,13 +357,13 @@ async function shoutoutCommand(lowermessage: string): Promise<void> {
   if (!matches || !matches[1]) return;
 
   const sousername = matches[1];
-  console.log(sousername);
+  logger.info("Shoutout Called with username: " + sousername);
 
   try {
     const avatar = await helpers.getTwitchAvatar(sousername);
     animations.rain([avatar], settings.defaultEmotes, 50);
   } catch (error) {
-    console.error("Error getting avatar:", error);
+    logger.error(`Error getting avatar for shoutout: ${(error as Error).message}`);
   }
 }
 

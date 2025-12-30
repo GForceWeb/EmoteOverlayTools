@@ -1,26 +1,9 @@
 import type { Express, Request, Response } from "express";
+import { log } from "./logger";
 
 // Avatar cache: stores { url: string, cachedAt: number } keyed by normalized username/id
 const avatarCache = new Map<string, { url: string; cachedAt: number }>();
 const AVATAR_CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6 hours in milliseconds
-
-// Logger callback type - will be set by main.ts
-type LogCallback = (type: "info" | "warning" | "error", message: string) => void;
-let logCallback: LogCallback = () => {}; // Default no-op
-
-export function setLogCallback(callback: LogCallback): void {
-  logCallback = callback;
-}
-
-function log(type: "info" | "warning" | "error", message: string): void {
-  logCallback(type, message);
-  // Also log to console for debugging
-  if (type === "error") {
-    console.error(`[AvatarCache] ${message}`);
-  } else {
-    console.log(`[AvatarCache] ${message}`);
-  }
-}
 
 function isAvatarCacheValid(cachedAt: number): boolean {
   return Date.now() - cachedAt < AVATAR_CACHE_TTL_MS;
@@ -87,4 +70,3 @@ export function getCacheStats(): { size: number; entries: string[] } {
     entries: Array.from(avatarCache.keys()),
   };
 }
-

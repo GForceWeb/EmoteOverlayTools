@@ -100,11 +100,4 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.on("updater:downloaded", sub);
     return () => ipcRenderer.removeListener("updater:downloaded", sub);
   },
-
-  // Listen for log messages from main process
-  onMainLog: (cb: (log: { type: "info" | "warning" | "error"; message: string; timestamp: string }) => void) => {
-    const sub = (_e: any, log: any) => cb(log);
-    ipcRenderer.on("main-log", sub);
-    return () => ipcRenderer.removeListener("main-log", sub);
-  },
 });

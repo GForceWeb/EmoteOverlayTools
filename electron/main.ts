@@ -5,7 +5,8 @@ import express from "express";
 import { WebSocketServer } from "ws";
 import * as http from "http";
 import { defaultConfig } from "../src/shared/defaultConfig";
-import { setupAvatarCacheEndpoint, setLogCallback } from "./avatar-cache";
+import { setupAvatarCacheEndpoint } from "./avatar-cache";
+import { writeLog, getLogs, getAvailableDates, cleanOldLogs, log } from "./logger";
 
 // Keep a global reference of the mainWindow object
 let mainWindow: BrowserWindow | null = null;
@@ -20,16 +21,6 @@ let currentSettings = defaultConfig;
 
 // Updater state
 let hasAttemptedInitialUpdateCheck = false;
-
-// Send log entry to renderer process for display in System Logs
-function sendLogToRenderer(type: "info" | "warning" | "error", message: string): void {
-  if (mainWindow) {
-    mainWindow.webContents.send("main-log", { type, message, timestamp: new Date().toISOString() });
-  }
-}
-
-// Set up the avatar cache log callback to send logs to renderer
-setLogCallback(sendLogToRenderer);
 
 async function getAutoUpdater(): Promise<any | null> {
   try {
@@ -141,6 +132,65 @@ function setupExpressServer() {
 
   // Add API endpoint to save settings
   expressApp.use(express.json()); // Add this to parse JSON request bodies
+
+  // Logging API endpoints
+  expressApp.post("/api/log", (req: express.Request, res: express.Response) => {
+    try {
+      const { type, message, source } = req.body;
+      
+      // Validate required fields
+      if (!type || !message || !source) {
+        res.status(400).json({ error: "Missing required fields: type, message, source" });
+        return;
+      }
+      
+      // Validate type
+      if (!["info", "warning", "error"].includes(type)) {
+        res.status(400).json({ error: "Invalid type. Must be: info, warning, or error" });
+        return;
+      }
+      
+      // Validate source
+      if (!["main", "overlay", "admin"].includes(source)) {
+        res.status(400).json({ error: "Invalid source. Must be: main, overlay, or admin" });
+        return;
+      }
+      
+      writeLog(type, message, source);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error writing log:", error);
+      res.status(500).json({ error: "Failed to write log" });
+    }
+  });
+
+  expressApp.get("/api/logs", (req: express.Request, res: express.Response) => {
+    try {
+      const dates = getAvailableDates();
+      res.json({ dates });
+    } catch (error) {
+      console.error("Error getting log dates:", error);
+      res.status(500).json({ error: "Failed to get log dates" });
+    }
+  });
+
+  expressApp.get("/api/logs/:date", (req: express.Request, res: express.Response) => {
+    try {
+      const { date } = req.params;
+      
+      // Basic date format validation (YYYY-MM-DD)
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+        res.status(400).json({ error: "Invalid date format. Use YYYY-MM-DD" });
+        return;
+      }
+      
+      const logs = getLogs(date);
+      res.json({ logs });
+    } catch (error) {
+      console.error("Error getting logs:", error);
+      res.status(500).json({ error: "Failed to get logs" });
+    }
+  });
 
   // Start the server
   server.listen(overlayServerPort, () => {
@@ -338,6 +388,11 @@ app.whenReady().then(() => {
       console.warn('Failed to set AppUserModelId:', err);
     }
   }
+  
+  // Clean up old log files on startup
+  cleanOldLogs();
+  log("info", "Application started");
+  
   setupExpressServer();
   setupWebSocketServer();
   createWindow();

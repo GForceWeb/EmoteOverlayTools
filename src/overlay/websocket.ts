@@ -3,6 +3,7 @@ import animations from "./animations.ts";
 import handlers from "./handlers.ts";
 import { WSData } from "../shared/types.ts";
 import OverlaySettings from "./settings.ts";
+import logger from "./lib/logger.ts";
 
 const settings = OverlaySettings.settings;
 
@@ -43,7 +44,7 @@ function connectws(): void {
   isElectron = checkElectron();
 
   if (isElectron) {
-    console.log("Running in Electron environment, using IPC for messages");
+    logger.info("Running in Electron environment, using IPC for messages");
     setupElectronCommunication();
 
     window.addEventListener("message", handleElectronMessage);
@@ -271,7 +272,7 @@ function handleMessage(msg: string): void {
       return;
     }
   } catch (error) {
-    console.error("Error processing WebSocket message:", error);
+    logger.error(`Error processing WebSocket message: ${(error as Error).message}`);
   }
 }
 

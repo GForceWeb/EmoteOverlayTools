@@ -108,7 +108,8 @@ export interface AnimationModule {
 }
 
 export interface LogEntry {
-  timestamp: Date;
+  timestamp: string;
   type: "info" | "warning" | "error";
+  source: "main" | "overlay" | "admin";
   message: string;
 }
