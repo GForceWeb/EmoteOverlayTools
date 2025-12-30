@@ -1,35 +1,18 @@
 // Common Type Definitions
 
 export interface AnimationSettings {
-  enabled: boolean;
+  enabled: boolean;           // Legacy field for backward compatibility
+  enabledManual: boolean;     // For !er command (manual trigger)
+  enabledKappagen: boolean;   // For !k kappagen random pool
   count?: number;
   interval?: number;
   text?: string;
 }
 
+// Use index signature to allow dynamic animation keys
+// This allows new animations to be added without type updates
 export interface AnimationList {
-  rain: AnimationSettings;
-  rise: AnimationSettings;
-  explode: AnimationSettings;
-  volcano: AnimationSettings;
-  firework: AnimationSettings;
-  rightwave: AnimationSettings;
-  leftwave: AnimationSettings;
-  carousel: AnimationSettings;
-  spiral: AnimationSettings;
-  comets: AnimationSettings;
-  dvd: AnimationSettings;
-  text: AnimationSettings;
-  cyclone: AnimationSettings;
-  tetris: AnimationSettings;
-  bounce: AnimationSettings;
-  cube: AnimationSettings;
-  fade: AnimationSettings;
-  dodecahedron: AnimationSettings;
-  // invaders: AnimationSettings;
-  traffic: AnimationSettings;
-  snake: AnimationSettings;
-  solitaire: AnimationSettings;
+  [key: string]: AnimationSettings;
 }
 
 export interface FeatureSettings {

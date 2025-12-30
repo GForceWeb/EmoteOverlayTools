@@ -24,7 +24,7 @@ import { PreviewPane } from "@/admin/components/preview-pane";
 import { ConnectionStatus } from "@/admin/components/connection-status";
 import { OverlayUrl } from "@/admin/components/overlay-url";
 
-import { defaultConfig } from "@/shared/defaultConfig";
+import { defaultConfig, deepMergeSettings } from "@/shared/defaultConfig";
 
 export function SettingsDashboard() {
   const [settings, setSettings] = useState<Settings>(defaultConfig);
@@ -58,7 +58,9 @@ export function SettingsDashboard() {
         }
 
         const data = await response.json();
-        setSettings(data);
+        // Deep merge with defaults to ensure all animations are present
+        const mergedSettings = deepMergeSettings(data, defaultConfig);
+        setSettings(mergedSettings);
         sendLog("info", "Settings loaded from config file");
       } catch (error) {
         console.error("Failed to load settings:", error);

@@ -1,5 +1,5 @@
 import { Settings } from "../shared/types";
-import { defaultConfig } from "../shared/defaultConfig";
+import { defaultConfig, deepMergeSettings } from "../shared/defaultConfig";
 import logger from "./lib/logger";
 
 class OverlaySettings {
@@ -50,9 +50,9 @@ class OverlaySettings {
     return OverlaySettings.instance;
   }
 
-  // Update settings with new values
+  // Update settings with new values, using deep merge for animations
   public updateSettings(newSettings: Partial<Settings>): void {
-    this.settings = { ...this.settings, ...newSettings };
+    this.settings = deepMergeSettings(newSettings, this.settings);
   }
 
   // Method to fetch settings from server

@@ -4,7 +4,7 @@ import fs from "fs";
 import express from "express";
 import { WebSocketServer } from "ws";
 import * as http from "http";
-import { defaultConfig } from "../src/shared/defaultConfig";
+import { defaultConfig, deepMergeSettings } from "../src/shared/defaultConfig";
 import { setupAvatarCacheEndpoint } from "./avatar-cache";
 import { writeLog, getLogs, getAvailableDates, cleanOldLogs, log } from "./logger";
 
@@ -72,19 +72,25 @@ function getWindowIconPath(): string | undefined {
   return undefined;
 }
 
-// Load settings on startup
+// Load settings on startup with deep merge to ensure new animations are added
 try {
   if (!fs.existsSync(settingsPath)) {
-    // Create default settings file if it doesn't exist from DEFAULT_SETTINGS
-
+    // Create default settings file if it doesn't exist
     fs.writeFileSync(settingsPath, JSON.stringify(defaultConfig, null, 2));
     console.log("Created default settings file at:", settingsPath);
-  }
-  if (fs.existsSync(settingsPath)) {
-    currentSettings = JSON.parse(fs.readFileSync(settingsPath, "utf8"));
+    currentSettings = defaultConfig;
+  } else {
+    // Load user settings and deep merge with defaults to add any new animations
+    const userSettings = JSON.parse(fs.readFileSync(settingsPath, "utf8"));
+    currentSettings = deepMergeSettings(userSettings, defaultConfig);
+    
+    // Save the merged settings back to disk so new animations are persisted
+    fs.writeFileSync(settingsPath, JSON.stringify(currentSettings, null, 2));
+    console.log("Settings loaded and merged with defaults");
   }
 } catch (error) {
   console.error("Failed to load settings:", error);
+  currentSettings = defaultConfig;
 }
 
 // Set up the Express server for serving the animation content
@@ -110,18 +116,20 @@ function setupExpressServer() {
     (req: express.Request, res: express.Response) => {
       try {
         if (fs.existsSync(settingsPath)) {
-          const fileSettings = fs.readFileSync(settingsPath, "utf8");
+          // Load and merge with defaults to ensure new animations are included
+          const userSettings = JSON.parse(fs.readFileSync(settingsPath, "utf8"));
+          const mergedSettings = deepMergeSettings(userSettings, defaultConfig);
           res.setHeader("Content-Type", "application/json");
-          res.send(fileSettings); // Send the raw file contents
+          res.json(mergedSettings);
         } else {
-          // If file doesn't exist yet, fall back to current settings
-          res.json(currentSettings);
+          // If file doesn't exist yet, return default config
+          res.json(defaultConfig);
         }
       } catch (error) {
         console.error("Error reading settings file:", error);
         res.status(500).json({
           error: "Failed to read settings file",
-          fallback: currentSettings,
+          fallback: defaultConfig,
         });
       }
     }
@@ -452,8 +460,8 @@ ipcMain.handle("get-obs-url", () => {
 
 ipcMain.handle("save-settings", async (event, newSettings) => {
   try {
-    // Merge new settings with default config to ensure new fields aren't lost
-    const mergedSettings = { ...defaultConfig, ...newSettings };
+    // Deep merge to ensure new animations from registry are preserved
+    const mergedSettings = deepMergeSettings(newSettings, defaultConfig);
     fs.writeFileSync(settingsPath, JSON.stringify(mergedSettings, null, 2));
     currentSettings = mergedSettings;
     return { success: true };

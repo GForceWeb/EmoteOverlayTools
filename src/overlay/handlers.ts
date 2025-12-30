@@ -1,51 +1,181 @@
 import { globalVars } from "./config.ts";
-import { WSData } from "../shared/types.ts";
+import { WSData, AnimationSettings } from "../shared/types.ts";
 import OverlaySettings from "./settings";
-const settings = OverlaySettings.settings;
+import {
+  animationRegistry,
+  getAnimationDefinition,
+  getGroupChildren,
+  AnimationDefinition,
+} from "../shared/animationRegistry.ts";
 
 import helpers from "./helpers.ts";
 import animations from "./animations.ts";
 import logger from "./lib/logger.ts";
 
+// Get settings reference (will be updated dynamically)
+function getSettings() {
+  return OverlaySettings.settings;
+}
+
 // Variable to track if bot chat is enabled
 let Botchat: boolean = false;
 
-let ani = settings.animations;
-let animationMap: [string, number, number][] = [
-  [
-    "rain", // FunctionName: The name of the animation function to be called.
-    ani.rain.count ?? 50, // DefaultEmotes: The default number of emotes for the animation.
-    ani.rain.interval ?? 50, // DefaultInterval: The default interval (in milliseconds) between emotes for the animation.
-  ],
-  ["rise", ani.rise.count ?? 100, ani.rise.interval ?? 50],
-  ["explode", ani.explode.count ?? 100, ani.explode.interval ?? 20],
-  ["volcano", ani.volcano.count ?? 100, ani.volcano.interval ?? 20],
-  ["firework", ani.firework.count ?? 100, ani.firework.interval ?? 20],
-  ["rightwave", ani.rightwave.count ?? 100, ani.rightwave.interval ?? 20],
-  ["leftwave", ani.leftwave.count ?? 100, ani.leftwave.interval ?? 20],
-  ["carousel", ani.carousel.count ?? 100, ani.carousel.interval ?? 150],
-  ["spiral", ani.spiral.count ?? 100, ani.spiral.interval ?? 170],
-  ["comets", ani.comets.count ?? 100, ani.comets.interval ?? 50],
-  ["dvd", ani.dvd.count ?? 8, ani.dvd.interval ?? 50],
-  ["text", ani.text.count ?? 1, ani.text.interval ?? 25],
-  ["cyclone", ani.cyclone.count ?? 100, ani.cyclone.interval ?? 30],
-  ["tetris", ani.tetris.count ?? 50, ani.tetris.interval ?? 40],
-  ["shapes", ani.cube.count ?? 100, ani.cube.interval ?? 50], // Randomly picks between cube and dodecahedron
-  ["traffic", ani.traffic.count ?? 100, ani.traffic.interval ?? 250],
-  ["snake", ani.snake.count ?? 20, ani.snake.interval ?? 150],
-  ["solitaire", ani.solitaire.count ?? 50, ani.solitaire.interval ?? 50]
-];
+/**
+ * Check if an animation is enabled for manual execution (!er)
+ */
+function isAnimationEnabledManual(animationName: string): boolean {
+  const settings = getSettings();
+  const animSettings = settings.animations[animationName];
+  
+  if (!animSettings) {
+    // Animation not in settings, check registry for default
+    const def = getAnimationDefinition(animationName);
+    return def?.defaultEnabledManual ?? false;
+  }
+  
+  // If enableAllAnimations is on, all animations are enabled
+  if (settings.enableAllAnimations) {
+    return true;
+  }
+  
+  // Check the enabledManual flag, falling back to legacy enabled flag
+  return animSettings.enabledManual ?? animSettings.enabled ?? false;
+}
 
-// Shape animations that "shapes" can randomly select from
-const shapeAnimations = ["cube", "dodecahedron"];
+/**
+ * Check if an animation is enabled for the kappagen random pool (!k)
+ */
+function isAnimationEnabledKappagen(animationName: string): boolean {
+  const settings = getSettings();
+  const animSettings = settings.animations[animationName];
+  
+  if (!animSettings) {
+    // Animation not in settings, check registry for default
+    const def = getAnimationDefinition(animationName);
+    return def?.defaultEnabledKappagen ?? false;
+  }
+  
+  // If enableAllAnimations is on, all animations are enabled
+  if (settings.enableAllAnimations) {
+    return true;
+  }
+  
+  // Check the enabledKappagen flag, falling back to legacy enabled flag
+  return animSettings.enabledKappagen ?? animSettings.enabled ?? false;
+}
+
+/**
+ * Get animation settings (count, interval) for a given animation
+ */
+function getAnimationParams(animationName: string): { count: number; interval: number } {
+  const settings = getSettings();
+  const animSettings = settings.animations[animationName];
+  const def = getAnimationDefinition(animationName);
+  
+  return {
+    count: animSettings?.count ?? def?.defaultCount ?? 50,
+    interval: animSettings?.interval ?? def?.defaultInterval ?? 50,
+  };
+}
+
+/**
+ * Build the pool of animations enabled for kappagen random selection (!k)
+ * This filters based on enabledKappagen and excludes group children
+ * (groups handle their own child selection)
+ */
+function buildRandomAnimationPool(): AnimationDefinition[] {
+  const pool: AnimationDefinition[] = [];
+  
+  for (const [name, def] of Object.entries(animationRegistry)) {
+    // Skip group children - they're selected through their parent group
+    if (def.group) {
+      continue;
+    }
+    
+    // Check if enabled for random pool
+    if (isAnimationEnabledKappagen(name)) {
+      // For groups, check if at least one child is enabled
+      if (def.isGroup && def.children) {
+        const enabledChildren = def.children.filter((childName) =>
+          isAnimationEnabledKappagen(childName)
+        );
+        if (enabledChildren.length > 0) {
+          pool.push(def);
+        }
+      } else {
+        pool.push(def);
+      }
+    }
+  }
+  
+  return pool;
+}
+
+/**
+ * Select a random child animation from a group
+ */
+function selectGroupChild(groupDef: AnimationDefinition): string | null {
+  if (!groupDef.children || groupDef.children.length === 0) {
+    return null;
+  }
+  
+  // Filter to only enabled children
+  const enabledChildren = groupDef.children.filter((childName) =>
+    isAnimationEnabledKappagen(childName)
+  );
+  
+  if (enabledChildren.length === 0) {
+    return null;
+  }
+  
+  const index = Math.floor(Math.random() * enabledChildren.length);
+  return enabledChildren[index];
+}
+
+/**
+ * Execute an animation with special handling for requirements
+ */
+async function executeAnimation(
+  animationName: string,
+  images: string[],
+  count: number,
+  interval: number,
+  username: string,
+  text?: string
+): Promise<void> {
+  const def = getAnimationDefinition(animationName);
+  
+  if (!animations.hasOwnProperty(animationName) || typeof animations[animationName] !== "function") {
+    logger.error(`Animation function not found: ${animationName}`);
+    return;
+  }
+  
+  // Handle special requirements
+  if (def?.requiresAvatar) {
+    try {
+      const avatar = await helpers.getTwitchAvatar(username);
+      animations[animationName](images, count, interval, avatar);
+    } catch (error) {
+      logger.error(`Error getting avatar for ${animationName}: ${(error as Error).message}`);
+      animations[animationName](images, count, interval);
+    }
+  } else if (def?.requiresText) {
+    const displayText = text || getSettings().animations[animationName]?.text || "Hype";
+    animations[animationName](images, displayText, interval);
+  } else {
+    animations[animationName](images, count, interval);
+  }
+}
 
 function isFeatureEnabled(feature: string, subbedCheck: boolean): boolean {
+  const settings = getSettings();
   return (
-    (settings.enableAllFeatures || settings.features[feature]) && subbedCheck
+    (settings.enableAllFeatures || settings.features[feature]?.enabled) && subbedCheck
   );
 }
 
 function chatMessageHandler(wsdata: WSData): void {
+  const settings = getSettings();
   const message = wsdata.data?.message?.message || "";
   const lowermessage = message.toLowerCase();
   const username = wsdata.data?.message?.username || "";
@@ -157,117 +287,123 @@ function getEmoteImages(wsdata: WSData): string[] {
   return images;
 }
 
-function checkCountMaximum(count): number {
+function checkCountMaximum(count: number): number {
+  const settings = getSettings();
   if (count > settings.maxEmotes) {
     count = settings.maxEmotes;
   }
   return count;
 }
 
+/**
+ * Handle !k (kappagen) command - picks a random enabled animation
+ */
 async function kappagenHandler(lowermessage: string, images: string[], username: string): Promise<void> {
-  let rAnimation = Math.round(helpers.Randomizer(0, animationMap.length - 1));
-  let count =
-    helpers.getCommandValue(lowermessage, "count") ??
-    animationMap[rAnimation][1];
-  count = checkCountMaximum(count);
-  let interval =
-    helpers.getCommandValue(lowermessage, "interval") ??
-    animationMap[rAnimation][2];
-  let animation = animationMap[rAnimation][0];
-
-  // If "shapes" was selected, randomly pick between available shape animations
-  if (animation === "shapes") {
-    const shapeIndex = Math.round(helpers.Randomizer(0, shapeAnimations.length - 1));
-    animation = shapeAnimations[shapeIndex];
+  // Build pool of enabled animations
+  const pool = buildRandomAnimationPool();
+  
+  if (pool.length === 0) {
+    logger.info("No animations enabled for random pool");
+    return;
   }
-
-  logger.info(
-    `Rolled: ${rAnimation}. Running: ${animation} with ${count} emote(s) every ${interval} ms`
-  );
-
-  if (
-    animations.hasOwnProperty(animation) &&
-    typeof animations[animation] === "function"
-  ) {
-    // Special handling for snake animation to use user's avatar as head
-    if (animation === "snake") {
-      try {
-        const avatar = await helpers.getTwitchAvatar(username);
-        animations.snake(images, count, interval, avatar);
-      } catch (error) {
-        logger.error(`Error getting avatar for snake: ${(error as Error).message}`);
-        animations.snake(images, count, interval);
-      }
-    } else {
-      animations[animation](images, count, interval);
-    }
-  } else {
-    logger.info("Animation Function Mapping Failed");
-  }
-}
-
-async function emoteRainHandler(message: string, images: string[], username: string): Promise<void> {
-  //Get !er animation with regex from lowermessage
-  const lowermessage = message.toLowerCase();
-  const regexp = /!er (\w*)/gm;
-  const matches = regexp.exec(lowermessage);
-  if (matches && matches[1]) {
-    let animation = matches[1];
-    logger.info("Running emoteRain: " + animation);
-    if (animation == "text") {
-      //Set Default Text if no text supplied
-      let text = "Hype";
-      const textEntry = animationMap.find((item) => item[0] === "text");
-      let interval =
-        helpers.getCommandValue(lowermessage, "interval") ??
-        (textEntry ? textEntry[2] : 25);
-      //Get Text from Command
-      const textRegexp = /text (\S*)/i;
-      const textMatches = textRegexp.exec(message);
-      if (textMatches && textMatches[1]) {
-        text = textMatches[1];
-      }
-
-      animations.text(images, text, interval);
-
+  
+  // Pick a random animation from the pool
+  const randomIndex = Math.floor(Math.random() * pool.length);
+  let selectedDef = pool[randomIndex];
+  let animationName = selectedDef.name;
+  
+  // If it's a group, select a child
+  if (selectedDef.isGroup) {
+    const childName = selectGroupChild(selectedDef);
+    if (!childName) {
+      logger.info(`No enabled children for group: ${animationName}`);
       return;
     }
-    //Check if animation is in the list of animationMap
-    let animationCheck = animationMap.find((item) => item[0] == animation);
-    if (animationCheck) {
-      let count =
-        helpers.getCommandValue(lowermessage, "count") ?? animationCheck[1];
-      count = checkCountMaximum(count);
-      let interval =
-        helpers.getCommandValue(lowermessage, "interval") ?? animationCheck[2];
-      
-      // If "shapes" was selected via !er, randomly pick between available shape animations
-      let finalAnimation = animation;
-      if (animation === "shapes") {
-        const shapeIndex = Math.round(helpers.Randomizer(0, shapeAnimations.length - 1));
-        finalAnimation = shapeAnimations[shapeIndex];
-      }
-      
-      // Special handling for snake animation to use user's avatar as head
-      if (finalAnimation === "snake") {
-        try {
-          const avatar = await helpers.getTwitchAvatar(username);
-          animations.snake(images, count, interval, avatar);
-        } catch (error) {
-          logger.error(`Error getting avatar for snake: ${(error as Error).message}`);
-          animations.snake(images, count, interval);
-        }
-      } else {
-        animations[finalAnimation](images, count, interval);
-      }
+    animationName = childName;
+    selectedDef = getAnimationDefinition(childName) || selectedDef;
+  }
+  
+  // Get count and interval from command or settings
+  const params = getAnimationParams(animationName);
+  let count = helpers.getCommandValue(lowermessage, "count") ?? params.count;
+  count = checkCountMaximum(count);
+  let interval = helpers.getCommandValue(lowermessage, "interval") ?? params.interval;
+  
+  logger.info(
+    `Rolled: ${randomIndex}. Running: ${animationName} with ${count} emote(s) every ${interval} ms`
+  );
+  
+  await executeAnimation(animationName, images, count, interval, username);
+}
+
+/**
+ * Handle !er (emote rain) command - runs a specific animation
+ */
+async function emoteRainHandler(message: string, images: string[], username: string): Promise<void> {
+  const lowermessage = message.toLowerCase();
+  const regexp = /!er (\w+)/gm;
+  const matches = regexp.exec(lowermessage);
+  
+  if (!matches || !matches[1]) {
+    logger.info("No animation specified for !er");
+    return;
+  }
+  
+  let animationName = matches[1];
+  logger.info("Running emoteRain: " + animationName);
+  
+  // Check if animation exists in registry
+  let def = getAnimationDefinition(animationName);
+  
+  if (!def) {
+    // Try to find if it's a direct animation function that exists
+    if (animations.hasOwnProperty(animationName) && typeof animations[animationName] === "function") {
+      // Allow direct animation calls even if not in registry
+      logger.info(`Animation ${animationName} found as direct function`);
     } else {
-      logger.info(`Animation ${animation} Not Found in animationMap`);
+      logger.info(`Animation ${animationName} not found`);
+      return;
     }
   }
+  
+  // Check if animation is enabled for manual execution
+  if (!isAnimationEnabledManual(animationName)) {
+    logger.info(`Animation ${animationName} is disabled for manual execution`);
+    return;
+  }
+  
+  // If it's a group, select a random enabled child
+  if (def?.isGroup) {
+    const childName = selectGroupChild(def);
+    if (!childName) {
+      logger.info(`No enabled children for group: ${animationName}`);
+      return;
+    }
+    animationName = childName;
+    def = getAnimationDefinition(childName);
+  }
+  
+  // Get parameters
+  const params = getAnimationParams(animationName);
+  let count = helpers.getCommandValue(lowermessage, "count") ?? params.count;
+  count = checkCountMaximum(count);
+  let interval = helpers.getCommandValue(lowermessage, "interval") ?? params.interval;
+  
+  // Extract text for text animation
+  let text: string | undefined;
+  if (def?.requiresText) {
+    const textRegexp = /text\s+(\S+)/i;
+    const textMatches = textRegexp.exec(message);
+    if (textMatches && textMatches[1]) {
+      text = textMatches[1];
+    }
+  }
+  
+  await executeAnimation(animationName, images, count, interval, username, text);
 }
 
 //Normal emotes animations
-function emoteMessageHandler(emotes): void {
+function emoteMessageHandler(emotes: string[]): void {
   let emoteCount = emotes.length;
   let randomAnimation = Math.round(helpers.Randomizer(1, 4));
   switch (randomAnimation) {
@@ -289,6 +425,7 @@ function emoteMessageHandler(emotes): void {
 }
 
 async function firstWordsHander(wsdata: WSData): Promise<void> {
+  const settings = getSettings();
   const subbedCheck =
     !settings.subOnly || (settings.subOnly && wsdata.data?.message?.subscriber);
   if (!isFeatureEnabled("firstwords", subbedCheck)) {
@@ -310,6 +447,7 @@ async function cheersCommand(
   username: string,
   targetuser?: string
 ): Promise<void> {
+  const settings = getSettings();
   logger.info("Cheers: " + username + (targetuser || ""));
 
   try {
@@ -351,6 +489,7 @@ async function lurkCommand(username: string): Promise<void> {
 }
 
 async function shoutoutCommand(lowermessage: string): Promise<void> {
+  const settings = getSettings();
   // ALLOW - And other word symbols
   let regexp = /\@(.*)/;
   let matches = lowermessage.match(regexp);
