@@ -17,6 +17,7 @@
         "cross-env": "^7.0.3",
         "cypress": "^13.6.0",
         "cypress-wait-until": "^2.0.1",
+        "dotenv-cli": "^11.0.0",
         "electron": "^28.1.0",
         "electron-builder": "^24.9.1",
         "nodemon": "^3.0.2",
@@ -37,7 +38,7 @@
         "electron:start": "nodemon --exec \"electron .\" --ext ts,js,cjs --watch dist/electron",
         "electron:build": "tsc -p tsconfig.json && vite build && electron-builder",
         "electron:preview": "npm run build && electron .",
-        "electron:release": "tsc -p tsconfig.json && vite build && electron-builder --publish always"
+        "electron:release": "tsc -p tsconfig.json && vite build && dotenv -e .env -- electron-builder --publish always"
     },
     "dependencies": {
         "@radix-ui/react-accordion": "^1.2.3",
