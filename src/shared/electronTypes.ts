@@ -23,7 +23,7 @@ interface ElectronAPI {
   getVersion: () => Promise<string>;
 
   // Updater
-  updaterCheck: () => Promise<{ success: boolean; error?: string }>;
+  updaterCheck: (options?: { silent?: boolean }) => Promise<{ success: boolean; error?: string }>;
   updaterDownload: () => Promise<{ success: boolean; file?: string; error?: string }>;
   updaterQuitAndInstall: () => Promise<{ success: boolean; error?: string }>;
   updaterSimulate: () => Promise<{ success: boolean; error?: string }>;

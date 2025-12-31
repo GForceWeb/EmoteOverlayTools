@@ -1,0 +1,4 @@
+provider: github
+owner: gforceweb
+repo: EmoteOverlayTools
+updaterCacheDirName: emote-overlay-tools
