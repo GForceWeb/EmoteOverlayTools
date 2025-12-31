@@ -11,7 +11,7 @@ if (container) {
   const root = createRoot(container);
   root.render( 
   <ThemeProvider defaultTheme="dark" forcedTheme="dark">
-    <main className="min-h-screen bg-background p-4 md:p-8 dark flex flex-col">
+    <main className="min-h-screen bg-background p-4 md:p-8 pb-24 dark flex flex-col">
       <div className="flex-1">
         <SettingsDashboard />
       </div>

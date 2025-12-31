@@ -321,6 +321,7 @@ function createWindow() {
   const browserWindowOptions: Electron.BrowserWindowConstructorOptions = {
     width: 1200,
     height: 800,
+    autoHideMenuBar: process.platform !== "darwin",
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -333,6 +334,13 @@ function createWindow() {
   }
 
   mainWindow = new BrowserWindow(browserWindowOptions);
+
+  // Hide menu bar (File/Edit/View/...) for end users on Windows/Linux.
+  // Note: macOS uses the system menu bar; we leave it alone.
+  if (process.platform !== "darwin") {
+    mainWindow.setAutoHideMenuBar(true);
+    mainWindow.setMenuBarVisibility(false);
+  }
 
   // Load the admin interface in development or production
   if (process.env.NODE_ENV === "development") {

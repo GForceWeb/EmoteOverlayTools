@@ -33,7 +33,7 @@ const DialogContent = React.forwardRef<
     hideCloseButton?: boolean;
   }
 >(({ className, children, hideCloseButton = false, ...props }, ref) => (
-  <DialogPortal>
+  <DialogPortal container={typeof document !== "undefined" ? document.getElementById("root") : null}>
     <DialogOverlay />
     <DialogPrimitive.Content
       ref={ref}
