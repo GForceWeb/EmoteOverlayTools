@@ -112,24 +112,34 @@ function buildRandomAnimationPool(): AnimationDefinition[] {
 }
 
 /**
- * Select a random child animation from a group
+ * Select a random enabled child animation from a group using the provided predicate.
  */
-function selectGroupChild(groupDef: AnimationDefinition): string | null {
+function selectEnabledGroupChild(
+  groupDef: AnimationDefinition,
+  isEnabled: (animationName: string) => boolean
+): string | null {
   if (!groupDef.children || groupDef.children.length === 0) {
     return null;
   }
-  
-  // Filter to only enabled children
-  const enabledChildren = groupDef.children.filter((childName) =>
-    isAnimationEnabledKappagen(childName)
-  );
-  
+
+  const enabledChildren = groupDef.children.filter((childName) => isEnabled(childName));
+
   if (enabledChildren.length === 0) {
     return null;
   }
-  
+
   const index = Math.floor(Math.random() * enabledChildren.length);
   return enabledChildren[index];
+}
+
+function isValidAnimationName(animationName: string): boolean {
+  if (getAnimationDefinition(animationName)) {
+    return true;
+  }
+  return (
+    animations.hasOwnProperty(animationName) &&
+    typeof animations[animationName] === "function"
+  );
 }
 
 /**
@@ -180,7 +190,7 @@ function chatMessageHandler(wsdata: WSData): void {
   const lowermessage = message.toLowerCase();
   const username = wsdata.data?.message?.username || "";
   const userId = wsdata.data?.message?.userId || "";
-  const emotes = getEmoteImages(wsdata);
+  const emotes = getEmoteImages(wsdata, message);
 
   const subbedCheck =
     !settings.subOnly || (settings.subOnly && wsdata.data?.message?.subscriber);
@@ -240,6 +250,25 @@ function chatMessageHandler(wsdata: WSData): void {
       break;
 
     case lowermessage.includes("!k"):
+      // Alias: users sometimes type `!k <animation>` but mean `!er <animation>`.
+      // If the token after !k is a valid animation name, run it as if it were !er.
+      {
+        const aliasMatch = /^!k\s+(\w+)/i.exec(message);
+        const aliasAnimation = aliasMatch?.[1];
+        const shouldAliasToEr =
+          !!aliasAnimation && isValidAnimationName(aliasAnimation.toLowerCase());
+
+        if (shouldAliasToEr) {
+          if (isFeatureEnabled("emoterain", subbedCheck)) {
+            const erMessage = message.replace(/^!k\b/i, "!er");
+            emoteRainHandler(erMessage, emotes, username);
+          } else {
+            logger.info("EmoteRain Not Enabled or User Not Subscribed");
+          }
+          break;
+        }
+      }
+
       if (isFeatureEnabled("kappagen", subbedCheck)) {
         kappagenHandler(lowermessage, emotes, username);
       } else {
@@ -273,14 +302,48 @@ function actionsHandler(wsdata: WSData): void {
   let action = wsdata.data?.name;
 }
 
-function getEmoteImages(wsdata: WSData): string[] {
+function extractEmojiStrings(message: string): string[] {
+  // Matches:
+  // - Keycap sequences: 1️⃣, #️⃣, *️⃣
+  // - Regional indicator flags: 🇺🇸
+  // - Extended pictographic emojis including ZWJ sequences and skin tone modifiers
+  const emojiRegex =
+    /(?:[0-9#*]\uFE0F?\u20E3)|(?:[\u{1F1E6}-\u{1F1FF}]{2})|(?:\p{Extended_Pictographic}(?:\uFE0F|\uFE0E)?(?:[\u{1F3FB}-\u{1F3FF}])?(?:\u200D\p{Extended_Pictographic}(?:\uFE0F|\uFE0E)?(?:[\u{1F3FB}-\u{1F3FF}])?)*)/gu;
+
+  const matches = message.match(emojiRegex);
+  return matches ?? [];
+}
+
+function emojiToTwemojiUrl(emoji: string): string {
+  const codepoints = Array.from(emoji)
+    .map((char) => char.codePointAt(0)!.toString(16))
+    .join("-");
+  return `https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/${codepoints}.png`;
+}
+
+function extractEmojiImageUrls(message: string): string[] {
+  const unique = new Set<string>();
+  for (const emoji of extractEmojiStrings(message)) {
+    unique.add(emojiToTwemojiUrl(emoji));
+  }
+  return [...unique];
+}
+
+function getEmoteImages(wsdata: WSData, message?: string): string[] {
   const emotes = wsdata.data?.message?.emotes || [];
   const emotecount = emotes.length;
 
-  let images: string[] = [];
+  const images: string[] = [];
   for (let i = 0; i < emotecount; i++) {
     if (emotes[i] && emotes[i].imageUrl) {
-      images[i] = emotes[i].imageUrl;
+      images.push(emotes[i].imageUrl);
+    }
+  }
+
+  const emojiUrls = extractEmojiImageUrls(message ?? wsdata.data?.message?.message ?? "");
+  for (const url of emojiUrls) {
+    if (!images.includes(url)) {
+      images.push(url);
     }
   }
 
@@ -314,7 +377,7 @@ async function kappagenHandler(lowermessage: string, images: string[], username:
   
   // If it's a group, select a child
   if (selectedDef.isGroup) {
-    const childName = selectGroupChild(selectedDef);
+    const childName = selectEnabledGroupChild(selectedDef, isAnimationEnabledKappagen);
     if (!childName) {
       logger.info(`No enabled children for group: ${animationName}`);
       return;
@@ -374,7 +437,7 @@ async function emoteRainHandler(message: string, images: string[], username: str
   
   // If it's a group, select a random enabled child
   if (def?.isGroup) {
-    const childName = selectGroupChild(def);
+    const childName = selectEnabledGroupChild(def, isAnimationEnabledManual);
     if (!childName) {
       logger.info(`No enabled children for group: ${animationName}`);
       return;
