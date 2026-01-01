@@ -70,11 +70,11 @@ function isAnimationEnabledKappagen(animationName: string): boolean {
 function getAnimationParams(animationName: string): { count: number; interval: number } {
   const settings = getSettings();
   const animSettings = settings.animations[animationName];
-  const def = getAnimationDefinition(animationName);
+  const animationDef = getAnimationDefinition(animationName);
   
   return {
-    count: animSettings?.count ?? def?.defaultCount ?? 50,
-    interval: animSettings?.interval ?? def?.defaultInterval ?? 50,
+    count: animSettings?.count ?? animationDef?.defaultCount ?? 50,
+    interval: animSettings?.interval ?? animationDef?.defaultInterval ?? 50,
   };
 }
 
@@ -86,24 +86,24 @@ function getAnimationParams(animationName: string): { count: number; interval: n
 function buildRandomAnimationPool(): AnimationDefinition[] {
   const pool: AnimationDefinition[] = [];
   
-  for (const [name, def] of Object.entries(animationRegistry)) {
+  for (const [name, registryDef] of Object.entries(animationRegistry)) {
     // Skip group children - they're selected through their parent group
-    if (def.group) {
+    if (registryDef.group) {
       continue;
     }
     
     // Check if enabled for random pool
     if (isAnimationEnabledKappagen(name)) {
       // For groups, check if at least one child is enabled
-      if (def.isGroup && def.children) {
-        const enabledChildren = def.children.filter((childName) =>
+      if (registryDef.isGroup && registryDef.children) {
+        const enabledChildren = registryDef.children.filter((childName) =>
           isAnimationEnabledKappagen(childName)
         );
         if (enabledChildren.length > 0) {
-          pool.push(def);
+          pool.push(registryDef);
         }
       } else {
-        pool.push(def);
+        pool.push(registryDef);
       }
     }
   }
@@ -153,7 +153,7 @@ async function executeAnimation(
   username: string,
   text?: string
 ): Promise<void> {
-  const def = getAnimationDefinition(animationName);
+  const animationDef = getAnimationDefinition(animationName);
   
   if (!animations.hasOwnProperty(animationName) || typeof animations[animationName] !== "function") {
     logger.error(`Animation function not found: ${animationName}`);
@@ -161,7 +161,7 @@ async function executeAnimation(
   }
   
   // Handle special requirements
-  if (def?.requiresAvatar) {
+  if (animationDef?.requiresAvatar) {
     try {
       const avatar = await helpers.getTwitchAvatar(username);
       animations[animationName](images, count, interval, avatar);
@@ -169,7 +169,7 @@ async function executeAnimation(
       logger.error(`Error getting avatar for ${animationName}: ${(error as Error).message}`);
       animations[animationName](images, count, interval);
     }
-  } else if (def?.requiresText) {
+  } else if (animationDef?.requiresText) {
     const displayText = text || getSettings().animations[animationName]?.text || "Hype";
     animations[animationName](images, displayText, interval);
   } else {
@@ -372,18 +372,18 @@ async function kappagenHandler(lowermessage: string, images: string[], username:
   
   // Pick a random animation from the pool
   const randomIndex = Math.floor(Math.random() * pool.length);
-  let selectedDef = pool[randomIndex];
-  let animationName = selectedDef.name;
+  let selectedAnimationDef = pool[randomIndex];
+  let animationName = selectedAnimationDef.name;
   
   // If it's a group, select a child
-  if (selectedDef.isGroup) {
-    const childName = selectEnabledGroupChild(selectedDef, isAnimationEnabledKappagen);
+  if (selectedAnimationDef.isGroup) {
+    const childName = selectEnabledGroupChild(selectedAnimationDef, isAnimationEnabledKappagen);
     if (!childName) {
       logger.info(`No enabled children for group: ${animationName}`);
       return;
     }
     animationName = childName;
-    selectedDef = getAnimationDefinition(childName) || selectedDef;
+    selectedAnimationDef = getAnimationDefinition(childName) || selectedAnimationDef;
   }
   
   // Get count and interval from command or settings
@@ -416,9 +416,9 @@ async function emoteRainHandler(message: string, images: string[], username: str
   logger.info("Running emoteRain: " + animationName);
   
   // Check if animation exists in registry
-  let def = getAnimationDefinition(animationName);
+  let animationDef = getAnimationDefinition(animationName);
   
-  if (!def) {
+  if (!animationDef) {
     // Try to find if it's a direct animation function that exists
     if (animations.hasOwnProperty(animationName) && typeof animations[animationName] === "function") {
       // Allow direct animation calls even if not in registry
@@ -436,14 +436,14 @@ async function emoteRainHandler(message: string, images: string[], username: str
   }
   
   // If it's a group, select a random enabled child
-  if (def?.isGroup) {
-    const childName = selectEnabledGroupChild(def, isAnimationEnabledManual);
+  if (animationDef?.isGroup) {
+    const childName = selectEnabledGroupChild(animationDef, isAnimationEnabledManual);
     if (!childName) {
       logger.info(`No enabled children for group: ${animationName}`);
       return;
     }
     animationName = childName;
-    def = getAnimationDefinition(childName);
+    animationDef = getAnimationDefinition(childName);
   }
   
   // Get parameters
@@ -454,7 +454,7 @@ async function emoteRainHandler(message: string, images: string[], username: str
   
   // Extract text for text animation
   let text: string | undefined;
-  if (def?.requiresText) {
+  if (animationDef?.requiresText) {
     const textRegexp = /text\s+(\S+)/i;
     const textMatches = textRegexp.exec(message);
     if (textMatches && textMatches[1]) {
