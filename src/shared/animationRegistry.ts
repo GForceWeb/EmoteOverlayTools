@@ -247,6 +247,17 @@ export const animationRegistry: Record<string, AnimationDefinition> = {
     defaultEnabledManual: true,
     defaultEnabledKappagen: true,  // Enabled within the shapes group
   },
+  ufo: {
+    name: "ufo",
+    displayName: "UFO",
+    description: "A UFO flies across the screen dropping emotes",
+    defaultCount: 40,
+    defaultInterval: 275,
+    countLabel: "Emotes to Drop",
+    intervalLabel: "Drop Frequency (ms)",
+    defaultEnabledManual: true,
+    defaultEnabledKappagen: true,
+  },
 };
 
 /**
