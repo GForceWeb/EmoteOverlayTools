@@ -30,16 +30,42 @@ export interface AnimationDefinition {
  * All available animations with their metadata
  */
 export const animationRegistry: Record<string, AnimationDefinition> = {
-  // Standard animations - enabled for both manual and random by default
+  // Group parent: falling
+  falling: {
+    name: "falling",
+    displayName: "Falling",
+    description: "Randomly selects between falling animations (rain, snow)",
+    defaultCount: 50,
+    defaultInterval: 50,
+    isGroup: true,
+    children: ["rain", "snow"],
+    defaultEnabledManual: true,
+    defaultEnabledKappagen: true,
+  },
+
+  // Group children: falling
   rain: {
     name: "rain",
     displayName: "Rain",
     description: "Emotes fall from top to bottom",
     defaultCount: 50,
     defaultInterval: 50,
+    group: "falling",
     defaultEnabledManual: true,
     defaultEnabledKappagen: true,
   },
+  snow: {
+    name: "snow",
+    displayName: "Snow",
+    description: "Emotes drift down gently like snowflakes",
+    defaultCount: 50,
+    defaultInterval: 50,
+    group: "falling",
+    defaultEnabledManual: true,
+    defaultEnabledKappagen: true,
+  },
+
+  // Standard animations - enabled for both manual and random by default
   rise: {
     name: "rise",
     displayName: "Rise",
@@ -246,6 +272,17 @@ export const animationRegistry: Record<string, AnimationDefinition> = {
     group: "shapes",
     defaultEnabledManual: true,
     defaultEnabledKappagen: true,  // Enabled within the shapes group
+  },
+  eq: {
+    name: "eq",
+    displayName: "EQ Visualizer",
+    description: "Emotes stack as music EQ bars with electronic beat pattern",
+    defaultCount: 20,
+    defaultInterval: 375,
+    countLabel: "Number of Bars (max 50)",
+    intervalLabel: "Beat Interval (ms)",
+    defaultEnabledManual: true,
+    defaultEnabledKappagen: true,
   },
   ufo: {
     name: "ufo",
