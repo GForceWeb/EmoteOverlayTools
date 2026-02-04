@@ -210,6 +210,7 @@ export function SettingsDashboard() {
                   : "http://localhost:3030"
               }
               settings={settings}
+              onSettingsChange={setSettings}
             />
           </div>
         </div>

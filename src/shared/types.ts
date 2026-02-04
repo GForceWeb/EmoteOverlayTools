@@ -29,6 +29,12 @@ export interface FeatureList {
   choon: FeatureSettings;
 }
 
+export interface PreviewEmote {
+  id: string;
+  name: string;
+  imageUrl: string;
+}
+
 export interface Settings {
   streamerBotWebsocketUrl: string;
   overlayServerPort: number;
@@ -42,6 +48,7 @@ export interface Settings {
   defaultEmotes: number;
   debug: boolean;
   configFilePath: string;
+  previewEmotes: PreviewEmote[];
 }
 
 export interface GlobalVars {

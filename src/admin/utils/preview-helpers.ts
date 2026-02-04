@@ -1,4 +1,4 @@
-import type { Settings, WSData } from "@/shared/types";
+import type { Settings, WSData, EmoteData } from "@/shared/types";
 
 /**
  * Get a reference to the overlay iframe
@@ -11,6 +11,25 @@ export const getOverlayIframe = (): HTMLIFrameElement | null => {
     return null;
   }
   return iframe;
+};
+
+/**
+ * Get the emotes to use for preview based on settings
+ */
+const getPreviewEmotes = (settings: Settings): EmoteData[] => {
+  // Use custom preview emotes if set, otherwise use default Kappa
+  if (settings.previewEmotes && settings.previewEmotes.length > 0) {
+    return settings.previewEmotes.map(e => ({
+      name: e.name,
+      imageUrl: e.imageUrl,
+    }));
+  }
+  
+  // Default fallback
+  return [{
+    name: "Kappa",
+    imageUrl: "https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/2.0",
+  }];
 };
 
 /**
@@ -30,6 +49,9 @@ export const previewAnimation = (
       ? `!er ${animation} ${config.text || "Preview Text"}`
       : `!er ${animation} ${config.count || 10} ${config.interval || 100}`;
 
+  // Get custom preview emotes from settings
+  const previewEmotes = getPreviewEmotes(settings);
+
   // Construct the message
   const wsMessage: WSData = {
     event: {
@@ -42,12 +64,7 @@ export const previewAnimation = (
         userId: "123456789", // Placeholder user ID
         message: messageContent,
         subscriber: true,
-        emotes: [
-          {
-            name: "test",
-            imageUrl: "https://static-cdn.jtvnw.net/emoticons/v1/425618/2.0",
-          },
-        ],
+        emotes: previewEmotes,
       },
     },
   };
@@ -98,6 +115,9 @@ export const previewFeature = (
       featureCommand = `!${feature}`;
   }
 
+  // Get custom preview emotes from settings
+  const previewEmotes = getPreviewEmotes(settings);
+
   // Construct the message
   const wsMessage: WSData = {
     event: {
@@ -110,12 +130,7 @@ export const previewFeature = (
         userId: "123456789", // Placeholder user ID
         message: featureCommand,
         subscriber: true,
-        emotes: [
-          {
-            name: "test",
-            imageUrl: "https://static-cdn.jtvnw.net/emoticons/v1/425618/2.0",
-          },
-        ],
+        emotes: previewEmotes,
       },
     },
   };

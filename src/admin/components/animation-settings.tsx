@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/admin/components/ui/card";
-import type { Settings, AnimationSettings as AnimationSettingsType } from "@/shared/types";
+import type { Settings, AnimationSettings as AnimationSettingsType, PreviewEmote } from "@/shared/types";
 import {
   Accordion,
   AccordionContent,
@@ -26,6 +26,8 @@ import {
   getGroupChildren,
   AnimationDefinition,
 } from "@/shared/animationRegistry";
+import { EmotePicker } from "@/admin/components/emote-picker";
+import { Separator } from "@/admin/components/ui/separator";
 
 interface AnimationSettingsProps {
   settings: Settings;
@@ -355,6 +357,22 @@ export function AnimationSettings({
         </CardDescription>
       </CardHeader>
       <CardContent>
+        {/* Preview Emotes Picker */}
+        <div className="mb-6">
+          <EmotePicker
+            selectedEmotes={settings.previewEmotes || []}
+            onEmotesChange={(emotes: PreviewEmote[]) => {
+              setSettings((prev) => ({
+                ...prev,
+                previewEmotes: emotes,
+              }));
+            }}
+            maxEmotes={10}
+          />
+        </div>
+
+        <Separator className="my-6" />
+
         {/* Enable All Animations Toggle */}
         <div className="flex items-center justify-between p-4 bg-secondary/50 rounded-lg mb-6">
           <div className="space-y-0.5">

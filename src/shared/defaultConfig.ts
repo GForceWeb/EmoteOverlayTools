@@ -1,5 +1,24 @@
-import { Settings, AnimationSettings, AnimationList } from "./types";
+import { Settings, AnimationSettings, AnimationList, PreviewEmote } from "./types";
 import { animationRegistry, AnimationDefinition } from "./animationRegistry";
+
+// Default preview emotes - LUL, Kappa, PogChamp
+const defaultPreviewEmotes: PreviewEmote[] = [
+  {
+    id: '425618',
+    name: 'LUL',
+    imageUrl: 'https://static-cdn.jtvnw.net/emoticons/v2/425618/default/dark/2.0',
+  },
+  {
+    id: '25',
+    name: 'Kappa',
+    imageUrl: 'https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/2.0',
+  },
+  {
+    id: '307827377',
+    name: 'PogChamp',
+    imageUrl: 'https://static-cdn.jtvnw.net/emoticons/v2/307827377/default/dark/2.0',
+  },
+];
 
 /**
  * Generate default animation settings from the registry
@@ -85,6 +104,10 @@ export function deepMergeSettings(
       userSettings.animations,
       defaults.animations
     ),
+    // Preserve preview emotes array, use defaults if not set
+    previewEmotes: userSettings.previewEmotes?.length 
+      ? userSettings.previewEmotes 
+      : defaults.previewEmotes,
   };
 }
 
@@ -109,4 +132,5 @@ export const defaultConfig: Settings = {
   defaultEmotes: 100,
   debug: false,
   configFilePath: "",
+  previewEmotes: defaultPreviewEmotes,
 };

@@ -20,22 +20,35 @@ import {
   SelectValue,
 } from "@/admin/components/ui/select";
 import { PlayIcon } from "lucide-react";
-import type { Settings } from "@/shared/types";
+import type { Settings, PreviewEmote } from "@/shared/types";
 import {
   previewAnimation,
   previewFeature,
 } from "@/admin/utils/preview-helpers";
+import { EmotePicker } from "@/admin/components/emote-picker";
+import { Separator } from "@/admin/components/ui/separator";
 
 interface PreviewControlsProps {
   settings: Settings;
+  onSettingsChange?: (settings: Settings) => void;
 }
 
-export function PreviewControls({ settings }: PreviewControlsProps) {
+export function PreviewControls({ settings, onSettingsChange }: PreviewControlsProps) {
   const [activeTab, setActiveTab] = useState<"feature" | "animation">(
     "animation"
   );
   const [selectedItem, setSelectedItem] = useState<string>("");
   const [tempConfig, setTempConfig] = useState<any>(null);
+
+  // Handle preview emotes change
+  const handleEmotesChange = (emotes: PreviewEmote[]) => {
+    if (onSettingsChange) {
+      onSettingsChange({
+        ...settings,
+        previewEmotes: emotes,
+      });
+    }
+  };
 
   // Reset selected item when tab changes
   useEffect(() => {
@@ -87,6 +100,15 @@ export function PreviewControls({ settings }: PreviewControlsProps) {
       <p className="text-sm text-muted-foreground">
         Select and customize a feature or animation to preview
       </p>
+
+      {/* Emote Picker Section */}
+      <EmotePicker
+        selectedEmotes={settings.previewEmotes || []}
+        onEmotesChange={handleEmotesChange}
+        maxEmotes={10}
+      />
+
+      <Separator className="my-4" />
 
       <Tabs
         value={activeTab}

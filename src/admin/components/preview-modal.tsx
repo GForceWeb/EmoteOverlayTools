@@ -18,6 +18,7 @@ interface PreviewModalProps {
   onRefresh: () => void;
   sidebarPlaceholderRef: RefObject<HTMLDivElement>;
   settings: Settings;
+  onSettingsChange?: (settings: Settings) => void;
 }
 
 export function PreviewModal({
@@ -27,6 +28,7 @@ export function PreviewModal({
   onRefresh,
   sidebarPlaceholderRef,
   settings,
+  onSettingsChange,
 }: PreviewModalProps) {
   const modalContentRef = useRef<HTMLDivElement>(null);
   const modalPlaceholderRef = useRef<HTMLDivElement>(null);
@@ -83,7 +85,7 @@ export function PreviewModal({
     // If modal is open, position the iframe
     if (isOpen) {
       // Small delay to ensure modal is fully rendered
-      setTimeout(positionIframeInModal, 50);
+      setTimeout(positionIframeInModal, 300);
 
       // Add event listeners for resizing and scrolling
       window.addEventListener("resize", positionIframeInModal);
@@ -221,7 +223,7 @@ export function PreviewModal({
         <div className="flex flex-col md:flex-row w-full h-full">
           {showControls && (
             <div className="w-full md:w-64 border-r border-border bg-card p-4 overflow-y-auto">
-              <PreviewControls settings={settings} />
+              <PreviewControls settings={settings} onSettingsChange={onSettingsChange} />
             </div>
           )}
           {/* This is a placeholder that helps position our fixed iframe */}

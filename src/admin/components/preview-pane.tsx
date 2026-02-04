@@ -15,9 +15,10 @@ import type { Settings } from "@/shared/types";
 interface PreviewPaneProps {
   previewUrl: string;
   settings: Settings;
+  onSettingsChange?: (settings: Settings) => void;
 }
 
-export function PreviewPane({ previewUrl, settings }: PreviewPaneProps) {
+export function PreviewPane({ previewUrl, settings, onSettingsChange }: PreviewPaneProps) {
   const [url, setUrl] = useState(previewUrl);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [iframeLoaded, setIframeLoaded] = useState(false);
@@ -286,6 +287,7 @@ export function PreviewPane({ previewUrl, settings }: PreviewPaneProps) {
         onRefresh={refreshPreview}
         sidebarPlaceholderRef={sidebarPlaceholderRef}
         settings={settings}
+        onSettingsChange={onSettingsChange}
       />
     </>
   );
