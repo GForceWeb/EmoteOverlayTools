@@ -3,6 +3,9 @@ import animations from "./animations";
 import OverlaySettings from "./settings";
 const settings = OverlaySettings.settings;
 
+const REFERENCE_WIDTH = 1920;
+const REFERENCE_HEIGHT = 1080;
+
 // Create WebSocket connection to StreamerBot using configured URL
 const ws = new WebSocket(settings.streamerBotWebsocketUrl);
 
@@ -46,6 +49,19 @@ function setCSSVars(): void {
   root.style.setProperty(
     "--avatar-size-small",
     cssAvatarSizeStandard / 2 + "px"
+  );
+  root.style.setProperty(
+    "--reference-pixel-x",
+    windowWidth / REFERENCE_WIDTH + "px"
+  );
+  root.style.setProperty(
+    "--reference-pixel-y",
+    windowHeight / REFERENCE_HEIGHT + "px"
+  );
+  root.style.setProperty(
+    "--reference-pixel",
+    Math.min(windowWidth / REFERENCE_WIDTH, windowHeight / REFERENCE_HEIGHT) +
+      "px"
   );
 }
 

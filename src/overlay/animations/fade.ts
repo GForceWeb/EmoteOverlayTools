@@ -43,7 +43,7 @@ function createDivs(image: string): void {
   }, 15000);
 }
 
-// Rising animation
+// Scale up and Fade animation
 function animation(element: HTMLElement): void {
   //Fade In
   gsap.to(element, {
@@ -53,6 +53,7 @@ function animation(element: HTMLElement): void {
     delay: 1,
     duration: 3,
   });
+  //Scale up
   gsap.to(element, {
     scale: 2.5,
     ease: Linear.easeNone,
@@ -60,6 +61,7 @@ function animation(element: HTMLElement): void {
     delay: 1,
     duration: 6,
   });
+  //Fade out
   gsap.to(element, {
     opacity: 0,
     ease: Linear.easeNone,

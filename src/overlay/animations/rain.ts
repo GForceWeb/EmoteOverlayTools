@@ -23,10 +23,13 @@ function createEmoteRain(image: string): void {
   Div.id = globalVars.divnumber.toString();
   globalVars.divnumber++;
 
+  const minSpawnHeight = helpers.scaleRelativeToHeight(450);
+  const maxSpawnHeight = helpers.scaleRelativeToHeight(500);
+
   gsap.set(Div, {
     className: "falling-element",
     x: helpers.Randomizer(0, innerWidth),
-    y: helpers.Randomizer(-500, -450),
+    y: helpers.Randomizer(-maxSpawnHeight, -minSpawnHeight),
     z: helpers.Randomizer(-200, 200),
     backgroundImage: "url(" + image + ")",
   });
@@ -44,13 +47,13 @@ function createEmoteRain(image: string): void {
 // Falling animation
 function falling_animation(element: HTMLElement): void {
   gsap.to(element, helpers.Randomizer(6, 16), {
-    y: innerHeight + 1400,
+    y: innerHeight + helpers.scaleRelativeToHeight(1400),
     ease: Linear.easeNone,
     repeat: 0,
     delay: -1,
   });
   gsap.to(element, helpers.Randomizer(4, 8), {
-    x: "+=100",
+    x: `+=${helpers.scaleRelativeToWidth(100)}`,
     rotationZ: helpers.Randomizer(0, 180),
     repeat: 4,
     yoyo: true,

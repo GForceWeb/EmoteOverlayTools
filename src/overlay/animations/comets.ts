@@ -23,10 +23,13 @@ function createEmoteComets(image: string): void {
   Div.id = globalVars.divnumber.toString();
   globalVars.divnumber++;
 
+  const spawnHeight = helpers.scaleRelativeToHeight(200);
+  const minSpawnHeight = helpers.scaleRelativeToHeight(75);
+
   gsap.set(Div, {
     className: "comet-element",
     x: helpers.Randomizer(0, innerWidth),
-    y: helpers.Randomizer(-200, -75),
+    y: helpers.Randomizer(-spawnHeight, -minSpawnHeight),
     z: helpers.Randomizer(-200, 200),
     backgroundImage: "url(" + image + ")",
   });
@@ -45,17 +48,29 @@ function createEmoteComets(image: string): void {
 function comet_animation(element: HTMLElement): void {
   // create random size of the travel
   let cometDuration = helpers.Randomizer(4, 8);
-  let cometSize = helpers.Randomizer(25, 100);
+  let cometSize = helpers.Randomizer(
+    helpers.scaleRelativeToViewport(25),
+    helpers.scaleRelativeToViewport(100)
+  );
   let cometX = gsap.getProperty(element, "x") as number;
-  if (cometX > 920) {
-    cometX = cometX - helpers.Randomizer(1150, 1500);
-  } else if (cometX < 920) {
-    cometX = cometX + helpers.Randomizer(1150, 1500);
+  const midpoint = innerWidth / 2;
+  const travelDistance = helpers.Randomizer(
+    helpers.scaleRelativeToWidth(1150),
+    helpers.scaleRelativeToWidth(1500)
+  );
+
+  if (cometX > midpoint) {
+    cometX = cometX - travelDistance;
+  } else if (cometX < midpoint) {
+    cometX = cometX + travelDistance;
   }
   gsap.to(element, { duration: cometDuration, x: cometX, ease: "sine.out" });
   gsap.to(element, {
     duration: cometDuration,
-    y: helpers.Randomizer(800, 1080),
+    y: helpers.Randomizer(
+      helpers.scaleRelativeToHeight(800),
+      helpers.scaleRelativeToHeight(1080)
+    ),
     ease: "power3.in",
   });
   gsap.to(element, {

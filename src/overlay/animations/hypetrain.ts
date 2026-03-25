@@ -2,6 +2,12 @@ import { globalVars } from "../config.ts";
 import helpers from "../helpers";
 import { gsap } from "gsap";
 
+const TRAIN_CAR_BASE_SIZE = 225;
+
+function getTrainCarSize(): number {
+  return helpers.scaleRelativeToViewport(TRAIN_CAR_BASE_SIZE);
+}
+
 // Add user avatar to current train car
 export function hypetrainprogression(username: string): void {
   helpers
@@ -20,6 +26,7 @@ function createhypetrainprogression(image: string[]): void {
   const carts = document.getElementsByClassName("train-cart");
   const cartsArray = Array.from(carts);
   const currentCart = cartsArray[cartsArray.length - 1];
+  const trainCarSize = getTrainCarSize();
 
   const UserImage = document.createElement("img");
 
@@ -28,8 +35,8 @@ function createhypetrainprogression(image: string[]): void {
     z: 10,
     zIndex: 10,
     position: "absolute",
-    left: "20px",
-    top: "70px",
+    left: trainCarSize * (20 / TRAIN_CAR_BASE_SIZE),
+    top: trainCarSize * (70 / TRAIN_CAR_BASE_SIZE),
     attr: { src: image[0] },
   });
 
@@ -79,6 +86,7 @@ export function hypetrainpreview(username: string): void {
 
 export function hypetrainstart(): void {
   const image = "img/trainhead.png";
+  const trainCarSize = getTrainCarSize();
   const HypeTrainWrapper = document.createElement("div");
   HypeTrainWrapper.id = String(
     setTimeout(() => {
@@ -99,8 +107,8 @@ export function hypetrainstart(): void {
     className: "train-head",
     float: "right",
     z: helpers.Randomizer(-200, 200),
-    width: "225px",
-    height: "225px",
+    width: trainCarSize,
+    height: trainCarSize,
     backgroundImage: `url(${image})`,
   });
 
@@ -123,6 +131,7 @@ export function hypetrainstart(): void {
 // Add additional Car to Train
 export function hypetrainlevelup(): void {
   const trainWrapper = document.getElementsByClassName("train-wrapper")[0];
+  const trainCarSize = getTrainCarSize();
 
   console.log(trainWrapper.id);
 
@@ -149,8 +158,8 @@ export function hypetrainlevelup(): void {
     className: "train-cart",
     float: "right",
     z: helpers.Randomizer(-200, 200),
-    width: "225px",
-    height: "225px",
+    width: trainCarSize,
+    height: trainCarSize,
     opacity: 0,
   });
 
@@ -160,8 +169,8 @@ export function hypetrainlevelup(): void {
     z: 100,
     zIndex: 100,
     position: "relative",
-    width: "225px",
-    height: "225px",
+    width: trainCarSize,
+    height: trainCarSize,
     attr: { src: image },
   });
 
@@ -178,20 +187,24 @@ function train_animation(element: HTMLElement): void {
   gsap
     .timeline({ repeat: -1, defaults: { duration: 3, ease: "none" } })
     .to(element, { x: window.innerWidth, duration: 10 })
-    .to(element, { y: -500, duration: 0.5 })
+    .to(element, { y: -helpers.scaleRelativeToHeight(500), duration: 0.5 })
     .to(element, { x: 0 - window.innerWidth, duration: 0.5 })
     .to(element, { y: 0, duration: 0.5 });
 }
 
 function passenger_animation(element: HTMLElement): void {
+  const trainCarSize = getTrainCarSize();
+  const passengerTravel = trainCarSize * (120 / TRAIN_CAR_BASE_SIZE);
+  const passengerBob = trainCarSize * (20 / TRAIN_CAR_BASE_SIZE);
+
   gsap
     .timeline({ repeat: -1, defaults: { duration: 3, ease: "none" } })
-    .to(element, { x: "+=120" })
-    .to(element, { x: "-=120" });
+    .to(element, { x: `+=${passengerTravel}` })
+    .to(element, { x: `-=${passengerTravel}` });
   gsap.to(element, {
     duration: 1,
     repeat: -1,
-    y: "-=20",
+    y: `-=${passengerBob}`,
     ease: "sine.out",
     yoyo: true,
   });

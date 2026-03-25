@@ -39,8 +39,16 @@ function createUFOFlight(
   let dropInterval: ReturnType<typeof setInterval> | null = null;
 
   // UFO dimensions
-  const ufoWidth = 120;
-  const ufoHeight = 60;
+  const ufoWidth = helpers.scaleRelativeToViewport(120);
+  const ufoHeight = helpers.scaleRelativeToViewport(60);
+  const domeExtraHeight = helpers.scaleRelativeToViewport(30);
+  const bodyTop = helpers.scaleRelativeToHeight(25);
+  const domeTop = helpers.scaleRelativeToHeight(5);
+  const lightsHeight = helpers.scaleRelativeToViewport(10);
+  const lightsTop = helpers.scaleRelativeToHeight(45);
+  const lightSize = helpers.scaleRelativeToViewport(8);
+  const tractorBeamHeight = helpers.scaleRelativeToHeight(80);
+  const tractorBeamTop = helpers.scaleRelativeToHeight(50);
 
   // Create the UFO container
   const ufoContainer = document.createElement("div");
@@ -50,7 +58,7 @@ function createUFOFlight(
   gsap.set(ufoContainer, {
     className: "ufo-ship",
     width: ufoWidth,
-    height: ufoHeight + 30, // Extra space for dome
+    height: ufoHeight + domeExtraHeight,
     position: "absolute",
     pointerEvents: "none",
     zIndex: 1000,
@@ -65,7 +73,7 @@ function createUFOFlight(
     background: "radial-gradient(ellipse at 30% 30%, #e8e8e8, #a0a0a0 40%, #606060 70%, #404040)",
     boxShadow: "0 4px 15px rgba(0,0,0,0.4), inset 0 -3px 10px rgba(0,0,0,0.3), inset 0 3px 10px rgba(255,255,255,0.3)",
     position: "absolute",
-    top: 25,
+    top: bodyTop,
     left: 0,
   });
 
@@ -78,7 +86,7 @@ function createUFOFlight(
     background: "radial-gradient(ellipse at 50% 70%, rgba(100, 255, 200, 0.7), rgba(0, 180, 130, 0.4) 60%, rgba(0, 100, 80, 0.3))",
     boxShadow: "0 0 15px rgba(0, 255, 180, 0.5), inset 0 -5px 15px rgba(0, 255, 180, 0.3)",
     position: "absolute",
-    top: 5,
+    top: domeTop,
     left: (ufoWidth - ufoWidth * 0.4) / 2,
   });
 
@@ -86,9 +94,9 @@ function createUFOFlight(
   const lightsContainer = document.createElement("div");
   gsap.set(lightsContainer, {
     width: ufoWidth * 0.8,
-    height: 10,
+    height: lightsHeight,
     position: "absolute",
-    top: 45,
+    top: lightsTop,
     left: ufoWidth * 0.1,
     display: "flex",
     justifyContent: "space-around",
@@ -99,8 +107,8 @@ function createUFOFlight(
   for (let i = 0; i < 5; i++) {
     const light = document.createElement("div");
     gsap.set(light, {
-      width: 8,
-      height: 8,
+      width: lightSize,
+      height: lightSize,
       borderRadius: "50%",
       background: lightColors[i],
       boxShadow: `0 0 10px ${lightColors[i]}, 0 0 20px ${lightColors[i]}`,
@@ -121,9 +129,9 @@ function createUFOFlight(
   const tractorBeam = document.createElement("div");
   gsap.set(tractorBeam, {
     width: ufoWidth * 0.5,
-    height: 80,
+    height: tractorBeamHeight,
     position: "absolute",
-    top: 50,
+    top: tractorBeamTop,
     left: (ufoWidth - ufoWidth * 0.5) / 2,
     background: "linear-gradient(to bottom, rgba(0, 255, 180, 0.4), rgba(0, 255, 180, 0) 100%)",
     clipPath: "polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%)",
@@ -250,7 +258,7 @@ function generateFlightPath(
   ufoHeight: number
 ): { startPos: Waypoint; endPos: Waypoint; waypoints: Waypoint[] } {
   const edges: Edge[] = ["left", "right", "top"];
-  const margin = 50;
+  const margin = helpers.scaleRelativeToViewport(50);
   const viewportWidth = window.innerWidth;
   const viewportHeight = window.innerHeight;
 
@@ -293,23 +301,23 @@ function getEdgePosition(
   margin: number,
   isStart: boolean
 ): Waypoint {
-  const offset = isStart ? -ufoWidth - 20 : -ufoWidth - 20; // Off-screen offset
+  const offscreenOffset = helpers.scaleRelativeToViewport(20);
 
   switch (edge) {
     case "left":
       return {
-        x: isStart ? -ufoWidth - 20 : -ufoWidth - 20,
+        x: isStart ? -ufoWidth - offscreenOffset : -ufoWidth - offscreenOffset,
         y: helpers.Randomizer(margin, viewportHeight * 0.5),
       };
     case "right":
       return {
-        x: isStart ? viewportWidth + 20 : viewportWidth + 20,
+        x: isStart ? viewportWidth + offscreenOffset : viewportWidth + offscreenOffset,
         y: helpers.Randomizer(margin, viewportHeight * 0.5),
       };
     case "top":
       return {
         x: helpers.Randomizer(margin, viewportWidth - ufoWidth - margin),
-        y: isStart ? -ufoHeight - 20 : -ufoHeight - 20,
+        y: isStart ? -ufoHeight - offscreenOffset : -ufoHeight - offscreenOffset,
       };
   }
 }
@@ -324,7 +332,10 @@ function dropEmote(image: string, ufoContainer: HTMLElement, ufoWidth: number): 
   globalVars.divnumber++;
 
   // Random horizontal drift for falling
-  const drift = helpers.Randomizer(-100, 100);
+  const drift = helpers.Randomizer(
+    -helpers.scaleRelativeToWidth(100),
+    helpers.scaleRelativeToWidth(100)
+  );
   
   // Random rotation for falling
   const rotation = helpers.Randomizer(-360, 360);
@@ -332,13 +343,14 @@ function dropEmote(image: string, ufoContainer: HTMLElement, ufoWidth: number): 
   // Get emote size from CSS variable (fallback to 50px)
   const root = document.documentElement;
   const cssSize = getComputedStyle(root).getPropertyValue("--emote-size-standard");
-  const emoteSize = parseInt(cssSize || "50", 10) || 50;
+  const emoteSize = parseInt(cssSize || "50", 10) || helpers.scaleRelativeToViewport(50);
   const halfEmoteSize = emoteSize / 2;
+  const beamOriginY = helpers.scaleRelativeToHeight(50);
 
   // Get initial UFO position - center emote under the tractor beam
   const initialRect = ufoContainer.getBoundingClientRect();
   const initialX = initialRect.left + ufoWidth / 2 - halfEmoteSize;
-  const initialY = initialRect.top + 50; // Position at tractor beam origin
+  const initialY = initialRect.top + beamOriginY;
 
   gsap.set(emote, {
     className: "ufo-dropped-emote",
@@ -364,7 +376,7 @@ function dropEmote(image: string, ufoContainer: HTMLElement, ufoWidth: number): 
     if (!trackingActive) return;
     const rect = ufoContainer.getBoundingClientRect();
     const newX = rect.left + ufoWidth / 2 - halfEmoteSize;
-    baseY = rect.top + 50; // Update base Y for when portal animation completes
+    baseY = rect.top + beamOriginY;
     gsap.set(emote, {
       x: newX,
     });
@@ -413,7 +425,7 @@ function dropEmote(image: string, ufoContainer: HTMLElement, ufoWidth: number): 
         // Fall to the ground with drift
         // Use sine.in for a more immediate start to the fall (less gradual ramp-up)
         gsap.to(emote, {
-          y: window.innerHeight + 100,
+          y: window.innerHeight + helpers.scaleRelativeToHeight(100),
           x: currentX + drift,
           rotation: rotation,
           duration: fallDuration,

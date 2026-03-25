@@ -12,8 +12,10 @@ export function invaders(
     count = 256;
   }
 
-  const containerWidth = innerWidth - 800; // Replace with the actual width of the container element
-  const containerHeight = innerHeight - 400;
+  const containerWidth = innerWidth - helpers.scaleRelativeToWidth(800);
+  const containerHeight = innerHeight - helpers.scaleRelativeToHeight(400);
+  const horizontalInset = helpers.scaleRelativeToWidth(50);
+  const spritePadding = helpers.scaleRelativeToViewport(20);
 
   const numRows = Math.ceil(Math.sqrt(count));
   const numCols = Math.ceil(count / numRows);
@@ -43,12 +45,12 @@ export function invaders(
     console.log(cellHeight);
 
     gsap.set(Div, {
-      x: x + 50,
+      x: x + horizontalInset,
       y,
       width: cellWidth,
       height: cellHeight,
       className: "invader-element",
-      backgroundSize: cellHeight - 20,
+      backgroundSize: Math.max(Math.min(cellWidth, cellHeight) - spritePadding, 0),
       backgroundImage: "url(" + images[imagenum] + ")",
     });
     globalVars.warp.appendChild(Div);
@@ -64,6 +66,8 @@ export function invaders(
 
 function invaders_animation(): void {
   const invaders = document.querySelectorAll(".invader-element");
+  const horizontalStep = helpers.scaleRelativeToWidth(200);
+  const verticalStep = helpers.scaleRelativeToHeight(75);
 
   // create a timeline for the animation
   const tl = gsap.timeline({ repeat: 50, repeatRefresh: true });
@@ -73,52 +77,52 @@ function invaders_animation(): void {
 
   // add tweens to the timeline to create the space invaders movement
   tl.to(invaders, {
-    x: "+=200",
+    x: `+=${horizontalStep}`,
     duration: initialDuration,
     onComplete: shortenDuration,
   })
     .to(invaders, {
-      x: "+=200",
+      x: `+=${horizontalStep}`,
       duration: initialDuration,
       onComplete: shortenDuration,
     })
     .to(invaders, {
-      x: "+=200",
+      x: `+=${horizontalStep}`,
       duration: initialDuration,
       onComplete: shortenDuration,
     })
     .to(invaders, {
-      x: "+=200",
+      x: `+=${horizontalStep}`,
       duration: initialDuration,
       onComplete: shortenDuration,
     })
     .to(invaders, {
-      y: "+=75",
+      y: `+=${verticalStep}`,
       duration: initialDuration,
       onComplete: shortenDuration,
     })
     .to(invaders, {
-      x: "-=200",
+      x: `-=${horizontalStep}`,
       duration: initialDuration,
       onComplete: shortenDuration,
     })
     .to(invaders, {
-      x: "-=200",
+      x: `-=${horizontalStep}`,
       duration: initialDuration,
       onComplete: shortenDuration,
     })
     .to(invaders, {
-      x: "-=200",
+      x: `-=${horizontalStep}`,
       duration: initialDuration,
       onComplete: shortenDuration,
     })
     .to(invaders, {
-      x: "-=200",
+      x: `-=${horizontalStep}`,
       duration: initialDuration,
       onComplete: shortenDuration,
     })
     .to(invaders, {
-      y: "+=75",
+      y: `+=${verticalStep}`,
       duration: initialDuration,
       onComplete: shortenDuration,
     });

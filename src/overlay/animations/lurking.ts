@@ -2,6 +2,12 @@ import { globalVars } from "../config.ts";
 import helpers from "../helpers.ts";
 import { gsap } from "gsap";
 
+const LURK_BASE_SIZE = 400;
+
+function getLurkSize(): number {
+  return helpers.scaleRelativeToViewport(LURK_BASE_SIZE);
+}
+
 export function lurking(
   image: string,
   iterations: number = 3,
@@ -17,6 +23,8 @@ export function lurking(
 }
 
 function lurking_animation_left(element: HTMLElement): void {
+  const horizontalPeek = helpers.scaleRelativeToWidth(200);
+
   gsap.to(element, 1, {
     rotationZ: "+=40",
     yoyo: true,
@@ -25,7 +33,7 @@ function lurking_animation_left(element: HTMLElement): void {
     delay: 0,
   });
   gsap.to(element, 1, {
-    x: "+=200",
+    x: `+=${horizontalPeek}`,
     yoyo: true,
     repeat: 0,
     ease: Sine.easeInOut,
@@ -39,7 +47,7 @@ function lurking_animation_left(element: HTMLElement): void {
     delay: 1.5,
   });
   gsap.to(element, 1, {
-    x: "-=200",
+    x: `-=${horizontalPeek}`,
     yoyo: true,
     repeat: 0,
     ease: Sine.easeInOut,
@@ -48,6 +56,8 @@ function lurking_animation_left(element: HTMLElement): void {
 }
 
 function lurking_animation_right(element: HTMLElement): void {
+  const horizontalPeek = helpers.scaleRelativeToWidth(200);
+
   gsap.to(element, 1, {
     rotationZ: "-=40",
     yoyo: true,
@@ -56,7 +66,7 @@ function lurking_animation_right(element: HTMLElement): void {
     delay: 0,
   });
   gsap.to(element, 1, {
-    x: "-=200",
+    x: `-=${horizontalPeek}`,
     yoyo: true,
     repeat: 0,
     ease: Sine.easeInOut,
@@ -70,7 +80,7 @@ function lurking_animation_right(element: HTMLElement): void {
     delay: 1.5,
   });
   gsap.to(element, 1, {
-    x: "+=200",
+    x: `+=${horizontalPeek}`,
     yoyo: true,
     repeat: 0,
     ease: Sine.easeInOut,
@@ -79,15 +89,17 @@ function lurking_animation_right(element: HTMLElement): void {
 }
 
 function lurking_animation_top(element: HTMLElement): void {
+  const verticalPeek = helpers.scaleRelativeToHeight(250);
+
   gsap.to(element, 1, {
-    y: "+=250",
+    y: `+=${verticalPeek}`,
     yoyo: true,
     repeat: 0,
     ease: Sine.easeInOut,
     delay: 0,
   });
   gsap.to(element, 1, {
-    y: "-=250",
+    y: `-=${verticalPeek}`,
     yoyo: true,
     repeat: 0,
     ease: Sine.easeInOut,
@@ -96,15 +108,17 @@ function lurking_animation_top(element: HTMLElement): void {
 }
 
 function lurking_animation_bottom(element: HTMLElement): void {
+  const verticalPeek = helpers.scaleRelativeToHeight(250);
+
   gsap.to(element, 1, {
-    y: "-=250",
+    y: `-=${verticalPeek}`,
     yoyo: true,
     repeat: 0,
     ease: Sine.easeInOut,
     delay: 0,
   });
   gsap.to(element, 1, {
-    y: "+=250",
+    y: `+=${verticalPeek}`,
     yoyo: true,
     repeat: 0,
     ease: Sine.easeInOut,
@@ -118,6 +132,7 @@ function createVisualLurk(image: string): void {
   globalVars.divnumber++;
   Div.style.background = "url(" + image + ")";
   Div.style.backgroundSize = "100% 100%";
+  const lurkSize = getLurkSize();
 
   console.log("Creating a Lurk Element");
 
@@ -129,8 +144,8 @@ function createVisualLurk(image: string): void {
       // left
       gsap.set(Div, {
         className: "lurking-element",
-        x: -400,
-        y: helpers.Randomizer(0, innerHeight - 400),
+        x: -lurkSize,
+        y: helpers.Randomizer(0, Math.max(innerHeight - lurkSize, 0)),
         z: 0,
       });
       lurking_animation_left(Div);
@@ -140,7 +155,7 @@ function createVisualLurk(image: string): void {
       gsap.set(Div, {
         className: "lurking-element",
         x: innerWidth,
-        y: helpers.Randomizer(0, innerHeight - 400),
+        y: helpers.Randomizer(0, Math.max(innerHeight - lurkSize, 0)),
         z: 0,
       });
       lurking_animation_right(Div);
@@ -149,8 +164,8 @@ function createVisualLurk(image: string): void {
       // top
       gsap.set(Div, {
         className: "lurking-element",
-        x: helpers.Randomizer(0, innerWidth - 400),
-        y: -400,
+        x: helpers.Randomizer(0, Math.max(innerWidth - lurkSize, 0)),
+        y: -lurkSize,
         z: 0,
         rotationX: 180,
       });
@@ -160,7 +175,7 @@ function createVisualLurk(image: string): void {
       // bottom
       gsap.set(Div, {
         className: "lurking-element",
-        x: helpers.Randomizer(0, innerWidth - 400),
+        x: helpers.Randomizer(0, Math.max(innerWidth - lurkSize, 0)),
         y: innerHeight,
         z: 0,
       });

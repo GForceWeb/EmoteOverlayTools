@@ -23,10 +23,15 @@ function createEmoteDVD(image: string): void {
   Div.id = globalVars.divnumber.toString();
   globalVars.divnumber++;
 
+  const elementSize = helpers.getCSSPixelValue(
+    "--emote-size-standard",
+    helpers.scaleRelativeToViewport(75)
+  );
+
   gsap.set(Div, {
     className: "dvd-element",
-    x: helpers.Randomizer(0, innerWidth),
-    y: helpers.Randomizer(0, innerHeight),
+    x: helpers.Randomizer(0, Math.max(innerWidth - elementSize, 0)),
+    y: helpers.Randomizer(0, Math.max(innerHeight - elementSize, 0)),
     z: helpers.Randomizer(-200, 200),
     backgroundImage: "url(" + image + ")",
   });
@@ -43,13 +48,6 @@ function createEmoteDVD(image: string): void {
 
 // DVD Bounce animation
 function dvd_animation(element: HTMLElement): void {
-  let DVDStartDirection = helpers.Randomizer(0, 360);
-  let DVDFirstX = helpers.Randomizer(0, innerWidth);
-  let DVDFirstY = helpers.Randomizer(0, innerWidth);
-
-  DVDFirstX = Math.sin(DVDStartDirection) * 2000;
-  DVDFirstY = Math.cos(DVDStartDirection) * 2000;
-
   gsap.to(element, {
     duration: 15,
     x: helpers.Randomizer(4000, 8000) * helpers.randomSign(),
@@ -62,8 +60,11 @@ function dvd_animation(element: HTMLElement): void {
 
 function modX(x) {
   var minX = 0;
-  var size = 75;
-  var maxX = innerWidth - size;
+  var size = helpers.getCSSPixelValue(
+    "--emote-size-standard",
+    helpers.scaleRelativeToViewport(75)
+  );
+  var maxX = Math.max(innerWidth - size, 1);
   x = parseInt(x);
 
   if (x > maxX || x < minX) {
@@ -80,8 +81,11 @@ function modX(x) {
 
 function modY(y) {
   var minY = 0;
-  var size = 75;
-  var maxY = innerHeight - size;
+  var size = helpers.getCSSPixelValue(
+    "--emote-size-standard",
+    helpers.scaleRelativeToViewport(75)
+  );
+  var maxY = Math.max(innerHeight - size, 1);
   y = parseInt(y);
 
   if (y > maxY || y < minY) {

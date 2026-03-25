@@ -11,9 +11,17 @@ Floats/bounces around then all fade out
 export function cheers(images: string[]): void {
   let imgcount = images.length;
   let interval = 250;
-  let basewidth = helpers.Randomizer(innerWidth / 2 - 50, innerWidth / 2 + 50);
-  let xPos = [basewidth, basewidth - 175];
-  let drop = [innerHeight - 500, innerHeight - 600];
+  const centerVariance = helpers.scaleRelativeToWidth(50);
+  const avatarSpacing = helpers.scaleRelativeToWidth(175);
+  let basewidth = helpers.Randomizer(
+    innerWidth / 2 - centerVariance,
+    innerWidth / 2 + centerVariance
+  );
+  let xPos = [basewidth, basewidth - avatarSpacing];
+  let drop = [
+    innerHeight - helpers.scaleRelativeToHeight(500),
+    innerHeight - helpers.scaleRelativeToHeight(600),
+  ];
 
   for (let j = 0; j < images.length; j++) {
     // split the count amongst the images
@@ -70,7 +78,7 @@ function createAvatarDivs(image: string, xPos: number, drop: number): void {
   gsap.set(Div, {
     className: "beer-avatar",
     x: xPos,
-    y: -250,
+    y: -helpers.scaleRelativeToHeight(250),
     z: 10,
     scale: 0.8,
     transformOrigin: "50% 50%",
@@ -86,6 +94,10 @@ function createAvatarDivs(image: string, xPos: number, drop: number): void {
 }
 
 function drop_animation(element: HTMLElement, drop: number): void {
+  const largeBobble = helpers.scaleRelativeToHeight(175);
+  const mediumBobble = helpers.scaleRelativeToHeight(125);
+  const smallBobble = helpers.scaleRelativeToHeight(100);
+
   gsap.to(element, {
     rotation: helpers.Randomizer(-15, 15),
     delay: 1,
@@ -102,14 +114,14 @@ function drop_animation(element: HTMLElement, drop: number): void {
       // Callback when the drop reaches the bottom
       gsap.to(element, {
         duration: 1.45, // Duration of the bobble
-        y: drop - 175, // Bobble up to 60% of the container's height
+        y: drop - largeBobble,
         yoyo: true, // Yoyo effect for bouncing
         repeat: 1, // Repeat indefinitely
         ease: "sine.inOut", // Easing function for the bobble
         onComplete: () => {
           gsap.to(element, {
             duration: 1.55, // Duration of the bobble
-            y: drop - 125, // Bobble up to 60% of the container's height
+            y: drop - mediumBobble,
             yoyo: true, // Yoyo effect for bouncing
             repeat: 1, // Repeat indefinitely
             ease: "sine.inOut", // Easing function for the bobble
@@ -117,7 +129,7 @@ function drop_animation(element: HTMLElement, drop: number): void {
               fadeout(element);
               gsap.to(element, {
                 duration: 1.65, // Duration of the bobble
-                y: drop - 100, // Bobble up to 60% of the container's height
+                y: drop - smallBobble,
                 yoyo: true, // Yoyo effect for bouncing
                 repeat: 1, // Repeat indefinitely
                 ease: "sine.inOut", // Easing function for the bobble

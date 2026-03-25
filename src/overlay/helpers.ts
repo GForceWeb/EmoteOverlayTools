@@ -3,6 +3,30 @@ function Randomizer(min: number, max: number): number {
   return min + Math.random() * (max - min);
 }
 
+const REFERENCE_WIDTH = 1920;
+const REFERENCE_HEIGHT = 1080;
+
+function scaleRelativeToWidth(px: number): number {
+  return (window.innerWidth * px) / REFERENCE_WIDTH;
+}
+
+function scaleRelativeToHeight(px: number): number {
+  return (window.innerHeight * px) / REFERENCE_HEIGHT;
+}
+
+function scaleRelativeToViewport(px: number): number {
+  return Math.min(scaleRelativeToWidth(px), scaleRelativeToHeight(px));
+}
+
+function getCSSPixelValue(variableName: string, fallback: number): number {
+  const rawValue = getComputedStyle(document.documentElement)
+    .getPropertyValue(variableName)
+    .trim();
+  const parsedValue = parseFloat(rawValue);
+
+  return Number.isFinite(parsedValue) ? parsedValue : fallback;
+}
+
 function TopOrBottom(): number {
   var topOrBottom = Math.random();
   if (topOrBottom < 0.5) {
@@ -136,7 +160,11 @@ export default {
   randomSign,
   removeelement,
   getCommandValue,
+  getCSSPixelValue,
   Randomizer,
+  scaleRelativeToHeight,
+  scaleRelativeToViewport,
+  scaleRelativeToWidth,
   TopOrBottom,
   getTwitchAvatar,
   executeWithInterval,

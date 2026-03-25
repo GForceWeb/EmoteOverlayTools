@@ -23,10 +23,12 @@ function createEmoteRise(image: string): void {
   Div.id = globalVars.divnumber.toString();
   globalVars.divnumber++;
 
+  const riseStartOffset = helpers.scaleRelativeToViewport(75);
+
   gsap.set(Div, {
     className: "rising-element",
     x: helpers.Randomizer(0, innerWidth),
-    y: innerHeight - 75,
+    y: innerHeight - riseStartOffset,
     z: helpers.Randomizer(-200, 200),
     backgroundImage: "url(" + image + ")",
   });
@@ -43,11 +45,16 @@ function createEmoteRise(image: string): void {
 
 // Rising animation
 function rising_animation(element: HTMLElement): void {
+  const riseSize = helpers.getCSSPixelValue(
+    "--emote-size-standard",
+    helpers.scaleRelativeToViewport(75)
+  );
+
   //Fade In
   gsap.to(element, 3, {
     opacity: 1,
-    width: "75px",
-    height: "75px",
+    width: riseSize,
+    height: riseSize,
     ease: Linear.easeNone,
     repeat: 0,
     delay: -1,
@@ -55,10 +62,15 @@ function rising_animation(element: HTMLElement): void {
   //Vertical Movement
   gsap.to(element, {
     duration: helpers.Randomizer(10, 20),
-    y: -100,
+    y: -helpers.scaleRelativeToHeight(100),
     x: function () {
       let xMove = gsap.getProperty(element, "x") as number;
-      return helpers.Randomizer(-250, 250) + xMove;
+      return (
+        helpers.Randomizer(
+          -helpers.scaleRelativeToWidth(250),
+          helpers.scaleRelativeToWidth(250)
+        ) + xMove
+      );
     },
     ease: Linear.easeNone,
     repeat: 0,

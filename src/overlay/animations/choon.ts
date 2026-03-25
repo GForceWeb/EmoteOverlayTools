@@ -18,7 +18,17 @@ export function choon(image) {
 
   // Randomise side to peep from
   var random = Math.floor(helpers.Randomizer(1, 2.99));
-  let height = helpers.Randomizer(0, innerHeight - 400);
+  const avatarSize = helpers.getCSSPixelValue(
+    "--avatar-size-standard",
+    helpers.scaleRelativeToViewport(216)
+  );
+  const offscreenOffset = avatarSize;
+  const noteLeftMin = helpers.scaleRelativeToWidth(50);
+  const noteLeftMax = helpers.scaleRelativeToWidth(250);
+  const noteHeightRange = helpers.scaleRelativeToHeight(200);
+  const rightNoteNearEdge = helpers.scaleRelativeToWidth(100);
+  const rightNoteFarEdge = helpers.scaleRelativeToWidth(350);
+  let height = helpers.Randomizer(0, Math.max(innerHeight - avatarSize, 0));
   let times = 8; // Increased number of notes
   let Notes = [];
 
@@ -26,7 +36,7 @@ export function choon(image) {
     case 1:
       // left
       gsap.set(SingingContainer, {
-        x: -400,
+        x: -offscreenOffset,
         y: height,
         z: 100,
         transformOrigin: "center",
@@ -40,8 +50,8 @@ export function choon(image) {
         // More varied positioning of notes
         gsap.set(Notes[i], {
           className: "note-element",
-          x: helpers.Randomizer(-50, 250),
-          y: height + helpers.Randomizer(-200, 200),
+          x: helpers.Randomizer(-noteLeftMin, noteLeftMax),
+          y: height + helpers.Randomizer(-noteHeightRange, noteHeightRange),
           z: 10,
           opacity: 0,
           scale: 0.01,
@@ -58,7 +68,7 @@ export function choon(image) {
     case 2:
       // right
       gsap.set(SingingContainer, {
-        x: innerWidth + 400,
+        x: innerWidth + offscreenOffset,
         y: height,
         z: 0,
         transformOrigin: "center",
@@ -72,8 +82,11 @@ export function choon(image) {
         // More varied positioning of notes
         gsap.set(Notes[i], {
           className: "note-element",
-          x: helpers.Randomizer(innerWidth - 100, innerWidth - 350),
-          y: height + helpers.Randomizer(-200, 200),
+          x: helpers.Randomizer(
+            innerWidth - rightNoteNearEdge,
+            innerWidth - rightNoteFarEdge
+          ),
+          y: height + helpers.Randomizer(-noteHeightRange, noteHeightRange),
           z: 10,
           opacity: 0,
           scale: 0.01,
