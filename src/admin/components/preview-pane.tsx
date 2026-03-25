@@ -8,7 +8,7 @@ import {
 } from "@/admin/components/ui/card";
 import { RefreshCwIcon, MaximizeIcon } from "lucide-react";
 import { Button } from "@/admin/components/ui/button";
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { PreviewModal } from "@/admin/components/preview-modal";
 import type { Settings } from "@/shared/types";
 
@@ -22,189 +22,73 @@ export function PreviewPane({ previewUrl, settings, onSettingsChange }: PreviewP
   const [url, setUrl] = useState(previewUrl);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [iframeLoaded, setIframeLoaded] = useState(false);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-  const sidebarPlaceholderRef = useRef<HTMLDivElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement | null>(null);
+  const [sidebarHostElement, setSidebarHostElement] = useState<HTMLDivElement | null>(null);
+  const [modalHostElement, setModalHostElement] = useState<HTMLDivElement | null>(null);
 
   useEffect(() => {
     setUrl(previewUrl);
   }, [previewUrl]);
 
-  // Handle iframe load event
-  const handleIframeLoad = () => {
-    setIframeLoaded(true);
-    // Position iframe after it's loaded
-    positionIframeInSidebar();
-  };
-
-  // Position iframe function - extracted to be called from multiple places
-  const positionIframeInSidebar = () => {
-    const iframe = document.getElementById("overlay-iframe");
-    const container = document.getElementById("floating-preview-container");
-
-    if (!sidebarPlaceholderRef.current || !iframe || !container) return;
-
-    try {
-      const sidebarRect = sidebarPlaceholderRef.current.getBoundingClientRect();
-
-      if (sidebarRect.width === 0 || sidebarRect.height === 0) {
-        console.warn(
-          "Sidebar placeholder has zero dimensions, delaying positioning"
-        );
-        setTimeout(positionIframeInSidebar, 300);
-        return;
-      }
-
-      // Calculate scale to fit 1920x1080 into the sidebar placeholder
-      // Use the actual available height instead of the padding-based height
-      const availableHeight = sidebarRect.height;
-      const scaleX = sidebarRect.width / 1920;
-      const scaleY = availableHeight / 1080;
-      const scale = Math.min(scaleX, scaleY, 1); // Don't scale up beyond 100%
-
-      // Center the iframe in the placeholder
-      const leftOffset =
-        sidebarRect.left + (sidebarRect.width - 1920 * scale) / 2;
-      const topOffset =
-        sidebarRect.top + (availableHeight - 1080 * scale) / 2;
-
-      // Apply the transformation - make sure to set explicit initial values
-      iframe.style.transform = `translate(${leftOffset}px, ${topOffset}px) scale(${scale})`;
-      iframe.style.opacity = "1"; // Ensure visibility
-
-      // Update data attributes
-      container.dataset.currentScale = String(scale);
-      container.dataset.leftOffset = String(leftOffset);
-      container.dataset.topOffset = String(topOffset);
-    } catch (error) {
-      console.error("Error positioning iframe:", error);
-    }
-  };
-
-  // Enhanced effect to position the iframe on load, scroll, and window resize
   useEffect(() => {
-    if (!iframeLoaded) return; // Only run after iframe has loaded
+    const iframe = document.createElement("iframe");
 
-    // Position immediately when component mounts
-    positionIframeInSidebar();
+    iframe.id = "overlay-iframe";
+    iframe.title = "Twitch Overlay Preview";
+    iframe.className = "size-full border-0 bg-black";
+    iframe.allow =
+      "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+    iframe.allowFullscreen = true;
 
-    // Add event listeners for scroll and resize
-    window.addEventListener("resize", positionIframeInSidebar);
-    window.addEventListener("scroll", positionIframeInSidebar);
+    const handleLoad = () => {
+      setIframeLoaded(true);
+    };
 
-    // Watch for layout changes in the entire sidebar
-    let sidebarContainer: Element | null = null;
-    if (sidebarPlaceholderRef.current) {
-      // Find the sidebar container (parent of the preview pane)
-      sidebarContainer = sidebarPlaceholderRef.current.closest('.lg\\:col-span-2');
-    }
-
-    // Check for ResizeObserver and use it if available
-    if (sidebarPlaceholderRef.current && window.ResizeObserver) {
-      const resizeObserver = new ResizeObserver((entries) => {
-        positionIframeInSidebar();
-      });
-
-      resizeObserver.observe(sidebarPlaceholderRef.current);
-
-      // Also observe the sidebar container to detect layout changes from other cards
-      if (sidebarContainer && sidebarContainer !== sidebarPlaceholderRef.current) {
-        resizeObserver.observe(sidebarContainer);
-      }
-
-      return () => {
-        window.removeEventListener("resize", positionIframeInSidebar);
-        window.removeEventListener("scroll", positionIframeInSidebar);
-        resizeObserver.disconnect();
-      };
-    }
+    iframe.addEventListener("load", handleLoad);
+    iframeRef.current = iframe;
+    setIframeLoaded(false);
+    iframe.src = previewUrl;
 
     return () => {
-      window.removeEventListener("resize", positionIframeInSidebar);
-      window.removeEventListener("scroll", positionIframeInSidebar);
+      iframe.removeEventListener("load", handleLoad);
+      iframe.remove();
+      iframeRef.current = null;
     };
-  }, [iframeLoaded]);
+  }, []);
 
-  // Watch for DOM changes that might affect layout
   useEffect(() => {
-    if (!iframeLoaded) return;
+    const iframe = iframeRef.current;
 
-    let sidebarContainer: Element | null = null;
-    if (sidebarPlaceholderRef.current) {
-      sidebarContainer = sidebarPlaceholderRef.current.closest('.lg\\:col-span-2');
+    if (!iframe) {
+      return;
     }
 
-    if (sidebarContainer && window.MutationObserver) {
-      const mutationObserver = new MutationObserver((mutations) => {
-        // Check if any mutations might affect layout
-        const shouldReposition = mutations.some(mutation => {
-          // Reposition if nodes were added/removed or attributes changed
-          return mutation.type === 'childList' || 
-                 (mutation.type === 'attributes' && 
-                  (mutation.attributeName === 'class' || mutation.attributeName === 'style'));
-        });
-
-        if (shouldReposition) {
-          // Small delay to allow layout to settle
-          setTimeout(positionIframeInSidebar, 50);
-        }
-      });
-
-      mutationObserver.observe(sidebarContainer, {
-        childList: true,
-        subtree: true,
-        attributes: true,
-        attributeFilter: ['class', 'style']
-      });
-
-      return () => {
-        mutationObserver.disconnect();
-      };
+    if (iframe.getAttribute("src") !== url) {
+      setIframeLoaded(false);
+      iframe.src = url;
     }
-  }, [iframeLoaded]);
+  }, [url]);
 
-  // Additional effect to reposition iframe when URL changes (which might affect layout)
-  useEffect(() => {
-    if (iframeLoaded) {
-      // Small delay to allow layout to settle after URL change
-      setTimeout(positionIframeInSidebar, 100);
+  useLayoutEffect(() => {
+    const iframe = iframeRef.current;
+    const targetHost = isModalOpen ? modalHostElement : sidebarHostElement;
+
+    if (!iframe || !targetHost || iframe.parentElement === targetHost) {
+      return;
     }
-  }, [url, iframeLoaded]);
 
-  // Listen for global layout change events
-  useEffect(() => {
-    if (!iframeLoaded) return;
-
-    const handleLayoutChange = () => {
-      // Small delay to allow layout to settle
-      setTimeout(positionIframeInSidebar, 100);
-    };
-
-    // Listen for custom layout change events
-    window.addEventListener('layout-change', handleLayoutChange);
-    
-    // Also listen for window focus which might indicate layout changes
-    window.addEventListener('focus', handleLayoutChange);
-
-    return () => {
-      window.removeEventListener('layout-change', handleLayoutChange);
-      window.removeEventListener('focus', handleLayoutChange);
-    };
-  }, [iframeLoaded]);
-
-  // Expose reposition function globally for manual triggering
-  useEffect(() => {
-    if (iframeLoaded) {
-      // Make the reposition function available globally
-      (window as any).repositionPreviewIframe = positionIframeInSidebar;
-      
-      return () => {
-        delete (window as any).repositionPreviewIframe;
-      };
-    }
-  }, [iframeLoaded]);
+    targetHost.appendChild(iframe);
+  }, [isModalOpen, modalHostElement, sidebarHostElement]);
 
   const refreshPreview = () => {
     if (iframeRef.current) {
+      setIframeLoaded(false);
+
+      if (iframeRef.current.contentWindow) {
+        iframeRef.current.contentWindow.location.reload();
+        return;
+      }
+
       iframeRef.current.src = url;
     }
   };
@@ -239,55 +123,28 @@ export function PreviewPane({ previewUrl, settings, onSettingsChange }: PreviewP
           </CardDescription>
         </CardHeader>
         <CardContent className="flex-1 min-h-0 flex flex-col">
-          {/* This is a placeholder that helps position our fixed iframe */}
           <div
-            ref={sidebarPlaceholderRef}
-            className="relative w-full flex-1 min-h-0"
-            style={{ 
-              paddingTop: "56.25%", /* 16:9 Aspect Ratio */
-              maxHeight: "calc(100vh - 400px)" /* Limit maximum height */
-            }}
-            data-testid="sidebar-preview-placeholder"
+            className="relative mx-auto aspect-video w-full overflow-hidden rounded-md border bg-black"
+            data-testid="sidebar-preview-host"
+            ref={setSidebarHostElement}
           >
-            {/* Content will be positioned here via the fixed iframe */}
+            {!iframeLoaded && (
+              <div className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground">
+                Loading preview...
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
 
-      {/* Fixed position iframe that moves between sidebar and modal via CSS */}
-      <div
-        className={`fixed top-0 left-0 w-0 h-0 pointer-events-none ${
-          isModalOpen ? "z-[60] modal-active" : "z-[40]"
-        }`}
-        id="floating-preview-container"
-      >
-        <iframe
-          id="overlay-iframe"
-          ref={iframeRef}
-          src={url}
-          className="absolute border-0 rounded-md bg-black pointer-events-auto"
-          title="Twitch Overlay Preview"
-          style={{
-            width: "1920px",
-            height: "1080px",
-            opacity: "0", // Start hidden, will be shown once positioned
-            transformOrigin: "top left",
-            transition: "transform 0.3s ease-in-out, opacity 0.3s ease-in-out",
-          }}
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-          onLoad={handleIframeLoad}
-        />
-      </div>
-
       <PreviewModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        previewUrl={url}
         onRefresh={refreshPreview}
-        sidebarPlaceholderRef={sidebarPlaceholderRef}
+        previewHostRef={setModalHostElement}
         settings={settings}
         onSettingsChange={onSettingsChange}
+        isPreviewReady={iframeLoaded}
       />
     </>
   );

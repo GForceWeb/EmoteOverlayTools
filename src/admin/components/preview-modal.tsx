@@ -7,173 +7,34 @@ import {
 } from "@/admin/components/ui/dialog";
 import { Button } from "@/admin/components/ui/button";
 import { RefreshCwIcon, XIcon } from "lucide-react";
-import { useEffect, useRef, useState, type RefObject } from "react";
+import { useRef, useState, type RefCallback } from "react";
 import { PreviewControls } from "@/admin/components/preview-controls";
 import type { Settings } from "@/shared/types";
 
 interface PreviewModalProps {
   isOpen: boolean;
   onClose: () => void;
-  previewUrl: string;
   onRefresh: () => void;
-  sidebarPlaceholderRef: RefObject<HTMLDivElement>;
+  previewHostRef: RefCallback<HTMLDivElement>;
   settings: Settings;
   onSettingsChange?: (settings: Settings) => void;
+  isPreviewReady: boolean;
 }
 
 export function PreviewModal({
   isOpen,
   onClose,
-  previewUrl,
   onRefresh,
-  sidebarPlaceholderRef,
+  previewHostRef,
   settings,
   onSettingsChange,
+  isPreviewReady,
 }: PreviewModalProps) {
   const modalContentRef = useRef<HTMLDivElement>(null);
-  const modalPlaceholderRef = useRef<HTMLDivElement>(null);
   const [showControls, setShowControls] = useState(true);
 
-  // Enhanced effect for modal position handling
-  useEffect(() => {
-    // Enhanced positioning for modal view
-    const positionIframeInModal = () => {
-      const iframe = document.getElementById("overlay-iframe");
-      const container = document.getElementById("floating-preview-container");
-
-      if (!isOpen || !iframe || !container || !modalPlaceholderRef.current)
-        return;
-
-      try {
-        // Set modal active class
-        container.classList.add("modal-active");
-
-        // Get modal placeholder dimensions
-        const modalRect = modalPlaceholderRef.current.getBoundingClientRect();
-
-        if (modalRect.width === 0 || modalRect.height === 0) {
-          console.warn("Modal placeholder has zero dimensions, retrying...");
-          setTimeout(positionIframeInModal, 50);
-          return;
-        }
-
-        // Calculate scale to fit the iframe (1920x1080) into the modal placeholder
-        const scaleX = modalRect.width / 1920;
-        const scaleY = modalRect.height / 1080;
-        const scale = Math.min(scaleX, scaleY);
-
-        // Center the iframe in the modal placeholder
-        const leftOffset =
-          modalRect.left + (modalRect.width - 1920 * scale) / 2;
-        const topOffset = modalRect.top + (modalRect.height - 1080 * scale) / 2;
-
-        // Apply the transformation with a slight delay to ensure smooth transition
-        setTimeout(() => {
-          iframe.style.transform = `translate(${leftOffset}px, ${topOffset}px) scale(${scale})`;
-          iframe.style.opacity = "1";
-
-          // Store positioning data
-          container.dataset.modalScale = String(scale);
-          container.dataset.modalLeft = String(leftOffset);
-          container.dataset.modalTop = String(topOffset);
-        }, 10);
-      } catch (error) {
-        console.error("Error positioning iframe in modal:", error);
-      }
-    };
-
-    // If modal is open, position the iframe
-    if (isOpen) {
-      // Small delay to ensure modal is fully rendered
-      setTimeout(positionIframeInModal, 300);
-
-      // Add event listeners for resizing and scrolling
-      window.addEventListener("resize", positionIframeInModal);
-      window.addEventListener("scroll", positionIframeInModal);
-
-      // Use ResizeObserver if available
-      if (modalPlaceholderRef.current && window.ResizeObserver) {
-        const resizeObserver = new ResizeObserver(() => {
-          positionIframeInModal();
-        });
-
-        resizeObserver.observe(modalPlaceholderRef.current);
-
-        return () => {
-          returnIframeToSidebar();
-          window.removeEventListener("resize", positionIframeInModal);
-          window.removeEventListener("scroll", positionIframeInModal);
-          resizeObserver.disconnect();
-        };
-      }
-
-      return () => {
-        returnIframeToSidebar();
-        window.removeEventListener("resize", positionIframeInModal);
-        window.removeEventListener("scroll", positionIframeInModal);
-      };
-    }
-  }, [isOpen, sidebarPlaceholderRef, showControls]); // Added showControls as dependency
-
-  // Function to return the iframe to sidebar position
-  const returnIframeToSidebar = () => {
-    const iframe = document.getElementById("overlay-iframe");
-    const container = document.getElementById("floating-preview-container");
-
-    if (!iframe || !container || !sidebarPlaceholderRef.current) return;
-
-    try {
-      // Remove modal active class
-      container.classList.remove("modal-active");
-
-      const sidebarRect = sidebarPlaceholderRef.current.getBoundingClientRect();
-
-      // Calculate scale for sidebar view
-      const scaleX = sidebarRect.width / 1920;
-      const scaleY = sidebarRect.height / 1080;
-      const scale = Math.min(scaleX, scaleY);
-
-      // Center in sidebar
-      const leftOffset =
-        sidebarRect.left + (sidebarRect.width - 1920 * scale) / 2;
-      const topOffset =
-        sidebarRect.top + (sidebarRect.height - 1080 * scale) / 2;
-
-      // Apply the transformation
-      iframe.style.transform = `translate(${leftOffset}px, ${topOffset}px) scale(${scale})`;
-    } catch (error) {
-      console.error("Error returning iframe to sidebar:", error);
-    }
-  };
-
-  // Function to handle control visibility toggle
   const handleToggleControls = () => {
     setShowControls(!showControls);
-    // Add small delay to allow DOM to update before repositioning
-    setTimeout(() => {
-      const iframe = document.getElementById("overlay-iframe");
-      const container = document.getElementById("floating-preview-container");
-
-      if (iframe && container && modalPlaceholderRef.current) {
-        // Force recalculation of iframe position
-        const modalRect = modalPlaceholderRef.current.getBoundingClientRect();
-
-        const scaleX = modalRect.width / 1920;
-        const scaleY = modalRect.height / 1080;
-        const scale = Math.min(scaleX, scaleY);
-
-        const leftOffset =
-          modalRect.left + (modalRect.width - 1920 * scale) / 2;
-        const topOffset = modalRect.top + (modalRect.height - 1080 * scale) / 2;
-
-        iframe.style.transform = `translate(${leftOffset}px, ${topOffset}px) scale(${scale})`;
-
-        // Update stored positioning data
-        container.dataset.modalScale = String(scale);
-        container.dataset.modalLeft = String(leftOffset);
-        container.dataset.modalTop = String(topOffset);
-      }
-    }, 100);
   };
 
   return (
@@ -220,20 +81,26 @@ export function PreviewModal({
           </div>
         </DialogHeader>
 
-        <div className="flex flex-col md:flex-row w-full h-full">
+        <div className="flex flex-1 flex-col md:flex-row w-full min-h-0">
           {showControls && (
             <div className="w-full md:w-64 border-r border-border bg-card p-4 overflow-y-auto">
               <PreviewControls settings={settings} onSettingsChange={onSettingsChange} />
             </div>
           )}
-          {/* This is a placeholder that helps position our fixed iframe */}
           <div
-            ref={modalPlaceholderRef}
-            className="relative w-full flex-grow bg-black overflow-hidden"
-            style={{ height: "calc(90vh - 60px)" }}
-            data-testid="modal-preview-placeholder"
+            className="flex flex-1 min-h-[320px] items-center justify-center overflow-auto bg-muted/20 p-4 md:p-6"
           >
-            {/* Content will be positioned here via the fixed iframe */}
+            <div
+              className="relative aspect-video w-full max-w-5xl overflow-hidden rounded-md border bg-black"
+              data-testid="modal-preview-host"
+              ref={previewHostRef}
+            >
+              {!isPreviewReady && (
+                <div className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground">
+                  Loading preview...
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </DialogContent>
