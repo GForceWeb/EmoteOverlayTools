@@ -129,6 +129,15 @@ export const animationRegistry: Record<string, AnimationDefinition> = {
     defaultEnabledManual: true,
     defaultEnabledKappagen: true,
   },
+  orbit: {
+    name: "orbit",
+    displayName: "Orbit",
+    description: "Emotes orbit around a shared ring with depth perspective",
+    defaultCount: 100,
+    defaultInterval: 150,
+    defaultEnabledManual: true,
+    defaultEnabledKappagen: true,
+  },
   spiral: {
     name: "spiral",
     displayName: "Spiral",
