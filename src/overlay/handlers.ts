@@ -302,6 +302,35 @@ function actionsHandler(wsdata: WSData): void {
   let action = wsdata.data?.name;
 }
 
+function gigantifyRedeemHandler(wsdata: WSData): void {
+  const isAdminPreview = wsdata.event?.source === "Admin";
+
+  if (!isAdminPreview && !isFeatureEnabled("gigantifyredeem", true)) {
+    logger.info("Gigantify Emote Redeems Not Enabled");
+    return;
+  }
+
+  if (wsdata.data?.rewardType !== "gigantify_an_emote") {
+    return;
+  }
+
+  const gigantifiedEmoteUrl = wsdata.data?.gigantifiedEmoteUrl;
+  if (!gigantifiedEmoteUrl) {
+    logger.info("Gigantify reward missing gigantified emote URL");
+    return;
+  }
+
+  if (
+    !animations.hasOwnProperty("gigantify") ||
+    typeof animations.gigantify !== "function"
+  ) {
+    logger.error("Gigantify animation function not found");
+    return;
+  }
+
+  animations.gigantify([gigantifiedEmoteUrl]);
+}
+
 function extractEmojiStrings(message: string): string[] {
   // Matches:
   // - Keycap sequences: 1️⃣, #️⃣, *️⃣
@@ -588,6 +617,7 @@ function botChat(message: string): void {
 export default {
   chatMessageHandler,
   actionsHandler,
+  gigantifyRedeemHandler,
   emoteMessageHandler,
   firstWordsHander,
   cheersCommand,

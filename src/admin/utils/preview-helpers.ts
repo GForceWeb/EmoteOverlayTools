@@ -93,6 +93,42 @@ export const previewFeature = (
   const iframe = getOverlayIframe();
   if (!iframe) return;
 
+  const previewEmotes = getPreviewEmotes(settings);
+
+  if (feature === "gigantifyredeem") {
+    const gigantifiedEmoteUrl =
+      previewEmotes[0]?.imageUrl ||
+      "https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/3.0";
+
+    const wsMessage: WSData = {
+      event: {
+        source: "Admin",
+        type: "AutomaticRewardRedemption",
+      },
+      data: {
+        userId: "123456789",
+        userName: settings.twitchUsername || "gforce_bot",
+        rewardType: "gigantify_an_emote",
+        rewardTitle: "Gigantify an Emote",
+        gigantifiedEmoteName: previewEmotes[0]?.name || "Kappa",
+        gigantifiedEmoteUrl,
+      },
+    };
+
+    iframe.contentWindow?.postMessage(
+      {
+        type: "PREVIEW_FEATURE",
+        feature: feature,
+        wsdata: wsMessage,
+        config: config,
+      },
+      "*"
+    );
+
+    console.log(`Previewing feature: ${feature}`, wsMessage);
+    return;
+  }
+
   // Determine the command based on feature type
   let featureCommand = "";
   switch (feature) {
@@ -114,9 +150,6 @@ export const previewFeature = (
     default:
       featureCommand = `!${feature}`;
   }
-
-  // Get custom preview emotes from settings
-  const previewEmotes = getPreviewEmotes(settings);
 
   // Construct the message
   const wsMessage: WSData = {

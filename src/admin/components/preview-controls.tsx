@@ -34,6 +34,17 @@ interface PreviewControlsProps {
 }
 
 export function PreviewControls({ settings, onSettingsChange }: PreviewControlsProps) {
+  const featureLabels: Record<keyof Settings["features"], string> = {
+    lurk: "Lurk",
+    welcome: "Welcome",
+    kappagen: "Kappagen",
+    cheers: "Cheers",
+    hypetrain: "Hype Train",
+    emoterain: "Emote Rain",
+    choon: "Choon",
+    gigantifyredeem: "Gigantify Emotes",
+  };
+
   const [activeTab, setActiveTab] = useState<"feature" | "animation">(
     "animation"
   );
@@ -136,7 +147,11 @@ export function PreviewControls({ settings, onSettingsChange }: PreviewControlsP
                   )
                   .map((feature) => (
                     <SelectItem key={feature} value={feature}>
-                      {feature.charAt(0).toUpperCase() + feature.slice(1)}
+                      {
+                        featureLabels[
+                          feature as keyof Settings["features"]
+                        ]
+                      }
                     </SelectItem>
                   ))}
               </SelectContent>
@@ -152,7 +167,9 @@ export function PreviewControls({ settings, onSettingsChange }: PreviewControlsP
               >
                 <PlayIcon className="mr-2 h-4 w-4" />
                 Preview{" "}
-                {selectedItem.charAt(0).toUpperCase() + selectedItem.slice(1)}
+                {featureLabels[selectedItem as keyof Settings["features"]] ||
+                  selectedItem.charAt(0).toUpperCase() +
+                    selectedItem.slice(1)}
               </Button>
             </div>
           )}

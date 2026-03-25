@@ -25,6 +25,17 @@ export function FeatureSettings({
   settings,
   setSettings,
 }: FeatureSettingsProps) {
+  const featureLabels: Record<keyof Settings["features"], string> = {
+    lurk: "Lurk",
+    welcome: "Welcome",
+    kappagen: "Kappagen",
+    cheers: "Cheers",
+    hypetrain: "Hype Train",
+    emoterain: "Emote Rain",
+    choon: "Choon",
+    gigantifyredeem: "Gigantify Emote Redeems",
+  };
+
   const handleFeatureToggle = (
     feature: keyof Settings["features"],
     enabled: boolean
@@ -58,6 +69,8 @@ export function FeatureSettings({
     hypetrain: "Animations during Hype Train events",
     emoterain: "Make it rain emotes on command",
     choon: "Music-related animations and effects",
+    gigantifyredeem:
+      "Animate Twitch Gigantify an Emote power-up redemptions",
   };
 
   return (
@@ -96,8 +109,8 @@ export function FeatureSettings({
             <div key={feature} className="flex flex-col space-y-2">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label htmlFor={`feature-${feature}`} className="capitalize">
-                    {feature}
+                  <Label htmlFor={`feature-${feature}`}>
+                    {featureLabels[feature as keyof Settings["features"]]}
                   </Label>
                   <p className="text-sm text-muted-foreground">
                     {featureDescriptions[feature as keyof Settings["features"]]}

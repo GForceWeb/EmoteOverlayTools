@@ -27,6 +27,7 @@ export interface FeatureList {
   hypetrain: FeatureSettings;
   emoterain: FeatureSettings;
   choon: FeatureSettings;
+  gigantifyredeem: FeatureSettings;
 }
 
 export interface PreviewEmote {
@@ -71,6 +72,7 @@ export interface WSData {
     source?: string;
   };
   data?: {
+    userId?: string;
     message?: {
       username?: string;
       userId?: string;
@@ -88,6 +90,11 @@ export interface WSData {
     from_broadcaster_user_id?: string;
     from_broadcaster_user_name?: string;
     viewers?: number;
+    rewardType?: string;
+    rewardTitle?: string;
+    gigantifiedEmoteId?: string;
+    gigantifiedEmoteName?: string;
+    gigantifiedEmoteUrl?: string;
   };
   actions?: any[];
   id?: string;

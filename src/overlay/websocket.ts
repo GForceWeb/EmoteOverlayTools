@@ -66,6 +66,7 @@ function connectws(): void {
             Twitch: [
               "ChatMessage",
               "FirstWord",
+              "AutomaticRewardRedemption",
               "HypeTrainStart",
               "HypeTrainUpdate",
               "HypeTrainLevelUp",
@@ -190,6 +191,11 @@ function handleMessage(msg: string): void {
     //Pass to FirstWordsHandler
     if (eventType == "FirstWord") {
       handlers.firstWordsHander(wsdata);
+      return;
+    }
+
+    if (eventType == "AutomaticRewardRedemption") {
+      handlers.gigantifyRedeemHandler(wsdata);
       return;
     }
 

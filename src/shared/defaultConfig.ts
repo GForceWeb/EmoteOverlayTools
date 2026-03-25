@@ -125,6 +125,7 @@ export const defaultConfig: Settings = {
     hypetrain: { enabled: true },
     emoterain: { enabled: true },
     choon: { enabled: true },
+    gigantifyredeem: { enabled: true },
   },
   animations: generateDefaultAnimations(),
   maxEmotes: 200,
