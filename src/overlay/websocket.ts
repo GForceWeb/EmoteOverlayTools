@@ -15,7 +15,26 @@ const handleElectronMessage = (event: MessageEvent) => {
   // Optional: Validate the origin for security
   // if (event.origin !== "your-expected-origin") return;
 
-  const { type, animation, wsdata } = event.data;
+  const { type, feature, config, wsdata } = event.data;
+
+  if (
+    type === "PREVIEW_FEATURE" &&
+    feature &&
+    config &&
+    feature in OverlaySettings.settings.features
+  ) {
+    OverlaySettings.updateSettings({
+      features: {
+        [feature]: {
+          ...OverlaySettings.settings.features[
+            feature as keyof typeof OverlaySettings.settings.features
+          ],
+          ...config,
+        },
+      } as Partial<typeof OverlaySettings.settings.features>,
+    });
+  }
+
   if (type === "PREVIEW_ANIMATION" || type === "PREVIEW_FEATURE") {
     handleMessage(JSON.stringify(wsdata));
   }

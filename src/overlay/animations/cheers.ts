@@ -1,6 +1,8 @@
 import { globalVars } from "../config";
 import helpers from "../helpers";
 import { gsap } from "gsap";
+import OverlaySettings from "../settings";
+import type { CheersPosition } from "@/shared/types";
 
 /*
 Large Beer image fade in
@@ -9,23 +11,52 @@ Floats/bounces around then all fade out
 */
 
 export function cheers(images: string[]): void {
-  let imgcount = images.length;
-  let interval = 250;
+  for (const centerX of getCheersCenters()) {
+    createCheersInstance(images, centerX);
+  }
+}
+
+function getCheersCenters(): number[] {
+  const cheersSettings = OverlaySettings.settings.features.cheers;
+  const leftFifth = innerWidth / 5;
+  const rightFifth = (innerWidth * 4) / 5;
+
+  if (cheersSettings.quantity === 2) {
+    return [leftFifth, rightFifth];
+  }
+
+  return [getCenterXForPosition(cheersSettings.position)];
+}
+
+function getCenterXForPosition(position: CheersPosition): number {
+  switch (position) {
+    case "left":
+      return innerWidth / 5;
+    case "right":
+      return (innerWidth * 4) / 5;
+    case "center":
+    default:
+      return innerWidth / 2;
+  }
+}
+
+function createCheersInstance(images: string[], centerX: number): void {
+  const imgcount = images.length;
+  const interval = 250;
   const centerVariance = helpers.scaleRelativeToWidth(50);
   const avatarSpacing = helpers.scaleRelativeToWidth(175);
-  let basewidth = helpers.Randomizer(
-    innerWidth / 2 - centerVariance,
-    innerWidth / 2 + centerVariance
+  const basewidth = helpers.Randomizer(
+    centerX - centerVariance,
+    centerX + centerVariance
   );
-  let xPos = [basewidth, basewidth - avatarSpacing];
-  let drop = [
+  const xPos = [basewidth, basewidth - avatarSpacing];
+  const drop = [
     innerHeight - helpers.scaleRelativeToHeight(500),
     innerHeight - helpers.scaleRelativeToHeight(600),
   ];
 
   for (let j = 0; j < images.length; j++) {
-    // split the count amongst the images
-    let imagenum = j % imgcount;
+    const imagenum = j % imgcount;
     setTimeout(() => {
       createAvatarDivs(images[imagenum], xPos[imagenum], drop[imagenum]);
     }, j * interval);
@@ -34,11 +65,10 @@ export function cheers(images: string[]): void {
   const BeerDiv = document.createElement("div");
   BeerDiv.id = globalVars.divnumber.toString();
   globalVars.divnumber++;
-  //BeerDiv.style.background = 'url(' + 'img/beer.jpg' + ')';
   BeerDiv.style.backgroundSize = "100% 100%";
   gsap.set(BeerDiv, {
     className: "beer-glass",
-    x: innerWidth / 2,
+    x: centerX,
     y: 0,
     z: 0,
     opacity: 0,
@@ -51,9 +81,9 @@ export function cheers(images: string[]): void {
   beer_animation(BeerDiv);
 
   const video: HTMLVideoElement = document.createElement("video");
-  video.src = "img/beerpourV2_VP9.webm"; // Replace with your video URL
+  video.src = "img/beerpourV2_VP9.webm";
   video.autoplay = true;
-  video.muted = true; // Autoplay requires muted for some browsers
+  video.muted = true;
   video.loop = true;
   video.controls = false;
 
@@ -62,7 +92,6 @@ export function cheers(images: string[]): void {
 
   BeerDiv.appendChild(video);
 
-  // Run animation
   setTimeout(() => {
     helpers.removeelement(BeerDiv.id);
   }, 15000);

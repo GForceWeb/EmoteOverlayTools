@@ -9,11 +9,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/admin/components/ui/card";
-import type { Settings } from "@/shared/types";
+import type { CheersPosition, Settings } from "@/shared/types";
 import { Label } from "@/admin/components/ui/label";
 import { Separator } from "@/admin/components/ui/separator";
 import { Button } from "@/admin/components/ui/button";
-import { WSData } from "@/shared/types";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/admin/components/ui/select";
 import { previewFeature } from "@/admin/utils/preview-helpers";
 
 interface FeatureSettingsProps {
@@ -25,6 +31,12 @@ export function FeatureSettings({
   settings,
   setSettings,
 }: FeatureSettingsProps) {
+  const cheersPositionLabels: Record<CheersPosition, string> = {
+    center: "Center",
+    left: "Left Side",
+    right: "Right Side",
+  };
+
   const featureLabels: Record<keyof Settings["features"], string> = {
     lurk: "Lurk",
     welcome: "Welcome",
@@ -56,7 +68,33 @@ export function FeatureSettings({
     }));
   };
 
-  const onPreviewFeature = (feature: string) => {
+  const handleCheersQuantityChange = (value: "1" | "2") => {
+    setSettings((prev) => ({
+      ...prev,
+      features: {
+        ...prev.features,
+        cheers: {
+          ...prev.features.cheers,
+          quantity: value === "2" ? 2 : 1,
+        },
+      },
+    }));
+  };
+
+  const handleCheersPositionChange = (position: CheersPosition) => {
+    setSettings((prev) => ({
+      ...prev,
+      features: {
+        ...prev.features,
+        cheers: {
+          ...prev.features.cheers,
+          position,
+        },
+      },
+    }));
+  };
+
+  const onPreviewFeature = (feature: keyof Settings["features"]) => {
     const featureConfig = settings.features[feature];
     previewFeature(feature, featureConfig, settings);
   };
@@ -120,7 +158,9 @@ export function FeatureSettings({
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => onPreviewFeature(feature)}
+                    onClick={() =>
+                      onPreviewFeature(feature as keyof Settings["features"])
+                    }
                   >
                     Preview
                   </Button>
@@ -137,6 +177,61 @@ export function FeatureSettings({
                   />
                 </div>
               </div>
+              {feature === "cheers" && (
+                <div className="rounded-lg border border-border/60 bg-secondary/20 p-4 space-y-4">
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="cheers-quantity">Quantity</Label>
+                      <Select
+                        value={settings.features.cheers.quantity.toString()}
+                        onValueChange={(value: "1" | "2") =>
+                          handleCheersQuantityChange(value)
+                        }
+                      >
+                        <SelectTrigger id="cheers-quantity">
+                          <SelectValue placeholder="Select quantity" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="1">1 animation</SelectItem>
+                          <SelectItem value="2">2 animations</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <p className="text-sm text-muted-foreground">
+                        Use one cheers animation or mirror it on both sides.
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="cheers-position">Position</Label>
+                      <Select
+                        value={settings.features.cheers.position}
+                        onValueChange={(value: CheersPosition) =>
+                          handleCheersPositionChange(value)
+                        }
+                        disabled={settings.features.cheers.quantity === 2}
+                      >
+                        <SelectTrigger id="cheers-position">
+                          <SelectValue placeholder="Select position" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Object.entries(cheersPositionLabels).map(
+                            ([value, label]) => (
+                              <SelectItem key={value} value={value}>
+                                {label}
+                              </SelectItem>
+                            )
+                          )}
+                        </SelectContent>
+                      </Select>
+                      <p className="text-sm text-muted-foreground">
+                        {settings.features.cheers.quantity === 2
+                          ? "Two cheers animations always render near the left and right edges."
+                          : "Choose where the cheers animation appears when only one is shown."}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
               {feature !== Object.keys(settings.features).pop() && (
                 <Separator className="my-2" />
               )}

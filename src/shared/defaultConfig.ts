@@ -95,10 +95,21 @@ export function deepMergeSettings(
     ...defaults,
     ...userSettings,
     // Deep merge features
-    features: {
-      ...defaults.features,
-      ...(userSettings.features || {}),
-    },
+    features: Object.fromEntries(
+      Object.entries(defaults.features).map(([featureName, defaultFeatureSettings]) => {
+        const userFeatureSettings = userSettings.features?.[
+          featureName as keyof Settings["features"]
+        ];
+
+        return [
+          featureName,
+          {
+            ...defaultFeatureSettings,
+            ...userFeatureSettings,
+          },
+        ];
+      })
+    ) as Settings["features"],
     // Deep merge animations with special handling for new animations
     animations: deepMergeAnimations(
       userSettings.animations,
@@ -121,7 +132,7 @@ export const defaultConfig: Settings = {
     lurk: { enabled: true },
     welcome: { enabled: true },
     kappagen: { enabled: true },
-    cheers: { enabled: true },
+    cheers: { enabled: true, quantity: 1, position: "center" },
     hypetrain: { enabled: true },
     emoterain: { enabled: true },
     choon: { enabled: true },

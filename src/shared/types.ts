@@ -19,11 +19,18 @@ export interface FeatureSettings {
   enabled: boolean;
 }
 
+export type CheersPosition = "center" | "left" | "right";
+
+export interface CheersFeatureSettings extends FeatureSettings {
+  quantity: 1 | 2;
+  position: CheersPosition;
+}
+
 export interface FeatureList {
   lurk: FeatureSettings;
   welcome: FeatureSettings;
   kappagen: FeatureSettings;
-  cheers: FeatureSettings;
+  cheers: CheersFeatureSettings;
   hypetrain: FeatureSettings;
   emoterain: FeatureSettings;
   choon: FeatureSettings;
