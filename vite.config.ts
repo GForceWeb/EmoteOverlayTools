@@ -28,7 +28,7 @@ export default defineConfig({
           build: {
             outDir: "dist/electron",
             rollupOptions: {
-              external: ["express", "ws"],
+              external: ["express", "ws", "fsevents", "vite"],
               output: {
                 format: "cjs",
                 entryFileNames: "[name].cjs",
@@ -47,7 +47,7 @@ export default defineConfig({
           build: {
             outDir: "dist/electron",
             rollupOptions: {
-              external: ["express", "ws"],
+              external: ["express", "ws", "fsevents", "vite"],
               output: {
                 format: "cjs",
                 entryFileNames: "[name].cjs",

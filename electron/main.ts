@@ -20,6 +20,26 @@ const wss = new WebSocketServer({ server });
 const settingsPath = path.join(app.getPath("userData"), "settings.json");
 let currentSettings = defaultConfig;
 
+function getOverlayMediaDirectory(): string | undefined {
+  const possibleMediaPaths = [
+    path.join(process.cwd(), "assets/img"),
+    path.join(__dirname, "../assets/img"),
+    path.join(__dirname, "../../assets/img"),
+    path.join(__dirname, "../renderer/overlay/img"),
+    path.join(process.cwd(), "dist/renderer/overlay/img"),
+    path.join(__dirname, "../renderer/img"),
+    path.join(process.cwd(), "dist/renderer/img"),
+  ];
+
+  for (const testPath of possibleMediaPaths) {
+    if (fs.existsSync(testPath)) {
+      return testPath;
+    }
+  }
+
+  return undefined;
+}
+
 // Helper function to get the correct icon path for tray notifications
 function getTrayIconPath(): string | undefined {
   const possibleIconPaths = [
@@ -81,7 +101,7 @@ try {
 }
 
 // Set up the Express server for serving the animation content
-function setupExpressServer() {
+async function setupExpressServer() {
   // Middleware to add CORS headers
   expressApp.use((req, res, next) => {
     res.setHeader("Access-Control-Allow-Origin", "*");
@@ -90,13 +110,13 @@ function setupExpressServer() {
     next();
   });
 
-  // Serve static files from the dist directory
-  expressApp.use(express.static(path.join(__dirname, "../renderer")));
+  expressApp.use(express.json());
 
-  // Serve the animation interface
-  expressApp.get("/", (req: express.Request, res: express.Response) => {
-    res.sendFile(path.join(__dirname, "../renderer/overlay/index.html"));
-  });
+  const overlayMediaDirectory = getOverlayMediaDirectory();
+  if (overlayMediaDirectory) {
+    expressApp.use("/overlay/img", express.static(overlayMediaDirectory));
+    expressApp.use("/img", express.static(overlayMediaDirectory));
+  }
 
   expressApp.get(
     "/api/settings",
@@ -124,9 +144,6 @@ function setupExpressServer() {
 
   // API endpoint to get Twitch avatar with caching
   setupAvatarCacheEndpoint(expressApp);
-
-  // Add API endpoint to save settings
-  expressApp.use(express.json()); // Add this to parse JSON request bodies
 
   // Logging API endpoints
   expressApp.post("/api/log", (req: express.Request, res: express.Response) => {
@@ -186,6 +203,29 @@ function setupExpressServer() {
       res.status(500).json({ error: "Failed to get logs" });
     }
   });
+
+  if (process.env.NODE_ENV === "development") {
+    const { createServer: createViteServer } = await import("vite");
+    const vite = await createViteServer({
+      configFile: path.resolve(process.cwd(), "vite.config.ts"),
+      cacheDir: path.resolve(process.cwd(), "node_modules/.vite-overlay"),
+      server: {
+        middlewareMode: true,
+      },
+    });
+    expressApp.get("/", (_req: express.Request, res: express.Response) => {
+      res.redirect("/overlay/index.html");
+    });
+    expressApp.use(vite.middlewares);
+  } else {
+    // Serve static files from the dist directory
+    expressApp.use(express.static(path.join(__dirname, "../renderer")));
+
+    // Serve the animation interface
+    expressApp.get("/", (_req: express.Request, res: express.Response) => {
+      res.sendFile(path.join(__dirname, "../renderer/overlay/index.html"));
+    });
+  }
 
   // Start the server
   server.listen(overlayServerPort, () => {
@@ -386,7 +426,7 @@ function createWindow() {
 }
 
 // App lifecycle events
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   // Remove default application menu (File/Edit/View/...) on Windows/Linux.
   // This prevents the menu from being shown via Alt and removes unused items.
   if (process.platform !== "darwin") {
@@ -406,7 +446,7 @@ app.whenReady().then(() => {
   cleanOldLogs();
   log("info", "Application started");
   
-  setupExpressServer();
+  await setupExpressServer();
   setupWebSocketServer();
   createWindow();
   createTray(); // Call createTray here
@@ -538,5 +578,3 @@ ipcMain.handle("open-external", async (_event, url: string) => {
 ipcMain.handle("get-version", () => {
   return app.getVersion();
 });
-
-
