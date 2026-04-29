@@ -247,6 +247,15 @@ export const animationRegistry: Record<string, AnimationDefinition> = {
     defaultEnabledManual: true,
     defaultEnabledKappagen: false,  // Not in random pool by default
   },
+  trampoline: {
+    name: "trampoline",
+    displayName: "Trampoline",
+    description: "Emotes spring onto a trampoline, bounce with tricks, then launch away",
+    defaultCount: 18,
+    defaultInterval: 140,
+    defaultEnabledManual: true,
+    defaultEnabledKappagen: true,
+  },
 
   // Group parent: shapes
   shapes: {
