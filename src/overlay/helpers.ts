@@ -155,6 +155,54 @@ function removeelement(div: string): void {
   }
 }
 
+function getTrimmedCsvStrings(value: string): string[] {
+  return value
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter((entry) => entry.length > 0);
+}
+
+function repeatValuesToLength<T>(values: T[], targetLength: number): T[] {
+  const repeated: T[] = [];
+
+  for (let index = 0; index < targetLength; index++) {
+    repeated.push(values[index % values.length]);
+  }
+
+  return repeated;
+}
+
+function asRecord(value: unknown): Record<string, unknown> | undefined {
+  if (value && typeof value === "object") {
+    return value as Record<string, unknown>;
+  }
+  return undefined;
+}
+
+function getNestedString(value: unknown, path: string[]): string | undefined {
+  let current: unknown = value;
+
+  for (const segment of path) {
+    const record = asRecord(current);
+    if (!record) {
+      return undefined;
+    }
+    current = record[segment];
+  }
+
+  return typeof current === "string" && current.length > 0 ? current : undefined;
+}
+
+function getFirstString(value: unknown, paths: string[][]): string | undefined {
+  for (const path of paths) {
+    const result = getNestedString(value, path);
+    if (result) {
+      return result;
+    }
+  }
+  return undefined;
+}
+
 export default {
   delay,
   randomSign,
@@ -168,4 +216,9 @@ export default {
   TopOrBottom,
   getTwitchAvatar,
   executeWithInterval,
+  getTrimmedCsvStrings,
+  repeatValuesToLength,
+  asRecord,
+  getNestedString,
+  getFirstString,
 };

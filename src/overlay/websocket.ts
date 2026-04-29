@@ -99,6 +99,7 @@ function connectws(): void {
             ],
             Raw: ["Action"],
             General: ["Custom"],
+            Custom: ["Event"]
           },
           id: "123",
         })
@@ -289,6 +290,11 @@ function handleMessage(msg: string): void {
       if (wsdata.data?.coinFlipResult == "Tails") {
         animations.coinflip(1, "Tails");
       }
+    }
+
+    if (eventType == "Event") {
+      handlers.customEventHandler(wsdata);
+      return;
     }
 
     //Actions

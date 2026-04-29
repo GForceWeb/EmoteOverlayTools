@@ -302,6 +302,102 @@ function actionsHandler(wsdata: WSData): void {
   let action = wsdata.data?.name;
 }
 
+
+
+function summarizeAutomaticRewardPayload(wsdata: WSData): string {
+  const dataRecord = helpers.asRecord(wsdata.data);
+  const rewardRecord = helpers.asRecord(dataRecord?.reward);
+  const emoteRecord =
+    helpers.asRecord(dataRecord?.gigantifiedEmote) || helpers.asRecord(dataRecord?.emote);
+
+  return JSON.stringify({
+    rewardType: helpers.getFirstString(wsdata.data, [["rewardType"], ["reward", "type"], ["reward", "rewardType"]]),
+    rewardTitle: helpers.getFirstString(wsdata.data, [["rewardTitle"], ["rewardName"], ["reward", "title"], ["reward", "name"]]),
+    gigantifiedEmoteUrl: helpers.getFirstString(wsdata.data, [
+      ["gigantifiedEmoteUrl"],
+      ["gigantifiedEmote", "url"],
+      ["gigantifiedEmote", "imageUrl"],
+      ["emote", "imageUrl"],
+      ["emote", "url"],
+    ]),
+    dataKeys: dataRecord ? Object.keys(dataRecord) : [],
+    rewardKeys: rewardRecord ? Object.keys(rewardRecord) : [],
+    emoteKeys: emoteRecord ? Object.keys(emoteRecord) : [],
+  });
+}
+
+async function customEventHandler(wsdata: WSData): Promise<void> {
+  const rounds = 3;
+  const avatarsPerRound = 5;
+  const roundDelayMs = 2000;
+  const eventName = helpers.getFirstString(wsdata.data, [["eventName"]]);
+
+  if (eventName !== "MaxOutMultiply") {
+    return;
+  }
+
+  const multiplyUsers = helpers.getFirstString(wsdata.data, [
+    ["args", "multiplyUsers"],
+    ["multiplyUsers"],
+  ]);
+
+  if (!multiplyUsers) {
+    logger.warning("MaxOutMultiply event missing multiplyUsers");
+    return;
+  }
+
+  const usernames = [...new Set(helpers.getTrimmedCsvStrings(multiplyUsers))];
+
+  if (usernames.length === 0) {
+    logger.warning("MaxOutMultiply event had no valid users");
+    return;
+  }
+
+  const avatarResults = await Promise.all(
+    usernames.map(async (username) => {
+      try {
+        return await helpers.getTwitchAvatar(username);
+      } catch (error) {
+        logger.error(
+          `Error getting avatar for MaxOutMultiply user ${username}: ${(error as Error).message}`
+        );
+        return null;
+      }
+    })
+  );
+
+  const avatars = avatarResults.filter((avatar): avatar is string => typeof avatar === "string");
+
+  if (avatars.length === 0) {
+    logger.warning("MaxOutMultiply event resolved no avatars");
+    return;
+  }
+
+  const scheduledAvatars = helpers.repeatValuesToLength(avatars, rounds * avatarsPerRound);
+
+  const params = getAnimationParams("firework");
+
+  if (
+    !animations.hasOwnProperty("firework") ||
+    typeof animations.firework !== "function"
+  ) {
+    logger.error("Firework animation function not found");
+    return;
+  }
+
+  for (let roundIndex = 0; roundIndex < rounds; roundIndex++) {
+    const roundStart = roundIndex * avatarsPerRound;
+    const roundAvatars = scheduledAvatars.slice(
+      roundStart,
+      roundStart + avatarsPerRound
+    );
+
+    setTimeout(() => {
+      animations.firework(roundAvatars, params.count, params.interval);
+    }, roundIndex * roundDelayMs);
+  }
+}
+
 function gigantifyRedeemHandler(wsdata: WSData): void {
   const isAdminPreview = wsdata.event?.source === "Admin";
 
@@ -310,13 +406,44 @@ function gigantifyRedeemHandler(wsdata: WSData): void {
     return;
   }
 
-  if (wsdata.data?.rewardType !== "gigantify_an_emote") {
+  const rewardType = helpers.getFirstString(wsdata.data, [
+    ["rewardType"],
+    ["reward", "type"],
+    ["reward", "rewardType"],
+  ]);
+  const rewardTitle = helpers.getFirstString(wsdata.data, [
+    ["rewardTitle"],
+    ["rewardName"],
+    ["reward", "title"],
+    ["reward", "name"],
+  ]);
+  const isGigantifyReward =
+    rewardType === "gigantify_an_emote" ||
+    (typeof rewardTitle === "string" && rewardTitle.toLowerCase().includes("gigantify"));
+
+  logger.info(
+    `AutomaticRewardRedemption payload summary: ${summarizeAutomaticRewardPayload(wsdata)}`
+  );
+
+  if (!isGigantifyReward) {
+    logger.info(
+      `Ignoring automatic reward redemption. rewardType=${rewardType || "<missing>"}, rewardTitle=${rewardTitle || "<missing>"}`
+    );
     return;
   }
 
-  const gigantifiedEmoteUrl = wsdata.data?.gigantifiedEmoteUrl;
+  const gigantifiedEmoteUrl = helpers.getFirstString(wsdata.data, [
+    ["gigantifiedEmoteUrl"],
+    ["gigantifiedEmote", "url"],
+    ["gigantifiedEmote", "imageUrl"],
+    ["emote", "imageUrl"],
+    ["emote", "url"],
+  ]);
+
   if (!gigantifiedEmoteUrl) {
-    logger.info("Gigantify reward missing gigantified emote URL");
+    logger.warning(
+      `Gigantify reward missing emote URL. Payload summary: ${summarizeAutomaticRewardPayload(wsdata)}`
+    );
     return;
   }
 
@@ -617,6 +744,7 @@ function botChat(message: string): void {
 export default {
   chatMessageHandler,
   actionsHandler,
+  customEventHandler,
   gigantifyRedeemHandler,
   emoteMessageHandler,
   firstWordsHander,

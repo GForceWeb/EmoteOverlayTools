@@ -79,7 +79,9 @@ export interface WSData {
     source?: string;
   };
   data?: {
+    eventName?: string;
     userId?: string;
+    args?: Record<string, unknown>;
     message?: {
       username?: string;
       userId?: string;
