@@ -138,6 +138,17 @@ export const animationRegistry: Record<string, AnimationDefinition> = {
     defaultEnabledManual: true,
     defaultEnabledKappagen: true,
   },
+  ripple: {
+    name: "ripple",
+    displayName: "Ripple",
+    description: "Each supplied emote lands like a water drop and expands outward in concentric rings",
+    defaultCount: 6,
+    defaultInterval: 180,
+    countLabel: "Rings Per Drop",
+    intervalLabel: "Ring Speed (ms, lower is faster)",
+    defaultEnabledManual: true,
+    defaultEnabledKappagen: true,
+  },
   spiral: {
     name: "spiral",
     displayName: "Spiral",

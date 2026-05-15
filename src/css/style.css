@@ -159,6 +159,26 @@ body,
   position: absolute;
   background-size: 100% 100%;
 }
+.ripple-element {
+  width: var(--emote-size-standard);
+  height: var(--emote-size-standard);
+  position: absolute;
+  background-size: 100% 100%;
+  will-change: transform, opacity;
+}
+.ripple-shadow {
+  position: absolute;
+  border-radius: 999px;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 255, 255, 0.22) 0%,
+    rgba(255, 255, 255, 0.12) 38%,
+    rgba(255, 255, 255, 0.04) 72%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  will-change: transform, opacity;
+}
 .spiral-element {
   width: var(--emote-size-standard);
   height: var(--emote-size-standard);

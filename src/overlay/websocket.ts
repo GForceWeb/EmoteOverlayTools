@@ -25,13 +25,14 @@ const handleElectronMessage = (event: MessageEvent) => {
   ) {
     OverlaySettings.updateSettings({
       features: {
+        ...OverlaySettings.settings.features,
         [feature]: {
           ...OverlaySettings.settings.features[
             feature as keyof typeof OverlaySettings.settings.features
           ],
           ...config,
         },
-      } as Partial<typeof OverlaySettings.settings.features>,
+      },
     });
   }
 
