@@ -164,19 +164,19 @@ The repository is structured as follows (key folders only):
 1. Install dependencies:
 
 ```
-npm install
+pnpm install
 ```
 
 2. Run in development mode:
 
 ```
-npm run electron:dev
+pnpm electron:dev
 ```
 
 3. Build for distribution:
 
 ```
-npm run electron:build
+pnpm electron:build
 ```
 
 # Feedback
