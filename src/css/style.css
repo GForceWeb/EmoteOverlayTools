@@ -191,6 +191,68 @@ body,
   position: absolute;
   background-size: 100% 100%;
 }
+.bubble-element {
+  position: absolute;
+  pointer-events: none;
+  z-index: 4;
+  will-change: transform, opacity;
+}
+.bubble-shell {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 30% 28%, rgba(255, 255, 255, 0.78) 0%, rgba(255, 255, 255, 0.34) 12%, rgba(255, 255, 255, 0.06) 26%, rgba(255, 255, 255, 0) 34%),
+    radial-gradient(circle at 74% 78%, rgba(255, 255, 255, 0.24) 0%, rgba(255, 255, 255, 0.05) 18%, rgba(255, 255, 255, 0) 38%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.22), rgba(153, 224, 255, 0.1) 32%, rgba(255, 169, 233, 0.07) 62%, rgba(255, 255, 255, 0.03));
+  border: calc(var(--reference-pixel) * 1.25) solid rgba(255, 255, 255, 0.34);
+  box-shadow:
+    inset 0 0 calc(var(--reference-pixel) * 8) rgba(255, 255, 255, 0.2),
+    inset 0 0 calc(var(--reference-pixel) * 24) rgba(157, 225, 255, 0.1),
+    0 calc(var(--reference-pixel) * 8) calc(var(--reference-pixel) * 14) rgba(137, 198, 255, 0.08);
+}
+.bubble-emote {
+  position: absolute;
+  inset: 16%;
+  border-radius: 50%;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  opacity: 0.74;
+  filter: saturate(0.92) brightness(1.12) contrast(1.04);
+}
+.bubble-highlight {
+  position: absolute;
+  width: 34%;
+  height: 34%;
+  top: 14%;
+  left: 18%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.96) 0%, rgba(255, 255, 255, 0.5) 40%, rgba(255, 255, 255, 0) 72%);
+  filter: blur(calc(var(--reference-pixel) * 0.8));
+}
+.bubble-sparkle {
+  position: absolute;
+  width: 18%;
+  height: 18%;
+  right: 20%;
+  top: 22%;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.7);
+  filter: blur(calc(var(--reference-pixel) * 1.1));
+  opacity: 0.7;
+}
+.bubble-pop-ring {
+  position: absolute;
+  inset: 12%;
+  border-radius: 50%;
+  border: calc(var(--reference-pixel) * 2) solid rgba(255, 255, 255, 0.8);
+  box-shadow:
+    0 0 calc(var(--reference-pixel) * 12) rgba(255, 255, 255, 0.3),
+    inset 0 0 calc(var(--reference-pixel) * 10) rgba(167, 232, 255, 0.24);
+  opacity: 0;
+}
 .trampoline-element {
   width: var(--emote-size-standard);
   height: var(--emote-size-standard);

@@ -267,6 +267,15 @@ export const animationRegistry: Record<string, AnimationDefinition> = {
     defaultEnabledManual: true,
     defaultEnabledKappagen: true,
   },
+  bubbles: {
+    name: "bubbles",
+    displayName: "Bubbles",
+    description: "Emotes rise like translucent bubbles, drift in a light breeze, and pop above mid-screen",
+    defaultCount: 36,
+    defaultInterval: 180,
+    defaultEnabledManual: true,
+    defaultEnabledKappagen: true,
+  },
 
   // Group parent: shapes
   shapes: {
