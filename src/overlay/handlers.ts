@@ -302,26 +302,14 @@ function actionsHandler(wsdata: WSData): void {
   let action = wsdata.data?.name;
 }
 
-
-
 function summarizeAutomaticRewardPayload(wsdata: WSData): string {
   const dataRecord = helpers.asRecord(wsdata.data);
-  const rewardRecord = helpers.asRecord(dataRecord?.reward);
-  const emoteRecord =
-    helpers.asRecord(dataRecord?.gigantifiedEmote) || helpers.asRecord(dataRecord?.emote);
+  const emoteRecord = helpers.asRecord(dataRecord?.gigantified_emote);
 
   return JSON.stringify({
-    rewardType: helpers.getFirstString(wsdata.data, [["rewardType"], ["reward", "type"], ["reward", "rewardType"]]),
-    rewardTitle: helpers.getFirstString(wsdata.data, [["rewardTitle"], ["rewardName"], ["reward", "title"], ["reward", "name"]]),
-    gigantifiedEmoteUrl: helpers.getFirstString(wsdata.data, [
-      ["gigantifiedEmoteUrl"],
-      ["gigantifiedEmote", "url"],
-      ["gigantifiedEmote", "imageUrl"],
-      ["emote", "imageUrl"],
-      ["emote", "url"],
-    ]),
+    rewardType: helpers.getNestedString(wsdata.data, ["reward_type"]),
+    gigantifiedEmoteUrl: helpers.getNestedString(wsdata.data, ["gigantified_emote", "imageUrl"]),
     dataKeys: dataRecord ? Object.keys(dataRecord) : [],
-    rewardKeys: rewardRecord ? Object.keys(rewardRecord) : [],
     emoteKeys: emoteRecord ? Object.keys(emoteRecord) : [],
   });
 }
@@ -406,38 +394,22 @@ function gigantifyRedeemHandler(wsdata: WSData): void {
     return;
   }
 
-  const rewardType = helpers.getFirstString(wsdata.data, [
-    ["rewardType"],
-    ["reward", "type"],
-    ["reward", "rewardType"],
-  ]);
-  const rewardTitle = helpers.getFirstString(wsdata.data, [
-    ["rewardTitle"],
-    ["rewardName"],
-    ["reward", "title"],
-    ["reward", "name"],
-  ]);
-  const isGigantifyReward =
-    rewardType === "gigantify_an_emote" ||
-    (typeof rewardTitle === "string" && rewardTitle.toLowerCase().includes("gigantify"));
+  const rewardType = helpers.getNestedString(wsdata.data, ["reward_type"]);
 
   logger.info(
     `AutomaticRewardRedemption payload summary: ${summarizeAutomaticRewardPayload(wsdata)}`
   );
 
-  if (!isGigantifyReward) {
+  if (rewardType !== "gigantify_an_emote") {
     logger.info(
-      `Ignoring automatic reward redemption. rewardType=${rewardType || "<missing>"}, rewardTitle=${rewardTitle || "<missing>"}`
+      `Ignoring automatic reward redemption. rewardType=${rewardType || "<missing>"}`
     );
     return;
   }
 
-  const gigantifiedEmoteUrl = helpers.getFirstString(wsdata.data, [
-    ["gigantifiedEmoteUrl"],
-    ["gigantifiedEmote", "url"],
-    ["gigantifiedEmote", "imageUrl"],
-    ["emote", "imageUrl"],
-    ["emote", "url"],
+  const gigantifiedEmoteUrl = helpers.getNestedString(wsdata.data, [
+    "gigantified_emote",
+    "imageUrl",
   ]);
 
   if (!gigantifiedEmoteUrl) {

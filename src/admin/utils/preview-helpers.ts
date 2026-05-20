@@ -99,6 +99,7 @@ export const previewFeature = (
     const gigantifiedEmoteUrl =
       previewEmotes[0]?.imageUrl ||
       "https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/3.0";
+    const gigantifiedEmoteName = previewEmotes[0]?.name || "Kappa";
 
     const wsMessage: WSData = {
       event: {
@@ -106,12 +107,23 @@ export const previewFeature = (
         type: "AutomaticRewardRedemption",
       },
       data: {
-        userId: "123456789",
-        userName: settings.twitchUsername || "gforce_bot",
-        rewardType: "gigantify_an_emote",
-        rewardTitle: "Gigantify an Emote",
-        gigantifiedEmoteName: previewEmotes[0]?.name || "Kappa",
-        gigantifiedEmoteUrl,
+        id: "preview-gigantify-redeem",
+        user_id: "123456789",
+        user_login: (settings.twitchUsername || "gforce_bot").toLowerCase(),
+        user_name: settings.twitchUsername || "gforce_bot",
+        user_input: "",
+        reward_type: "gigantify_an_emote",
+        cost: 0,
+        message_text: gigantifiedEmoteName,
+        message_emotes: [],
+        gigantified_emote: {
+          id: previewEmotes[0]?.id || "25",
+          name: gigantifiedEmoteName,
+          imageUrl: gigantifiedEmoteUrl,
+          begin: 0,
+          end: gigantifiedEmoteName.length,
+        },
+        redeemed_at: new Date().toISOString(),
       },
     };
 

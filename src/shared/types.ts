@@ -69,8 +69,11 @@ export interface GlobalVars {
 }
 
 export interface EmoteData {
+  id?: string;
   name: string;
   imageUrl: string;
+  begin?: number;
+  end?: number;
 }
 
 export interface WSData {
@@ -79,9 +82,12 @@ export interface WSData {
     source?: string;
   };
   data?: {
-    eventName?: string;
+    id?: string;
     userId?: string;
-    args?: Record<string, unknown>;
+    user_id?: string;
+    user_login?: string;
+    user_name?: string;
+    user_input?: string;
     message?: {
       username?: string;
       userId?: string;
@@ -99,11 +105,12 @@ export interface WSData {
     from_broadcaster_user_id?: string;
     from_broadcaster_user_name?: string;
     viewers?: number;
-    rewardType?: string;
-    rewardTitle?: string;
-    gigantifiedEmoteId?: string;
-    gigantifiedEmoteName?: string;
-    gigantifiedEmoteUrl?: string;
+    reward_type?: string;
+    cost?: number;
+    message_text?: string;
+    message_emotes?: EmoteData[];
+    gigantified_emote?: EmoteData;
+    redeemed_at?: string;
   };
   actions?: any[];
   id?: string;
