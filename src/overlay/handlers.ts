@@ -306,6 +306,77 @@ function actionsHandler(wsdata: WSData): void {
   let action = wsdata.data?.name;
 }
 
+function getPositiveInteger(value: unknown, fallback: number): number {
+  const parsed = typeof value === "number" ? value : Number(value);
+
+  if (!Number.isFinite(parsed) || parsed < 1) {
+    return fallback;
+  }
+
+  return Math.floor(parsed);
+}
+
+async function incomingRaidHandler(wsdata: WSData): Promise<void> {
+  const settings = getSettings();
+
+  if (!isFeatureEnabled("raids", true)) {
+    logger.info("Incoming Raid Not Enabled");
+    return;
+  }
+
+  if (!wsdata.data) {
+    logger.warning("Raid event missing data");
+    return;
+  }
+
+  const data = wsdata.data;
+  const displayName =
+    data.from_broadcaster_user_name ||
+    data.userName ||
+    data.user_name ||
+    data.user_login ||
+    "Raider";
+  const avatarLookup = data.from_broadcaster_user_id || displayName;
+  const shouldLookupById = Boolean(data.from_broadcaster_user_id);
+  const originalRaiderCount = getPositiveInteger(data.viewers, 1);
+  const raidSettings = settings.features.raids;
+  const maxRaiders = getPositiveInteger(raidSettings?.maxRaiders, 100);
+  const raiderCount = raidSettings?.capEnabled
+    ? Math.min(originalRaiderCount, maxRaiders)
+    : originalRaiderCount;
+
+  let avatarUrl = FALLBACK_TWITCH_AVATAR;
+
+  try {
+    avatarUrl = await helpers.getTwitchAvatar(avatarLookup, shouldLookupById);
+  } catch (error) {
+    logger.error(
+      `Error getting avatar for raid user ${displayName}: ${(error as Error).message}`
+    );
+  }
+
+  if (
+    !animations.hasOwnProperty("incomingRaid") ||
+    typeof animations.incomingRaid !== "function"
+  ) {
+    logger.error("Incoming raid animation function not found");
+    return;
+  }
+
+  const chargePasses = Math.min(
+    5,
+    Math.max(1, getPositiveInteger(raidSettings?.chargePasses, 1))
+  );
+
+  animations.incomingRaid({
+    avatarUrl,
+    displayName,
+    raiderCount,
+    originalRaiderCount,
+    chargePasses,
+  });
+}
+
 function summarizeAutomaticRewardPayload(wsdata: WSData): string {
   const dataRecord = helpers.asRecord(wsdata.data);
   const emoteRecord = helpers.asRecord(dataRecord?.gigantified_emote);
@@ -724,6 +795,7 @@ export default {
   actionsHandler,
   customEventHandler,
   gigantifyRedeemHandler,
+  incomingRaidHandler,
   emoteMessageHandler,
   firstWordsHander,
   cheersCommand,

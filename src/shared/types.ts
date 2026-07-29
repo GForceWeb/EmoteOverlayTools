@@ -26,6 +26,13 @@ export interface CheersFeatureSettings extends FeatureSettings {
   position: CheersPosition;
 }
 
+export interface RaidFeatureSettings extends FeatureSettings {
+  capEnabled: boolean;
+  maxRaiders: number;
+  /** How many times the raid pack charges across the screen (alternating direction). */
+  chargePasses: number;
+}
+
 export interface FeatureList {
   lurk: FeatureSettings;
   welcome: FeatureSettings;
@@ -35,6 +42,7 @@ export interface FeatureList {
   emoterain: FeatureSettings;
   choon: FeatureSettings;
   gigantifyredeem: FeatureSettings;
+  raids: RaidFeatureSettings;
 }
 
 export interface PreviewEmote {

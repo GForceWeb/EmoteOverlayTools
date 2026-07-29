@@ -13,6 +13,7 @@ import type { CheersPosition, Settings } from "@/shared/types";
 import { Label } from "@/admin/components/ui/label";
 import { Separator } from "@/admin/components/ui/separator";
 import { Button } from "@/admin/components/ui/button";
+import { Slider } from "@/admin/components/ui/slider";
 import {
   Select,
   SelectContent,
@@ -46,6 +47,7 @@ export function FeatureSettings({
     emoterain: "Emote Rain",
     choon: "Choon",
     gigantifyredeem: "Gigantify Emote Redeems",
+    raids: "Raids",
   };
 
   const handleFeatureToggle = (
@@ -94,6 +96,49 @@ export function FeatureSettings({
     }));
   };
 
+  const handleRaidCapEnabledChange = (capEnabled: boolean) => {
+    setSettings((prev) => ({
+      ...prev,
+      features: {
+        ...prev.features,
+        raids: {
+          ...prev.features.raids,
+          capEnabled,
+        },
+      },
+    }));
+  };
+
+  const handleRaidMaxRaidersChange = (maxRaiders: number) => {
+    const clampedMaxRaiders = Math.min(500, Math.max(1, maxRaiders));
+
+    setSettings((prev) => ({
+      ...prev,
+      features: {
+        ...prev.features,
+        raids: {
+          ...prev.features.raids,
+          maxRaiders: clampedMaxRaiders,
+        },
+      },
+    }));
+  };
+
+  const handleRaidChargePassesChange = (chargePasses: number) => {
+    const clampedPasses = Math.min(5, Math.max(1, chargePasses));
+
+    setSettings((prev) => ({
+      ...prev,
+      features: {
+        ...prev.features,
+        raids: {
+          ...prev.features.raids,
+          chargePasses: clampedPasses,
+        },
+      },
+    }));
+  };
+
   const onPreviewFeature = (feature: keyof Settings["features"]) => {
     const featureConfig = settings.features[feature];
     previewFeature(feature, featureConfig, settings);
@@ -109,6 +154,7 @@ export function FeatureSettings({
     choon: "Music-related animations and effects",
     gigantifyredeem:
       "Animate Twitch Gigantify an Emote power-up redemptions",
+    raids: "Animate incoming raids with the raiding channel leading an army.",
   };
 
   return (
@@ -229,6 +275,69 @@ export function FeatureSettings({
                           : "Choose where the cheers animation appears when only one is shown."}
                       </p>
                     </div>
+                  </div>
+                </div>
+              )}
+              {feature === "raids" && (
+                <div className="rounded-lg border border-border/60 bg-secondary/20 p-4 space-y-4">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="space-y-0.5">
+                      <Label htmlFor="raids-cap-enabled">
+                        Cap rendered raiders
+                      </Label>
+                      <p className="text-sm text-muted-foreground">
+                        Limit visible people for very large raids.
+                      </p>
+                    </div>
+                    <Switch
+                      id="raids-cap-enabled"
+                      checked={settings.features.raids.capEnabled}
+                      onCheckedChange={handleRaidCapEnabledChange}
+                    />
+                  </div>
+
+                  {settings.features.raids.capEnabled && (
+                    <div className="space-y-2">
+                      <div className="flex justify-between gap-4">
+                        <Label htmlFor="raids-max-raiders">
+                          Maximum rendered raiders:{" "}
+                          {settings.features.raids.maxRaiders}
+                        </Label>
+                      </div>
+                      <Slider
+                        id="raids-max-raiders"
+                        min={1}
+                        max={500}
+                        step={1}
+                        value={[settings.features.raids.maxRaiders || 100]}
+                        onValueChange={(value) =>
+                          handleRaidMaxRaidersChange(value[0])
+                        }
+                      />
+                    </div>
+                  )}
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between gap-4">
+                      <Label htmlFor="raids-charge-passes">
+                        Charge passes:{" "}
+                        {settings.features.raids.chargePasses ?? 1}
+                      </Label>
+                    </div>
+                    <Slider
+                      id="raids-charge-passes"
+                      min={1}
+                      max={5}
+                      step={1}
+                      value={[settings.features.raids.chargePasses ?? 1]}
+                      onValueChange={(value) =>
+                        handleRaidChargePassesChange(value[0])
+                      }
+                    />
+                    <p className="text-sm text-muted-foreground">
+                      How many times the raid charges across the screen,
+                      alternating direction each pass.
+                    </p>
                   </div>
                 </div>
               )}

@@ -95,6 +95,36 @@ export const previewFeature = (
 
   const previewEmotes = getPreviewEmotes(settings);
 
+  if (feature === "raids") {
+    const viewers = Math.floor(Math.random() * 96) + 5;
+    const raiderName = settings.twitchUsername || "gforce_bot";
+
+    const wsMessage: WSData = {
+      event: {
+        source: "Admin",
+        type: "Raid",
+      },
+      data: {
+        from_broadcaster_user_name: raiderName,
+        userName: raiderName,
+        viewers,
+      },
+    };
+
+    iframe.contentWindow?.postMessage(
+      {
+        type: "PREVIEW_FEATURE",
+        feature: feature,
+        wsdata: wsMessage,
+        config: config,
+      },
+      "*"
+    );
+
+    console.log(`Previewing feature: ${feature}`, wsMessage);
+    return;
+  }
+
   if (feature === "gigantifyredeem") {
     const gigantifiedEmoteUrl =
       previewEmotes[0]?.imageUrl ||

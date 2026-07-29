@@ -137,6 +137,12 @@ export const defaultConfig: Settings = {
     emoterain: { enabled: true },
     choon: { enabled: true },
     gigantifyredeem: { enabled: true },
+    raids: {
+      enabled: true,
+      capEnabled: true,
+      maxRaiders: 100,
+      chargePasses: 2,
+    },
   },
   animations: generateDefaultAnimations(),
   maxEmotes: 200,

@@ -1,3 +1,6 @@
+/* Raid animation styles live in raiders.css; Vite inlines this @import at build time. */
+@import "./raiders.css";
+
 body {
   overflow: hidden;
 }
@@ -303,12 +306,6 @@ body,
   background-size: 100%;
 }
 
-.raider-element {
-  width: var(--avatar-size-small);
-  height: var(--avatar-size-small);
-  position: absolute;
-  background-size: 100%;
-}
 .invader-element {
   position: absolute;
   background-size: inherit;
@@ -419,4 +416,3 @@ body,
 	background-size: 100% 100%;
 	z-index: 50;
 }
-

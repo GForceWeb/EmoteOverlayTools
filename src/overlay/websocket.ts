@@ -306,7 +306,7 @@ function handleMessage(msg: string): void {
 
     //Incoming Raid
     if (eventType == "Raid") {
-      //animations.hypetrain.incomingRaid(wsdata.data.from_broadcaster_user_id, wsdata.data.from_broadcaster_user_name, wsdata.data.viewers);
+      handlers.incomingRaidHandler(wsdata);
       return;
     }
 
