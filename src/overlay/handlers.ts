@@ -699,6 +699,11 @@ async function shoutoutCommand(lowermessage: string): Promise<void> {
 
 function botChat(message: string): void {
   const ws = globalVars.ws;
+  if (!ws || ws.readyState !== WebSocket.OPEN) {
+    logger.error("Unable to send bot chat message: WebSocket is not connected");
+    return;
+  }
+
   ws.send(
     JSON.stringify({
       request: "DoAction",

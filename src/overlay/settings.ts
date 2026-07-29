@@ -5,6 +5,7 @@ import logger from "./lib/logger";
 class OverlaySettings {
   private static instance: OverlaySettings;
   public settings: Settings;
+  public ready: Promise<void>;
 
   // Move settings properties to class level
   private constructor() {
@@ -34,7 +35,7 @@ class OverlaySettings {
     }
 
     // Load settings from server
-    this.fetchSettings()
+    this.ready = this.fetchSettings()
       .then(() => {
         logger.info("Settings loaded successfully");
       })

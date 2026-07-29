@@ -2,14 +2,60 @@ import { globalVars } from "./config.ts";
 import animations from "./animations.ts";
 import handlers from "./handlers.ts";
 import { WSData } from "../shared/types.ts";
+import { getEventUsername } from "../shared/streamerbotChat.ts";
 import OverlaySettings from "./settings.ts";
 import logger from "./lib/logger.ts";
 
-const settings = OverlaySettings.settings;
-
-let ws = globalVars.ws;
 let Botchat: boolean = false;
 let isElectron = false;
+let reconnectTimer: number | null = null;
+
+function scheduleReconnect(): void {
+  if (reconnectTimer !== null) {
+    return;
+  }
+
+  reconnectTimer = window.setTimeout(() => {
+    reconnectTimer = null;
+    connectws();
+  }, 10000);
+}
+
+function subscribeToEvents(ws: WebSocket): void {
+  ws.send(
+    JSON.stringify({
+      request: "Subscribe",
+      events: {
+        Twitch: [
+          "ChatMessage",
+          "FirstWord",
+          "AutomaticRewardRedemption",
+          "HypeTrainStart",
+          "HypeTrainUpdate",
+          "HypeTrainLevelUp",
+          "HypeTrainEnd",
+          "Raid",
+          "Cheer",
+          "Sub",
+          "Resub",
+          "GiftBomb",
+          "GiftSub",
+        ],
+        Raw: ["Action"],
+        General: ["Custom"],
+        Custom: ["Event"]
+      },
+      id: "123",
+    })
+  );
+
+  ws.send(
+    JSON.stringify({
+      request: "GetActions",
+      id: "ActionList",
+    })
+  );
+}
 
 const handleElectronMessage = (event: MessageEvent) => {
   // Optional: Validate the origin for security
@@ -72,46 +118,32 @@ function connectws(): void {
   }
 
   if ("WebSocket" in window) {
+    if (
+      globalVars.ws &&
+      (globalVars.ws.readyState === WebSocket.OPEN ||
+        globalVars.ws.readyState === WebSocket.CONNECTING)
+    ) {
+      return;
+    }
+
+    const ws = new WebSocket(OverlaySettings.settings.streamerBotWebsocketUrl);
+    globalVars.ws = ws;
+
     ws.onclose = function (): void {
-      // "connectws" is the function we defined previously
-      setTimeout(connectws, 10000);
+      if (globalVars.ws === ws) {
+        globalVars.ws = null;
+      }
+
+      scheduleReconnect();
+    };
+
+    ws.onerror = function (): void {
+      ws.close();
     };
 
     //Enable all Events
     ws.onopen = function (): void {
-      ws.send(
-        JSON.stringify({
-          request: "Subscribe",
-          events: {
-            Twitch: [
-              "ChatMessage",
-              "FirstWord",
-              "AutomaticRewardRedemption",
-              "HypeTrainStart",
-              "HypeTrainUpdate",
-              "HypeTrainLevelUp",
-              "HypeTrainEnd",
-              "Raid",
-              "Cheer",
-              "Sub",
-              "Resub",
-              "GiftBomb",
-              "GiftSub",
-            ],
-            Raw: ["Action"],
-            General: ["Custom"],
-            Custom: ["Event"]
-          },
-          id: "123",
-        })
-      );
-
-      ws.send(
-        JSON.stringify({
-          request: "GetActions",
-          id: "ActionList",
-        })
-      );
+      subscribeToEvents(ws);
     };
 
     ws.onmessage = function (event: MessageEvent): void {
@@ -168,6 +200,7 @@ function setupElectronCommunication(): void {
 // Function to process WebSocket messages
 function handleMessage(msg: string): void {
   try {
+    const settings = OverlaySettings.settings;
     const wsdata: WSData = JSON.parse(msg);
 
     console.log(wsdata);
@@ -227,10 +260,8 @@ function handleMessage(msg: string): void {
       eventType == "GiftSub" ||
       eventType == "Cheer"
     ) {
-      //Cheer uses message.username. Subs use userName
-      let userName = wsdata.data?.message?.username
-        ? wsdata.data.message.username
-        : wsdata.data?.userName;
+      // Cheer uses message.username. Subs use userName
+      let userName = getEventUsername(wsdata.data);
 
       //Add user to the front of the array
       if (userName) {

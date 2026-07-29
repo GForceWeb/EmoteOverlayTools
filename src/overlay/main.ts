@@ -13,6 +13,7 @@ async function init(): Promise<void> {
   // Show notice banner for non-app users (GitHub Pages, self-hosted, or with URL params)
   showNoticeBanner();
 
+  await OverlaySettings.ready;
   websockets.connectws();
 
   // Expose animations to the global window object for debugging
