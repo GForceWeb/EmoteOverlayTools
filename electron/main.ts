@@ -145,6 +145,74 @@ async function setupExpressServer() {
   // API endpoint to get Twitch avatar with caching
   setupAvatarCacheEndpoint(expressApp);
 
+  // Overlay presence: OBS browser sources heartbeat here so the admin UI
+  // can tell when a real overlay (not the in-app preview) is connected.
+  const OVERLAY_HEARTBEAT_TTL_MS = 15000;
+  const overlayClients = new Map<string, number>();
+
+  const pruneOverlayClients = () => {
+    const cutoff = Date.now() - OVERLAY_HEARTBEAT_TTL_MS;
+    for (const [clientId, lastSeen] of overlayClients) {
+      if (lastSeen < cutoff) {
+        overlayClients.delete(clientId);
+      }
+    }
+  };
+
+  const getOverlayStatus = () => {
+    pruneOverlayClients();
+    const clientCount = overlayClients.size;
+    let lastSeen: number | null = null;
+    for (const timestamp of overlayClients.values()) {
+      if (lastSeen === null || timestamp > lastSeen) {
+        lastSeen = timestamp;
+      }
+    }
+    return {
+      connected: clientCount > 0,
+      clientCount,
+      lastSeen,
+    };
+  };
+
+  expressApp.post(
+    "/api/overlay/heartbeat",
+    (req: express.Request, res: express.Response) => {
+      try {
+        const { clientId, source } = req.body ?? {};
+
+        // Preview iframe heartbeats are ignored so Step 2 can track OBS only
+        if (source === "preview") {
+          res.json({ success: true, ignored: true });
+          return;
+        }
+
+        if (!clientId || typeof clientId !== "string") {
+          res.status(400).json({ error: "Missing required field: clientId" });
+          return;
+        }
+
+        overlayClients.set(clientId, Date.now());
+        res.json({ success: true, ...getOverlayStatus() });
+      } catch (error) {
+        console.error("Error recording overlay heartbeat:", error);
+        res.status(500).json({ error: "Failed to record overlay heartbeat" });
+      }
+    }
+  );
+
+  expressApp.get(
+    "/api/overlay/status",
+    (_req: express.Request, res: express.Response) => {
+      try {
+        res.json(getOverlayStatus());
+      } catch (error) {
+        console.error("Error getting overlay status:", error);
+        res.status(500).json({ error: "Failed to get overlay status" });
+      }
+    }
+  );
+
   // Logging API endpoints
   expressApp.post("/api/log", (req: express.Request, res: express.Response) => {
     try {
@@ -213,8 +281,10 @@ async function setupExpressServer() {
         middlewareMode: true,
       },
     });
-    expressApp.get("/", (_req: express.Request, res: express.Response) => {
-      res.redirect("/overlay/index.html");
+    expressApp.get("/", (req: express.Request, res: express.Response) => {
+      const queryIndex = req.url.indexOf("?");
+      const query = queryIndex >= 0 ? req.url.slice(queryIndex) : "";
+      res.redirect(`/overlay/index.html${query}`);
     });
     expressApp.use(vite.middlewares);
   } else {

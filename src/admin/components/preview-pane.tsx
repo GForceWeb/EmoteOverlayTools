@@ -18,8 +18,23 @@ interface PreviewPaneProps {
   onSettingsChange?: (settings: Settings) => void;
 }
 
+function withPreviewSource(url: string): string {
+  try {
+    const parsed = new URL(url, window.location.origin);
+    // Load the overlay page directly so a "/" redirect can't drop ?source=preview
+    if (parsed.pathname === "/" || parsed.pathname === "") {
+      parsed.pathname = "/overlay/index.html";
+    }
+    parsed.searchParams.set("source", "preview");
+    return parsed.toString();
+  } catch {
+    const separator = url.includes("?") ? "&" : "?";
+    return `${url}${separator}source=preview`;
+  }
+}
+
 export function PreviewPane({ previewUrl, settings, onSettingsChange }: PreviewPaneProps) {
-  const [url, setUrl] = useState(previewUrl);
+  const [url, setUrl] = useState(() => withPreviewSource(previewUrl));
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
@@ -27,7 +42,7 @@ export function PreviewPane({ previewUrl, settings, onSettingsChange }: PreviewP
   const [modalHostElement, setModalHostElement] = useState<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    setUrl(previewUrl);
+    setUrl(withPreviewSource(previewUrl));
   }, [previewUrl]);
 
   useEffect(() => {
@@ -47,7 +62,7 @@ export function PreviewPane({ previewUrl, settings, onSettingsChange }: PreviewP
     iframe.addEventListener("load", handleLoad);
     iframeRef.current = iframe;
     setIframeLoaded(false);
-    iframe.src = previewUrl;
+    iframe.src = withPreviewSource(previewUrl);
 
     return () => {
       iframe.removeEventListener("load", handleLoad);
@@ -81,15 +96,21 @@ export function PreviewPane({ previewUrl, settings, onSettingsChange }: PreviewP
   }, [isModalOpen, modalHostElement, sidebarHostElement]);
 
   const refreshPreview = () => {
-    if (iframeRef.current) {
-      setIframeLoaded(false);
+    const iframe = iframeRef.current;
+    if (!iframe) {
+      return;
+    }
 
-      if (iframeRef.current.contentWindow) {
-        iframeRef.current.contentWindow.location.reload();
-        return;
-      }
+    setIframeLoaded(false);
 
-      iframeRef.current.src = url;
+    // Admin (e.g. :3000) and overlay (:3030) are cross-origin, so
+    // contentWindow.location.reload() throws. Reassign src instead.
+    try {
+      const parsed = new URL(url);
+      parsed.searchParams.set("_", String(Date.now()));
+      iframe.src = parsed.toString();
+    } catch {
+      iframe.src = url;
     }
   };
 

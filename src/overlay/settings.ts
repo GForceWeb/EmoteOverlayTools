@@ -1,6 +1,7 @@
 import { Settings } from "../shared/types";
 import { defaultConfig, deepMergeSettings } from "../shared/defaultConfig";
 import logger from "./lib/logger";
+import { startOverlayPresence } from "./presence";
 
 class OverlaySettings {
   private static instance: OverlaySettings;
@@ -64,6 +65,8 @@ class OverlaySettings {
         const data = await response.json();
         logger.info("Settings loaded from HTTP API");
         this.updateSettings(data);
+        // Only start presence after a successful connection to the main app
+        startOverlayPresence();
       } else {
         logger.error(`Failed to load settings via HTTP: ${response.statusText}`);
       }

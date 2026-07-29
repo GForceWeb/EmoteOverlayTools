@@ -22,7 +22,6 @@ import { useToast } from "@/admin/hooks/use-toast";
 import { SaveIcon } from "lucide-react";
 import { PreviewPane } from "@/admin/components/preview-pane";
 import { ConnectionStatus } from "@/admin/components/connection-status";
-import { OverlayUrl } from "@/admin/components/overlay-url";
 
 import { defaultConfig, deepMergeSettings } from "@/shared/defaultConfig";
 
@@ -192,14 +191,8 @@ export function SettingsDashboard() {
         <div className="lg:col-span-2 flex flex-col space-y-6 min-h-0">
           <ConnectionStatus 
             settings={settings} 
+            overlayUrl={getBaseUrl()}
             key={settingsSaved ? "saved" : "not-saved"} // Force re-render when settings are saved
-          />
-          <OverlayUrl
-            url={
-              settings.overlayServerPort
-                ? `http://localhost:${settings.overlayServerPort}`
-                : "http://localhost:3030"
-            }
           />
 
           <div className="flex-1 min-h-0">
