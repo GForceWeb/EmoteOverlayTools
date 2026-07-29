@@ -1,5 +1,6 @@
 import { globalVars } from "./config.ts";
-import { WSData, AnimationSettings } from "../shared/types.ts";
+import { WSData, AnimationSettings, EmoteData } from "../shared/types.ts";
+import { normalizeChatEventData } from "../shared/streamerbotChat.ts";
 import OverlaySettings from "./settings";
 import {
   animationRegistry,
@@ -11,6 +12,9 @@ import {
 import helpers from "./helpers.ts";
 import animations from "./animations.ts";
 import logger from "./lib/logger.ts";
+
+const FALLBACK_TWITCH_AVATAR =
+  "https://static-cdn.jtvnw.net/jtv_user_pictures/8e051a26-051f-4abe-bcfa-e13a5d13fad0-profile_image-300x300.png";
 
 // Get settings reference (will be updated dynamically)
 function getSettings() {
@@ -186,14 +190,14 @@ function isFeatureEnabled(feature: string, subbedCheck: boolean): boolean {
 
 function chatMessageHandler(wsdata: WSData): void {
   const settings = getSettings();
-  const message = wsdata.data?.message?.message || "";
+  const chat = normalizeChatEventData(wsdata.data);
+  const message = chat.message;
   const lowermessage = message.toLowerCase();
-  const username = wsdata.data?.message?.username || "";
-  const userId = wsdata.data?.message?.userId || "";
-  const emotes = getEmoteImages(wsdata, message);
+  const username = chat.username;
+  const userId = chat.userId;
+  const emotes = getEmoteImages(chat.emotes, message);
 
-  const subbedCheck =
-    !settings.subOnly || (settings.subOnly && wsdata.data?.message?.subscriber);
+  const subbedCheck = !settings.subOnly || (settings.subOnly && chat.subscriber);
 
   switch (true) {
     case lowermessage.includes("!lurk"):
@@ -290,7 +294,7 @@ function chatMessageHandler(wsdata: WSData): void {
       break;
 
     default:
-      if (typeof wsdata.data?.message?.emotes != "undefined") {
+      if (chat.emotes.length > 0) {
         emoteMessageHandler(emotes);
       }
       break;
@@ -457,18 +461,15 @@ function extractEmojiImageUrls(message: string): string[] {
   return [...unique];
 }
 
-function getEmoteImages(wsdata: WSData, message?: string): string[] {
-  const emotes = wsdata.data?.message?.emotes || [];
-  const emotecount = emotes.length;
-
+function getEmoteImages(emotes: EmoteData[], message?: string): string[] {
   const images: string[] = [];
-  for (let i = 0; i < emotecount; i++) {
-    if (emotes[i] && emotes[i].imageUrl) {
-      images.push(emotes[i].imageUrl);
+  for (const emote of emotes) {
+    if (emote.imageUrl) {
+      images.push(emote.imageUrl);
     }
   }
 
-  const emojiUrls = extractEmojiImageUrls(message ?? wsdata.data?.message?.message ?? "");
+  const emojiUrls = extractEmojiImageUrls(message ?? "");
   for (const url of emojiUrls) {
     if (!images.includes(url)) {
       images.push(url);
@@ -617,14 +618,14 @@ function emoteMessageHandler(emotes: string[]): void {
 
 async function firstWordsHander(wsdata: WSData): Promise<void> {
   const settings = getSettings();
-  const subbedCheck =
-    !settings.subOnly || (settings.subOnly && wsdata.data?.message?.subscriber);
+  const chat = normalizeChatEventData(wsdata.data);
+  const subbedCheck = !settings.subOnly || (settings.subOnly && chat.subscriber);
   if (!isFeatureEnabled("firstwords", subbedCheck)) {
     logger.info("First Words Detected but Not Enabled");
     return;
   }
 
-  const username = wsdata.data?.message?.username || "";
+  const username = chat.username;
 
   try {
     const avatar = await helpers.getTwitchAvatar(username);

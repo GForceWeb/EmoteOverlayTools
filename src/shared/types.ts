@@ -74,6 +74,16 @@ export interface EmoteData {
   imageUrl: string;
   begin?: number;
   end?: number;
+  startIndex?: number;
+  endIndex?: number;
+}
+
+export interface StreamerBotTwitchUser {
+  id?: string;
+  login?: string;
+  name?: string;
+  subscribed?: boolean;
+  subscriptionTier?: string;
 }
 
 export interface WSData {
@@ -88,6 +98,9 @@ export interface WSData {
     user_login?: string;
     user_name?: string;
     user_input?: string;
+    text?: string;
+    user?: StreamerBotTwitchUser;
+    emotes?: EmoteData[];
     message?: {
       username?: string;
       userId?: string;
