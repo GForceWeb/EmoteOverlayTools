@@ -57,7 +57,7 @@ export const animationRegistry: Record<string, AnimationDefinition> = {
   snow: {
     name: "snow",
     displayName: "Snow",
-    description: "Emotes drift down gently like snowflakes",
+    description: "Emotes drift down gently like snowflakes, pile up on the ground, then melt away",
     defaultCount: 50,
     defaultInterval: 50,
     group: "falling",
