@@ -5,6 +5,12 @@ body {
   overflow: hidden;
 }
 
+/* Preview/debug only — production OBS overlays stay transparent */
+html.preview-background,
+html.preview-background body {
+  background-color: #000;
+}
+
 html,
 body,
 #container {
