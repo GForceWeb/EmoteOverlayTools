@@ -9,6 +9,11 @@ import { setupAvatarCacheEndpoint } from "./avatar-cache";
 import { writeLog, getLogs, getAvailableDates, cleanOldLogs, log } from "./logger";
 import { registerUpdaterIpc, setupAutoUpdater } from "./updater";
 
+// On Windows, set this as early as possible so taskbar grouping uses our identity/icon.
+if (process.platform === "win32") {
+  app.setAppUserModelId("com.gforce.emoteoverlaytools");
+}
+
 // Keep a global reference of the mainWindow object
 let mainWindow: BrowserWindow | null = null;
 let tray: Tray | null = null;
@@ -19,6 +24,45 @@ const server = http.createServer(expressApp);
 const wss = new WebSocketServer({ server });
 const settingsPath = path.join(app.getPath("userData"), "settings.json");
 let currentSettings = defaultConfig;
+
+type OverlayPresenceRole = "overlay" | "preview";
+type OverlayPresenceClient = {
+  id: string;
+  role: OverlayPresenceRole;
+  lastSeen: number;
+};
+
+const OVERLAY_PRESENCE_TTL_MS = 12_000;
+const overlayPresenceClients = new Map<string, OverlayPresenceClient>();
+
+function pruneOverlayPresence(now = Date.now()) {
+  for (const [id, client] of overlayPresenceClients) {
+    if (now - client.lastSeen > OVERLAY_PRESENCE_TTL_MS) {
+      overlayPresenceClients.delete(id);
+    }
+  }
+}
+
+function getOverlayPresenceStatus() {
+  pruneOverlayPresence();
+  let overlayClients = 0;
+  let previewClients = 0;
+
+  for (const client of overlayPresenceClients.values()) {
+    if (client.role === "preview") {
+      previewClients += 1;
+    } else {
+      overlayClients += 1;
+    }
+  }
+
+  return {
+    overlayConnected: overlayClients > 0,
+    previewConnected: previewClients > 0,
+    overlayClients,
+    previewClients,
+  };
+}
 
 function getOverlayMediaDirectory(): string | undefined {
   const possibleMediaPaths = [
@@ -43,11 +87,14 @@ function getOverlayMediaDirectory(): string | undefined {
 // Helper function to get the correct icon path for tray notifications
 function getTrayIconPath(): string | undefined {
   const possibleIconPaths = [
-    path.join(__dirname, "../renderer/img/icon_draft.png"),       // Production: dist/renderer/img/
-    path.join(__dirname, "../assets/img/icon_draft.png"),         // Development: assets/img/
-    path.join(__dirname, "../../assets/img/icon_draft.png"),      // Alternative path
-    path.join(process.cwd(), "assets/img/icon_draft.png"),        // From project root
-    path.join(process.cwd(), "dist/renderer/img/icon_draft.png")  // From dist
+    path.join(process.cwd(), "assets/img/app-icon.png"),
+    path.join(__dirname, "../assets/img/app-icon.png"),
+    path.join(__dirname, "../../assets/img/app-icon.png"),
+    path.join(__dirname, "../renderer/img/app-icon.png"),
+    path.join(process.cwd(), "dist/renderer/img/app-icon.png"),
+    path.join(process.cwd(), "assets/img/icon_draft.png"),
+    path.join(__dirname, "../renderer/img/icon_draft.png"),
+    path.join(process.cwd(), "dist/renderer/img/icon_draft.png"),
   ];
   
   for (const testPath of possibleIconPaths) {
@@ -61,14 +108,19 @@ function getTrayIconPath(): string | undefined {
 // Helper function to get the correct icon path for the application window (taskbar/titlebar)
 function getWindowIconPath(): string | undefined {
   const possibleIconPaths = [
-    // Prefer ICO when available
+    // Prefer PNG first — more reliable for BrowserWindow.setIcon on Windows.
+    path.join(process.cwd(), "assets/img/app-icon.png"),
+    path.join(__dirname, "../assets/img/app-icon.png"),
+    path.join(__dirname, "../../assets/img/app-icon.png"),
+    path.join(__dirname, "../renderer/img/app-icon.png"),
+    path.join(process.cwd(), "dist/renderer/img/app-icon.png"),
+    // ICO fallbacks (installer / shell)
+    path.join(process.cwd(), "assets/img/favicon.ico"),
     path.join(__dirname, "../renderer/img/favicon.ico"),
     path.join(process.cwd(), "dist/renderer/img/favicon.ico"),
-    path.join(process.cwd(), "assets/img/favicon.ico"),
-    // Fallback to PNG
+    path.join(process.cwd(), "assets/img/icon_draft.png"),
     path.join(__dirname, "../renderer/img/icon_draft.png"),
     path.join(process.cwd(), "dist/renderer/img/icon_draft.png"),
-    path.join(process.cwd(), "assets/img/icon_draft.png"),
   ];
 
   for (const testPath of possibleIconPaths) {
@@ -77,6 +129,22 @@ function getWindowIconPath(): string | undefined {
     }
   }
   return undefined;
+}
+
+function loadAppIconImage(): Electron.NativeImage | null {
+  const iconPath = getWindowIconPath();
+  if (!iconPath) {
+    return null;
+  }
+
+  const image = nativeImage.createFromPath(iconPath);
+  if (image.isEmpty()) {
+    console.warn("Failed to load window icon from:", iconPath);
+    return null;
+  }
+
+  console.log("Loaded window/taskbar icon from:", iconPath);
+  return image;
 }
 
 // Load settings on startup with deep merge to ensure new animations are added
@@ -138,6 +206,46 @@ async function setupExpressServer() {
           error: "Failed to read settings file",
           fallback: defaultConfig,
         });
+      }
+    }
+  );
+
+  // Overlay browser-source presence (excludes Live Preview clients)
+  expressApp.post(
+    "/api/overlay-presence",
+    (req: express.Request, res: express.Response) => {
+      try {
+        const { id, role } = req.body ?? {};
+        if (typeof id !== "string" || !id.trim()) {
+          res.status(400).json({ error: "Missing client id" });
+          return;
+        }
+        if (role !== "overlay" && role !== "preview") {
+          res.status(400).json({ error: "Invalid role. Must be: overlay or preview" });
+          return;
+        }
+
+        overlayPresenceClients.set(id, {
+          id,
+          role,
+          lastSeen: Date.now(),
+        });
+        res.json({ success: true, ...getOverlayPresenceStatus() });
+      } catch (error) {
+        console.error("Error updating overlay presence:", error);
+        res.status(500).json({ error: "Failed to update overlay presence" });
+      }
+    }
+  );
+
+  expressApp.get(
+    "/api/overlay-status",
+    (_req: express.Request, res: express.Response) => {
+      try {
+        res.json(getOverlayPresenceStatus());
+      } catch (error) {
+        console.error("Error reading overlay status:", error);
+        res.status(500).json({ error: "Failed to read overlay status" });
       }
     }
   );
@@ -274,29 +382,18 @@ function createTray() {
   let icon: Electron.NativeImage;
   
   try {
-    // Try to load from assets if available - check multiple possible paths
-    const possibleIconPaths = [
-      path.join(__dirname, "../renderer/img/icon_draft.png"),       // Production: dist/renderer/img/
-      path.join(__dirname, "../assets/img/icon_draft.png"),         // Development: assets/img/
-      path.join(__dirname, "../../assets/img/icon_draft.png"),      // Alternative path
-      path.join(process.cwd(), "assets/img/icon_draft.png"),        // From project root
-      path.join(process.cwd(), "dist/renderer/img/icon_draft.png")  // From dist
-    ];
-    
-    let iconPath: string | null = null;
-    for (const testPath of possibleIconPaths) {
-      if (fs.existsSync(testPath)) {
-        iconPath = testPath;
-        break;
-      }
-    }
+    const iconPath = getTrayIconPath();
     
     if (iconPath) {
-      icon = nativeImage.createFromPath(iconPath);
+      // Windows tray looks best at ~16–32px; oversized PNGs can fall back to Electron's default.
+      const source = nativeImage.createFromPath(iconPath);
+      icon = source.isEmpty()
+        ? source
+        : source.resize({ width: 32, height: 32, quality: "best" });
       console.log("Loaded tray icon from:", iconPath);
     } else {
       // Fallback to a simple icon
-      console.log("No icon file found, using fallback. Checked paths:", possibleIconPaths);
+      console.log("No icon file found, using fallback.");
       icon = nativeImage.createFromDataURL('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTggMUMxMS44NjYgMSAxNSA0LjEzNCAxNSA4QzE1IDExLjg2NiAxMS44NjYgMTUgOCAxNUM0LjEzNCAxNSAxIDExLjg2NiAxIDhDMSA0LjEzNCA0LjEzNCAxIDggMVoiIGZpbGw9IiM2NDY0NjQiLz4KPHBhdGggZD0iTTggM0M5LjY1Njg1IDMgMTEgNC4zNDMxNSAxMSA2QzExIDcuNjU2ODUgOS42NTY4NSA5IDggOUM2LjM0MzE1IDkgNSA3LjY1Njg1IDUgNkM1IDQuMzQzMTUgNi4zNDMxNSAzIDggM1oiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPgo=');
     }
   } catch (error) {
@@ -356,11 +453,11 @@ function createTray() {
 
 // Create the Electron application window
 function createWindow() {
-  const windowIconPath = getWindowIconPath();
+  const windowIcon = loadAppIconImage();
 
   const browserWindowOptions: Electron.BrowserWindowConstructorOptions = {
     width: 1200,
-    height: 800,
+    height: 1200,
     autoHideMenuBar: process.platform !== "darwin",
     webPreferences: {
       nodeIntegration: false,
@@ -369,11 +466,16 @@ function createWindow() {
     },
   };
 
-  if (windowIconPath) {
-    browserWindowOptions.icon = windowIconPath;
+  if (windowIcon) {
+    browserWindowOptions.icon = windowIcon;
   }
 
   mainWindow = new BrowserWindow(browserWindowOptions);
+
+  // Re-apply after creation — Windows taskbar can ignore constructor icon in dev.
+  if (windowIcon) {
+    mainWindow.setIcon(windowIcon);
+  }
 
   // Hide menu bar (File/Edit/View/...) for end users on Windows/Linux.
   // Note: macOS uses the system menu bar; we leave it alone.
@@ -431,15 +533,6 @@ app.whenReady().then(async () => {
   // This prevents the menu from being shown via Alt and removes unused items.
   if (process.platform !== "darwin") {
     Menu.setApplicationMenu(null);
-  }
-
-  // Ensure proper taskbar grouping and icon usage on Windows during development
-  if (process.platform === 'win32') {
-    try {
-      app.setAppUserModelId('com.gforce.emoteoverlaytools');
-    } catch (err) {
-      console.warn('Failed to set AppUserModelId:', err);
-    }
   }
   
   // Clean up old log files on startup

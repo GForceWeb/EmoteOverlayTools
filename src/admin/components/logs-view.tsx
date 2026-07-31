@@ -158,11 +158,11 @@ export function LogsView({ overlayServerPort }: LogsViewProps) {
 
   return (
     <>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 px-5 py-4">
         <div>
-          <CardTitle>System Logs</CardTitle>
+          <CardTitle className="font-display text-base">System Logs</CardTitle>
           <CardDescription>
-            View system logs and activity
+            Debug activity
             {isToday && (
               <span className="ml-2 text-xs text-muted-foreground">
                 (auto-refreshing)
@@ -195,7 +195,7 @@ export function LogsView({ overlayServerPort }: LogsViewProps) {
           </Button>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-5 pb-5">
         <div className="mb-4 flex flex-wrap gap-2">
           <div className="flex space-x-1">
             <Button variant={filter === "all" ? "default" : "outline"} size="sm" onClick={() => setFilter("all")}>

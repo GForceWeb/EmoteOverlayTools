@@ -1,306 +1,135 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/admin/components/ui/card";
-import { Badge } from "@/admin/components/ui/badge";
+import React, { useState } from "react";
 import { Button } from "@/admin/components/ui/button";
-import { RefreshCw, Wifi, WifiOff, ChevronDown, ChevronUp } from "lucide-react";
-import type { Settings } from "@/shared/types";
-import { useToast } from "@/admin/hooks/use-toast";
+import { Input } from "@/admin/components/ui/input";
+import { Label } from "@/admin/components/ui/label";
+import { InfoHint } from "@/admin/components/info-hint";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { cn } from "@/admin/lib/utils";
+import type { ConnectionState } from "@/admin/hooks/use-connection-status";
 
 interface ConnectionStatusProps {
-  settings: Settings;
+  websocketUrl: string;
+  onWebsocketUrlChange: (value: string) => void;
+  embedded?: boolean;
+  defaultInstructionsOpen?: boolean;
 }
 
-type ConnectionState = "connected" | "disconnected" | "connecting" | "error";
+export function getStatusColor(connectionState: ConnectionState) {
+  switch (connectionState) {
+    case "connected":
+      return "bg-emerald-500";
+    case "connecting":
+      return "bg-amber-400";
+    case "error":
+    case "disconnected":
+      return "bg-red-500";
+    default:
+      return "bg-gray-500";
+  }
+}
 
-export function ConnectionStatus({ settings }: ConnectionStatusProps) {
-  const [connectionState, setConnectionState] = useState<ConnectionState>("disconnected");
-  const [lastAttempt, setLastAttempt] = useState<Date | null>(null);
-  const [nextAutoTest, setNextAutoTest] = useState<Date | null>(null);
-  const [ws, setWs] = useState<WebSocket | null>(null);
-  const [showInstructions, setShowInstructions] = useState(true);
-  const { toast } = useToast();
+export function getStatusText(connectionState: ConnectionState) {
+  switch (connectionState) {
+    case "connected":
+      return "Connected";
+    case "connecting":
+      return "Connecting...";
+    case "error":
+      return "Connection Error";
+    case "disconnected":
+      return "Disconnected";
+    default:
+      return "Unknown";
+  }
+}
 
-  const handleToggleInstructions = () => {
-    setShowInstructions(!showInstructions);
-    
-    // Trigger layout change event for preview iframe repositioning
-    setTimeout(() => {
-      window.dispatchEvent(new CustomEvent('layout-change'));
-    }, 50);
-  };
+export function getStatusHsl(connectionState: ConnectionState) {
+  switch (connectionState) {
+    case "connected":
+      return "142 71% 45%";
+    case "connecting":
+      return "45 93% 47%";
+    case "error":
+    case "disconnected":
+      return "0 72% 51%";
+    default:
+      return "0 0% 50%";
+  }
+}
 
-  const getWebSocketUrl = useCallback(() => {
-    // Extract the WebSocket URL from the settings
-    // The setting is stored as "ws://localhost:8080/" but we need to parse it
-    let url = settings.streamerBotWebsocketUrl;
-    
-    // If it doesn't start with ws:// or wss://, assume it's just the hostname
-    if (!url.startsWith("ws://") && !url.startsWith("wss://")) {
-      url = `ws://${url}`;
-    }
-    
-    // Ensure it ends with /
-    if (!url.endsWith("/")) {
-      url += "/";
-    }
-    
-    return url;
-  }, [settings.streamerBotWebsocketUrl]);
-
-  const testConnection = useCallback(async (isManualTest = false) => {
-    const wsUrl = getWebSocketUrl();
-    setConnectionState("connecting");
-    setLastAttempt(new Date());
-    
-    // Set next auto test time (5 minutes from now)
-    const nextTest = new Date();
-    nextTest.setMinutes(nextTest.getMinutes() + 5);
-    setNextAutoTest(nextTest);
-
-    if (isManualTest) {
-      toast({
-        title: "Testing connection...",
-        description: `Attempting to connect to ${wsUrl}`,
-      });
-    }
-
-    try {
-      // Close existing connection if any
-      if (ws) {
-        ws.close();
-      }
-
-      const newWs = new WebSocket(wsUrl);
-      setWs(newWs);
-
-      // Set up connection timeout
-      const connectionTimeout = setTimeout(() => {
-        if (newWs.readyState === WebSocket.CONNECTING) {
-          newWs.close();
-          setConnectionState("error");
-          if (isManualTest) {
-            toast({
-              title: "Connection failed",
-              description: "Connection timed out after 5 seconds",
-              variant: "destructive",
-            });
-          }
-        }
-      }, 5000); // 5 second timeout
-
-      newWs.onopen = () => {
-        clearTimeout(connectionTimeout);
-        setConnectionState("connected");
-        
-        if (isManualTest) {
-          toast({
-            title: "Connection successful",
-            description: "Successfully connected to Streamer.Bot WebSocket server",
-          });
-        }
-        
-        // Send a test subscription message
-        newWs.send(JSON.stringify({
-          request: "Subscribe",
-          events: {
-            Twitch: ["ChatMessage"],
-            General: ["Custom"]
-          },
-          id: "connection-test"
-        }));
-      };
-
-      newWs.onclose = () => {
-        clearTimeout(connectionTimeout);
-        setConnectionState("disconnected");
-        setWs(null);
-        if (isManualTest) {
-          toast({
-            title: "Connection closed",
-            description: "WebSocket connection was closed",
-            variant: "destructive",
-          });
-        }
-      };
-
-      newWs.onerror = () => {
-        clearTimeout(connectionTimeout);
-        setConnectionState("error");
-        setWs(null);
-        if (isManualTest) {
-          toast({
-            title: "Connection error",
-            description: "Failed to connect to Streamer.Bot WebSocket server",
-            variant: "destructive",
-          });
-        }
-      };
-
-      newWs.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          // If we receive any message, the connection is working
-          if (data.status === "ok" || data.id === "connection-test") {
-            setConnectionState("connected");
-          }
-        } catch (error) {
-          // Even if we can't parse the message, receiving anything means connection works
-          setConnectionState("connected");
-        }
-      };
-
-    } catch (error) {
-      console.error("WebSocket connection error:", error);
-      setConnectionState("error");
-      setWs(null);
-      if (isManualTest) {
-        toast({
-          title: "Connection error",
-          description: `Failed to connect: ${error instanceof Error ? error.message : String(error)}`,
-          variant: "destructive",
-        });
-      }
-    }
-  }, [getWebSocketUrl, ws, toast]);
-
-  // Test connection when component mounts or settings change
-  useEffect(() => {
-    testConnection();
-    
-    // Initialize next auto test time
-    const nextTest = new Date();
-    nextTest.setMinutes(nextTest.getMinutes() + 5);
-    setNextAutoTest(nextTest);
-  }, [testConnection]);
-
-  // Set up automatic re-testing every 5 minutes
-  useEffect(() => {
-    const interval = setInterval(() => {
-      testConnection();
-    }, 5 * 60 * 1000); // 5 minutes
-
-    return () => clearInterval(interval);
-  }, [testConnection]);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (ws) {
-        ws.close();
-      }
-    };
-  }, [ws]);
-
-  const getStatusColor = () => {
-    switch (connectionState) {
-      case "connected":
-        return "bg-green-500";
-      case "connecting":
-        return "bg-yellow-500";
-      case "error":
-      case "disconnected":
-        return "bg-red-500";
-      default:
-        return "bg-gray-500";
-    }
-  };
-
-  const getStatusText = () => {
-    switch (connectionState) {
-      case "connected":
-        return "Connected";
-      case "connecting":
-        return "Connecting...";
-      case "error":
-        return "Connection Error";
-      case "disconnected":
-        return "Disconnected";
-      default:
-        return "Unknown";
-    }
-  };
-
-  const getStatusIcon = () => {
-    switch (connectionState) {
-      case "connected":
-        return <Wifi className="h-4 w-4" />;
-      case "connecting":
-        return <RefreshCw className="h-4 w-4 animate-spin" />;
-      case "error":
-      case "disconnected":
-        return <WifiOff className="h-4 w-4" />;
-      default:
-        return <WifiOff className="h-4 w-4" />;
-    }
-  };
+export function ConnectionStatus({
+  websocketUrl,
+  onWebsocketUrlChange,
+  embedded = false,
+  defaultInstructionsOpen = false,
+}: ConnectionStatusProps) {
+  const [showInstructions, setShowInstructions] = useState(
+    defaultInstructionsOpen
+  );
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">Step 1: Streamer.Bot Connection</CardTitle>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleToggleInstructions}
-            className="h-8 w-8 p-0"
-          >
-            {showInstructions ? (
-              <ChevronUp className="h-4 w-4" />
-            ) : (
-              <ChevronDown className="h-4 w-4" />
-            )}
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {showInstructions && (
-          <div className="text-sm text-muted-foreground mb-4">
-            <p className="mb-2">In Streamer.Bot:</p>
-            <ol className="list-decimal list-inside space-y-1 ml-2">
-              <li>Ensure the Websocket server is enabled in Streamer.Bot settings</li>
-              <li>If you're using a remote Streamer.Bot instance or a different websocket port, adjust the WebSocket URL under General Settings</li>
-              <li>Click "Test Connection" to verify the connection</li>
-            </ol>
-          </div>
-        )}
-
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className={`w-3 h-3 rounded-full ${getStatusColor()}`} />
-            <span className="text-sm font-medium">{getStatusText()}</span>
-          </div>
-          <Badge variant="outline" className="flex items-center space-x-1">
-            {getStatusIcon()}
-            <span>WebSocket</span>
-          </Badge>
-        </div>
-
-        <div className="text-sm text-muted-foreground">
-          <p>Server: {getWebSocketUrl()}</p>
-          {lastAttempt && (
-            <p>Last attempt: {lastAttempt.toLocaleTimeString()}</p>
+    <div className={cn(!embedded && "rounded-xl border bg-card p-4")}>
+      <div className="mb-3 flex items-center justify-between gap-2">
+        <h3 className="font-display text-sm font-semibold tracking-tight">
+          Streamer.Bot Websocket Connection
+        </h3>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setShowInstructions((open) => !open)}
+          className="h-7 w-7 p-0 md:hidden"
+          aria-label={showInstructions ? "Hide instructions" : "Show instructions"}
+        >
+          {showInstructions ? (
+            <ChevronUp className="h-4 w-4" />
+          ) : (
+            <ChevronDown className="h-4 w-4" />
           )}
-          {nextAutoTest && (
-            <p>Next auto-test: {nextAutoTest.toLocaleTimeString()}</p>
-          )}
+        </Button>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 md:items-start">
+        <div className="space-y-2">
+          <div className="flex items-center gap-1.5">
+            <Label htmlFor="streamerBotWebsocketUrl" className="text-xs">
+              Streamer.Bot Websocket URL
+            </Label>
+            <InfoHint text="ws://localhost:8080/ is the default and should be correct unless you've customized Streamer.Bot or are running it on a separate computer." />
+          </div>
+          <Input
+            id="streamerBotWebsocketUrl"
+            name="streamerBotWebsocketUrl"
+            value={websocketUrl}
+            onChange={(e) => onWebsocketUrlChange(e.target.value)}
+            placeholder="ws://localhost:8080/"
+            className="font-mono text-xs"
+          />
         </div>
 
-        <div className="flex space-x-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => testConnection(true)}
-            disabled={connectionState === "connecting"}
-            className="flex-1"
-          >
-            <RefreshCw className="mr-2 h-4 w-4" />
-            Test Connection
-          </Button>
+        <div
+          className={cn(
+            "rounded-lg bg-secondary/40 p-3 text-sm text-muted-foreground",
+            !showInstructions && "hidden md:block"
+          )}
+        >
+          <p className="mb-2 font-medium text-foreground/80">In Streamer.Bot:</p>
+          <ol className="ml-2 list-inside list-decimal space-y-1">
+            <li>
+              Ensure the Websocket server is enabled in Streamer.Bot settings
+            </li>
+            <li>
+              Confirm the WebSocket URL matches your Streamer.Bot server
+              (default is usually fine)
+            </li>
+            <li>
+              Check the SB status in the app header — click the refresh icon to
+              retest the connection
+            </li>
+          </ol>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
-} 
+}

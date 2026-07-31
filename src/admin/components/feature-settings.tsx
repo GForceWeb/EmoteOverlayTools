@@ -113,23 +113,23 @@ export function FeatureSettings({
 
   return (
     <>
-      <CardHeader>
-        <CardTitle>Feature Settings</CardTitle>
+      <CardHeader className="space-y-1 px-5 py-4">
+        <CardTitle className="font-display text-base">Feature Settings</CardTitle>
         <CardDescription>
-          Enable or disable specific features for your stream overlay
+          Enable or disable overlay features
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-4 px-5 pb-5">
         {/* Enable All Features Toggle */}
-        <div className="flex items-center justify-between p-4 bg-secondary/50 rounded-lg">
+        <div className="flex items-center justify-between rounded-lg bg-secondary/50 px-3 py-3">
           <div className="space-y-0.5">
             <Label
               htmlFor="enableAllFeatures"
-              className="text-base font-medium"
+              className="text-sm font-medium"
             >
               Enable All Features
             </Label>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               Turn on all available features at once
             </p>
           </div>
@@ -140,21 +140,21 @@ export function FeatureSettings({
           />
         </div>
 
-        <Separator className="my-4" />
+        <Separator />
 
-        <div className="space-y-4">
+        <div className="space-y-3">
           {Object.entries(settings.features).map(([feature, { enabled }]) => (
             <div key={feature} className="flex flex-col space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0 space-y-0.5">
                   <Label htmlFor={`feature-${feature}`}>
                     {featureLabels[feature as keyof Settings["features"]]}
                   </Label>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs text-muted-foreground">
                     {featureDescriptions[feature as keyof Settings["features"]]}
                   </p>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex shrink-0 items-center space-x-2">
                   <Button
                     variant="outline"
                     size="sm"
@@ -178,8 +178,8 @@ export function FeatureSettings({
                 </div>
               </div>
               {feature === "cheers" && (
-                <div className="rounded-lg border border-border/60 bg-secondary/20 p-4 space-y-4">
-                  <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-3 rounded-lg border border-border/60 bg-secondary/20 p-3">
+                  <div className="grid gap-3 md:grid-cols-2">
                     <div className="space-y-2">
                       <Label htmlFor="cheers-quantity">Quantity</Label>
                       <Select
@@ -196,7 +196,7 @@ export function FeatureSettings({
                           <SelectItem value="2">2 animations</SelectItem>
                         </SelectContent>
                       </Select>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-xs text-muted-foreground">
                         Use one cheers animation or mirror it on both sides.
                       </p>
                     </div>
@@ -223,7 +223,7 @@ export function FeatureSettings({
                           )}
                         </SelectContent>
                       </Select>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-xs text-muted-foreground">
                         {settings.features.cheers.quantity === 2
                           ? "Two cheers animations always render near the left and right edges."
                           : "Choose where the cheers animation appears when only one is shown."}
@@ -233,7 +233,7 @@ export function FeatureSettings({
                 </div>
               )}
               {feature !== Object.keys(settings.features).pop() && (
-                <Separator className="my-2" />
+                <Separator className="my-1" />
               )}
             </div>
           ))}

@@ -1,3 +1,4 @@
+import "../css/style.css";
 import websockets from "./websocket.ts";
 import animations from "./animations.ts";
 import config from "./config.ts";
@@ -5,6 +6,7 @@ import OverlaySettings from "./settings";
 import handlers from "./handlers.ts";
 import { WSData } from "../shared/types.ts";
 import { showNoticeBanner } from "./notice-banner.ts";
+import { startOverlayPresenceHeartbeat } from "./presence.ts";
 
 const settings = OverlaySettings.settings;
 
@@ -13,6 +15,7 @@ async function init(): Promise<void> {
   // Show notice banner for non-app users (GitHub Pages, self-hosted, or with URL params)
   showNoticeBanner();
 
+  startOverlayPresenceHeartbeat();
   websockets.connectws();
 
   // Expose animations to the global window object for debugging
