@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   Dialog,
   DialogContent,
@@ -9,7 +9,11 @@ import {
 } from "@/admin/components/dialog";
 import { Button } from "@/admin/components/ui/button";
 
-export function Footer() {
+interface FooterProps {
+  saveAction?: ReactNode;
+}
+
+export function Footer({ saveAction }: FooterProps) {
   const [version, setVersion] = useState<string>("");
   const [status, setStatus] = useState<string>("");
   const [progress, setProgress] = useState<number | null>(null);
@@ -35,8 +39,7 @@ export function Footer() {
       }
     };
     fetchVersion();
-    
-    // Subscribe to updater events
+
     const unsubChecking = window.electronAPI.onUpdaterChecking(() => {
       if (!isMounted) return;
       lastCheckWasManualRef.current = pendingCheckIsManualRef.current;
@@ -58,13 +61,15 @@ export function Footer() {
     });
     const unsubError = window.electronAPI.onUpdaterError((message) => {
       if (!isMounted) return;
-      // Avoid noisy errors for the automatic (silent) check on launch.
       if (!lastCheckWasManualRef.current) return;
       setStatus(`Update error: ${message}`);
     });
     const unsubProgress = window.electronAPI.onUpdaterProgress((p) => {
       if (!isMounted) return;
-      const pct = typeof p?.percent === 'number' ? Math.max(0, Math.min(100, p.percent)) : null;
+      const pct =
+        typeof p?.percent === "number"
+          ? Math.max(0, Math.min(100, p.percent))
+          : null;
       setProgress(pct);
       if (pct != null) setStatus(`Downloading… ${pct.toFixed(0)}%`);
     });
@@ -77,7 +82,6 @@ export function Footer() {
       }
     });
 
-    // Auto-check on launch (quiet when up-to-date).
     pendingCheckIsManualRef.current = false;
     window.electronAPI.updaterCheck({ silent: true });
 
@@ -126,40 +130,45 @@ export function Footer() {
         </DialogContent>
       </Dialog>
 
-      <footer className="fixed bottom-0 left-0 right-0 z-50 bg-background text-center text-muted-foreground text-xs">
-        <div className="mx-auto max-w-7xl py-4 border-t px-4 md:px-8">
-          <div className="flex flex-col gap-2 items-center justify-center">
-            <span>
-              Emote Overlay Tools {version ? `v${version}` : "(dev)"} — made by G‑Force
+      <footer className="z-40 border-t border-border/70 bg-background/80 backdrop-blur-md">
+        <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-2 md:px-5">
+          <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
+            <span className="font-display font-medium text-foreground/80">
+              Emote Overlay Tools {version ? `v${version}` : "(dev)"}
             </span>
-            <div className="flex flex-wrap gap-2 items-center">
-              {status && <span className="text-[11px] opacity-80">{status}</span>}
+            <span className="hidden text-border sm:inline" aria-hidden>
+              ·
+            </span>
+            <span className="hidden sm:inline">made by G‑Force</span>
+            {status && (
+              <span className="opacity-80">{status}</span>
+            )}
+            <button
+              type="button"
+              className="rounded border border-border/80 px-2 py-0.5 transition-colors hover:bg-accent"
+              onClick={() => {
+                pendingCheckIsManualRef.current = true;
+                window.electronAPI.updaterCheck({ silent: false });
+              }}
+            >
+              Check for updates
+            </button>
+            {hasUpdate && !isDownloading && !hasTriggeredInstallRef.current && (
               <button
-                className="px-2 py-1 border rounded hover:bg-accent text-[11px]"
+                type="button"
+                className="rounded border border-primary/40 bg-primary/10 px-2 py-0.5 text-primary transition-colors hover:bg-primary/20"
                 onClick={() => {
-                  pendingCheckIsManualRef.current = true;
-                  window.electronAPI.updaterCheck({ silent: false });
+                  setIsUpdateDialogOpen(true);
                 }}
               >
-                Check for updates
+                Update Now
               </button>
-
-              {hasUpdate && !isDownloading && !hasTriggeredInstallRef.current && (
-                <button
-                  className="px-2 py-1 border rounded hover:bg-accent text-[11px]"
-                  onClick={() => {
-                    setIsUpdateDialogOpen(true);
-                  }}
-                >
-                  Update Now
-                </button>
-              )}
-            </div>
+            )}
           </div>
+
+          {saveAction ? <div className="shrink-0">{saveAction}</div> : null}
         </div>
       </footer>
     </>
   );
 }
-
-

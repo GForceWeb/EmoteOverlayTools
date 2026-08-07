@@ -232,21 +232,27 @@ export function AnimationSettings({
         value={def.name}
         className={isChild ? "ml-6 border-l-2 border-muted pl-4" : ""}
       >
-        <div className="flex items-center justify-between w-full">
-          <AccordionTrigger className="py-4 flex-1">
-            <div className="flex items-center gap-2">
-              <span className="capitalize">{def.displayName}</span>
-              {isChild && (
-                <span className="text-xs text-muted-foreground">(child)</span>
-              )}
-              {def.isGroup && (
-                <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded">
-                  Group
-                </span>
-              )}
-            </div>
-          </AccordionTrigger>
-          <div className="flex items-center space-x-2 pr-4">
+        <div className="flex w-full items-stretch gap-2">
+          <div className="min-w-0 flex-1">
+            <AccordionTrigger className="w-full py-3 hover:no-underline">
+              <div className="flex items-center gap-2">
+                <span className="capitalize">{def.displayName}</span>
+                {isChild && (
+                  <span className="text-xs text-muted-foreground">(child)</span>
+                )}
+                {def.isGroup && (
+                  <span className="rounded bg-primary/20 px-2 py-0.5 text-xs text-primary">
+                    Group
+                  </span>
+                )}
+              </div>
+            </AccordionTrigger>
+          </div>
+          <div
+            className="flex shrink-0 items-center space-x-2 self-center pr-4"
+            onClick={(e) => e.stopPropagation()}
+            onPointerDown={(e) => e.stopPropagation()}
+          >
             <Button
               variant="outline"
               size="sm"
@@ -267,18 +273,18 @@ export function AnimationSettings({
               }}
             >
               <RotateCcw className="mr-2 h-4 w-4" />
-              Reset to Defaults
+              Reset
             </Button>
           </div>
         </div>
-        <AccordionContent className="space-y-4 px-1 pb-4">
-          <p className="text-sm text-muted-foreground mb-4">
+        <AccordionContent className="space-y-3 px-1 pb-3">
+          <p className="mb-2 text-xs text-muted-foreground">
             {def.description}
           </p>
 
-          <div className="grid gap-6 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-2">
             {/* Left column: enable toggles */}
-            <div className="space-y-3 rounded-lg bg-secondary/30 p-4">
+            <div className="space-y-3 rounded-lg bg-secondary/30 p-3">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
                   <Label className="text-sm font-medium">Enable for !er</Label>
@@ -420,15 +426,15 @@ export function AnimationSettings({
 
   return (
     <>
-      <CardHeader>
-        <CardTitle>Animation Settings</CardTitle>
+      <CardHeader className="space-y-1 px-5 py-4">
+        <CardTitle className="font-display text-base">Animation Settings</CardTitle>
         <CardDescription>
-          Configure which animations are available for manual (!er) and kappagen (!k) triggers
+          Configure !er and !k animation triggers
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-5 pb-5">
         {/* Preview Emotes Picker */}
-        <div className="mb-6">
+        <div className="mb-4">
           <EmotePicker
             selectedEmotes={settings.previewEmotes || []}
             onEmotesChange={(emotes: PreviewEmote[]) => {
@@ -441,16 +447,16 @@ export function AnimationSettings({
           />
         </div>
 
-        <Separator className="my-6" />
+        <Separator className="my-4" />
 
         {/* Enable All Animations Toggle */}
-        <div className="flex items-center justify-between p-4 bg-secondary/50 rounded-lg mb-6">
+        <div className="mb-4 flex items-center justify-between rounded-lg bg-secondary/50 px-3 py-3">
           <div className="space-y-0.5">
-            <Label htmlFor="enableAllAnimations" className="text-base font-medium">
+            <Label htmlFor="enableAllAnimations" className="text-sm font-medium">
               Enable All Animations
             </Label>
-            <p className="text-sm text-muted-foreground">
-              Override individual settings and enable all animations for both !er and !k
+            <p className="text-xs text-muted-foreground">
+              Override individual settings for both !er and !k
             </p>
           </div>
           <Switch

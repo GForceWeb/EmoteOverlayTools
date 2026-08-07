@@ -1,7 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
- 
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -30,31 +30,88 @@
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
   }
+
   .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 270 90% 65%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 270 30% 18%;
-    --accent-foreground: 0 0% 98%;
+    --background: 265 28% 6%;
+    --foreground: 270 20% 96%;
+    --card: 265 24% 9%;
+    --card-foreground: 270 20% 96%;
+    --popover: 265 26% 10%;
+    --popover-foreground: 270 20% 96%;
+    --primary: 270 85% 68%;
+    --primary-foreground: 265 40% 8%;
+    --secondary: 265 18% 14%;
+    --secondary-foreground: 270 20% 96%;
+    --muted: 265 16% 14%;
+    --muted-foreground: 270 10% 62%;
+    --accent: 270 32% 16%;
+    --accent-foreground: 270 40% 92%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 270 90% 65%;
+    --border: 265 16% 18%;
+    --input: 265 16% 18%;
+    --ring: 270 85% 68%;
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+}
+
+@layer utilities {
+  .app-stage {
+    background-color: hsl(var(--background));
+    background-image:
+      radial-gradient(ellipse 90% 55% at 50% -15%, hsl(270 70% 28% / 0.35), transparent 55%),
+      radial-gradient(ellipse 50% 40% at 100% 80%, hsl(280 60% 22% / 0.18), transparent 50%),
+      radial-gradient(ellipse 40% 30% at 0% 60%, hsl(250 50% 20% / 0.15), transparent 45%);
+  }
+
+  .app-grain::before {
+    content: "";
+    pointer-events: none;
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    opacity: 0.045;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 180px 180px;
+  }
+
+  .panel-surface {
+    @apply rounded-xl border border-border/80 bg-card/80 shadow-lg shadow-black/20 backdrop-blur-sm;
+  }
+
+  .status-dot-pulse {
+    animation: status-pulse 2s ease-in-out infinite;
+  }
+}
+
+@keyframes status-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 hsl(var(--status-color, 142 71% 45%) / 0.45);
+  }
+  50% {
+    box-shadow: 0 0 0 6px hsl(var(--status-color, 142 71% 45%) / 0);
   }
 }
 
@@ -74,7 +131,7 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%) scale(0.37); /* Scale to fit in 400px height (400/1080 ≈ 0.37) */
+  transform: translate(-50%, -50%) scale(0.37);
   transform-origin: center center;
 }
 
@@ -82,13 +139,4 @@
   width: 100%;
   height: 100%;
   border: none;
-}
-
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
 }

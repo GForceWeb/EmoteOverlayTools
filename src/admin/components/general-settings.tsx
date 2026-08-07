@@ -18,14 +18,27 @@ import {
 import { RotateCcwIcon } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/admin/components/ui/button"
+import { InfoHint } from "@/admin/components/info-hint"
+import {
+  SetupGuideContent,
+  type SetupGuideContentProps,
+} from "@/admin/components/setup-guide-content"
 
 interface GeneralSettingsProps {
   settings: Settings
   setSettings: React.Dispatch<React.SetStateAction<Settings>>
   resetSettings: () => void
+  setupGuide: SetupGuideContentProps
+  isFirstRun?: boolean
 }
 
-export function GeneralSettings({ settings, setSettings, resetSettings }: GeneralSettingsProps) {
+export function GeneralSettings({
+  settings,
+  setSettings,
+  resetSettings,
+  setupGuide,
+  isFirstRun = false,
+}: GeneralSettingsProps) {
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false)
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -53,51 +66,45 @@ export function GeneralSettings({ settings, setSettings, resetSettings }: Genera
 
   return (
     <>
-      <CardHeader>
-        <CardTitle>General Settings</CardTitle>
-        <CardDescription>Configure the basic settings for your Twitch overlay</CardDescription>
+      <CardHeader className="space-y-1 px-5 py-4">
+        <CardTitle className="font-display text-base">Settings &amp; Connection</CardTitle>
+        <CardDescription>
+          {isFirstRun
+            ? "Welcome — connect Streamer.Bot and OBS, then set your Twitch username"
+            : "Connect Streamer.Bot / OBS and configure global defaults"}
+        </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-5 px-5 pb-5">
+        <div>
+          <h3 className="mb-3 font-display text-sm font-semibold tracking-tight">
+            Connection Setup
+          </h3>
+          <SetupGuideContent
+            {...setupGuide}
+            defaultInstructionsOpen={
+              setupGuide.defaultInstructionsOpen ?? isFirstRun
+            }
+          />
+        </div>
+
+        <Separator />
+
         <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="streamerBotWebsocketUrl">Streamer.Bot Websocket URL</Label>
-              <Input
-                id="streamerBotWebsocketUrl"
-                name="streamerBotWebsocketUrl"
-                value={settings.streamerBotWebsocketUrl}
-                onChange={handleInputChange}
-                placeholder="localhost"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="serverPort">Overlay Server Port</Label>
-              <Input
-                id="serverPort"
-                name="serverPort"
-                type="number"
-                value={settings.overlayServerPort}
-                onChange={handleInputChange}
-                placeholder="3030"
-              />
-            </div>
-          </div>
+          <h3 className="font-display text-sm font-semibold">Global Settings</h3>
 
           <div className="space-y-2">
-            <Label htmlFor="twitchUsername">Twitch Username</Label>
+            <div className="flex items-center gap-1.5">
+              <Label htmlFor="twitchUsername">Twitch Username</Label>
+              <InfoHint text="Used to look up your avatar as the default avatar for certain animations like Cheers." />
+            </div>
             <Input
               id="twitchUsername"
               name="twitchUsername"
-              value={settings.twitchUsername }
+              value={settings.twitchUsername}
               onChange={handleInputChange}
               placeholder="Your Twitch username"
             />
           </div>
-
-          <Separator className="my-6" />
-
-          {/* Advanced Settings (moved from Advanced tab) */}
-          <h3 className="text-lg font-medium">Advanced Settings</h3>
 
           <div className="space-y-2">
             <div className="flex justify-between">
@@ -129,10 +136,10 @@ export function GeneralSettings({ settings, setSettings, resetSettings }: Genera
             <p className="text-xs text-muted-foreground">Default number of emotes to use for each animation when not specified</p>
           </div>
 
-          <div className="flex items-center justify-between space-y-0 pt-4">
+          <div className="flex items-center justify-between space-y-0 pt-2">
             <div className="space-y-0.5">
               <Label htmlFor="subOnly">Subscriber Only Mode</Label>
-              <p className="text-sm text-muted-foreground">Limit overlay interactions to subscribers only</p>
+              <p className="text-xs text-muted-foreground">Limit overlay interactions to subscribers only</p>
             </div>
             <Switch
               id="subOnly"
@@ -141,10 +148,10 @@ export function GeneralSettings({ settings, setSettings, resetSettings }: Genera
             />
           </div>
 
-          <div className="flex items-center justify-between space-y-0 pt-2">
+          <div className="flex items-center justify-between space-y-0 pt-1">
             <div className="space-y-0.5">
               <Label htmlFor="debug">Debug Mode</Label>
-              <p className="text-sm text-muted-foreground">Enable debug information and logging</p>
+              <p className="text-xs text-muted-foreground">Enable debug information and logging</p>
             </div>
             <Switch
               id="debug"
@@ -153,7 +160,7 @@ export function GeneralSettings({ settings, setSettings, resetSettings }: Genera
             />
           </div>
 
-          <div className="space-y-2 pt-4">
+          <div className="space-y-2 pt-2">
             <Label htmlFor="configFilePath">Config File Path (Optional)</Label>
             <Input
               id="configFilePath"
@@ -165,8 +172,7 @@ export function GeneralSettings({ settings, setSettings, resetSettings }: Genera
             <p className="text-xs text-muted-foreground">Specify a custom path to save your configuration file</p>
           </div>
 
-          {/* Reset to Defaults Button */}
-          <div className="pt-6">
+          <div className="pt-3">
             <Button variant="destructive" onClick={() => setIsResetDialogOpen(true)} className="w-full">
               <RotateCcwIcon className="mr-2 h-4 w-4" />
               Reset to Defaults
@@ -175,7 +181,6 @@ export function GeneralSettings({ settings, setSettings, resetSettings }: Genera
         </div>
       </CardContent>
 
-      {/* Reset Confirmation Dialog */}
       <Dialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -203,4 +208,3 @@ export function GeneralSettings({ settings, setSettings, resetSettings }: Genera
     </>
   )
 }
-

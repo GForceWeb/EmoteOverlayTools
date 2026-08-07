@@ -3,9 +3,9 @@ import { Button } from "@/admin/components/ui/button";
 
 export function Support() {
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-5 p-5">
       <div className="space-y-2">
-        <h2 className="text-xl font-semibold">About the Project</h2>
+        <h2 className="font-display text-base font-semibold">About the Project</h2>
         <p className="text-sm text-muted-foreground">
             Emote Overlay Tools is a passion project that grew out of my love for streaming and a spark of inspiration from VRFlad’s excellent EmoteRain overlay. His original concept showed me what was possible and set me on this journey.
         </p>
@@ -25,7 +25,7 @@ export function Support() {
       </div>
 
       <div className="space-y-2">
-        <h2 className="text-xl font-semibold">About Me</h2>
+        <h2 className="font-display text-base font-semibold">About Me</h2>
         <p className="text-sm text-muted-foreground">
           I’m G-Force. I'm a DJ, streamer and web developer based in Australia. I’ve been DJing a full spectrum of hard, underground dance music for 
           over 17 years and have been streaming on Twitch since 2020. Day to day I work as a website developer building websites and custom 
@@ -34,7 +34,7 @@ export function Support() {
       </div>
 
       <div className="space-y-2">
-        <h2 className="text-xl font-semibold">Questions or Suggestions?</h2>
+        <h2 className="font-display text-base font-semibold">Questions or Suggestions?</h2>
         <p className="text-sm text-muted-foreground">
           The best place to get support, report issues, or chat about ideas is the Discord. New ideas and feedback are
           both welcome and encouraged — jump in and say hi!
@@ -56,7 +56,7 @@ export function Support() {
       </div>
 
       <div className="space-y-2">
-        <h2 className="text-xl font-semibold">Socials</h2>
+        <h2 className="font-display text-base font-semibold">Socials</h2>
         <p className="text-sm text-muted-foreground">
           Keep up with what I’m building (and drop by to hang out) on Twitch or Instagram. I stream Wednesday and
           Sunday evenings (GMT+8).
@@ -78,7 +78,7 @@ export function Support() {
       </div>
 
       <div className="space-y-2">
-        <h2 className="text-xl font-semibold">Feeling Generous?</h2>
+        <h2 className="font-display text-base font-semibold">Feeling Generous?</h2>
         <p className="text-sm text-muted-foreground">
           Donations are never required or expected. But if you enjoy the tool and have the means, supporting me with a
           donation would mean the world and helps me dedicate more time to building new features and improvements.

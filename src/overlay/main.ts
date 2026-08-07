@@ -1,3 +1,4 @@
+import "../css/style.css";
 import websockets from "./websocket.ts";
 import animations from "./animations.ts";
 import config from "./config.ts";
