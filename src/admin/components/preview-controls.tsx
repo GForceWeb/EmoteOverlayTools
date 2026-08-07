@@ -146,6 +146,11 @@ export function PreviewControls({ settings, onSettingsChange }: PreviewControlsP
                     (feature) =>
                       feature !== "emoterain" && feature !== "kappagen"
                   )
+                  .sort((a, b) =>
+                    featureLabels[a as keyof Settings["features"]].localeCompare(
+                      featureLabels[b as keyof Settings["features"]]
+                    )
+                  )
                   .map((feature) => (
                     <SelectItem key={feature} value={feature}>
                       {
@@ -184,7 +189,9 @@ export function PreviewControls({ settings, onSettingsChange }: PreviewControlsP
                 <SelectValue placeholder="Select an animation" />
               </SelectTrigger>
               <SelectContent>
-                {Object.keys(settings.animations).map((animation) => (
+                {Object.keys(settings.animations)
+                  .sort((a, b) => a.localeCompare(b))
+                  .map((animation) => (
                   <SelectItem key={animation} value={animation}>
                     {animation.charAt(0).toUpperCase() + animation.slice(1)}
                   </SelectItem>

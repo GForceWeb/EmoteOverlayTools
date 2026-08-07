@@ -336,22 +336,26 @@ export const animationRegistry: Record<string, AnimationDefinition> = {
   },
 };
 
+function byDisplayName(a: AnimationDefinition, b: AnimationDefinition): number {
+  return a.displayName.localeCompare(b.displayName);
+}
+
 /**
  * Get all top-level animations (excludes group children for random pool)
  */
 export function getTopLevelAnimations(): AnimationDefinition[] {
-  return Object.values(animationRegistry).filter(
-    (anim) => !anim.group // Exclude children that belong to a group
-  );
+  return Object.values(animationRegistry)
+    .filter((anim) => !anim.group) // Exclude children that belong to a group
+    .sort(byDisplayName);
 }
 
 /**
  * Get all animations that belong to a specific group
  */
 export function getGroupChildren(groupName: string): AnimationDefinition[] {
-  return Object.values(animationRegistry).filter(
-    (anim) => anim.group === groupName
-  );
+  return Object.values(animationRegistry)
+    .filter((anim) => anim.group === groupName)
+    .sort(byDisplayName);
 }
 
 /**

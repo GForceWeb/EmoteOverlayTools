@@ -189,7 +189,13 @@ export function FeatureSettings({
         <Separator />
 
         <div className="space-y-3">
-          {Object.entries(settings.features).map(([feature, { enabled }]) => (
+          {Object.entries(settings.features)
+            .sort(([a], [b]) =>
+              featureLabels[a as keyof Settings["features"]].localeCompare(
+                featureLabels[b as keyof Settings["features"]]
+              )
+            )
+            .map(([feature, { enabled }], index, sortedFeatures) => (
             <div key={feature} className="flex flex-col space-y-2">
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0 space-y-0.5">
@@ -341,7 +347,7 @@ export function FeatureSettings({
                   </div>
                 </div>
               )}
-              {feature !== Object.keys(settings.features).pop() && (
+              {index < sortedFeatures.length - 1 && (
                 <Separator className="my-1" />
               )}
             </div>
