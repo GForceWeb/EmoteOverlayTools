@@ -14,6 +14,7 @@ type OrbitPath = {
   path: OrbitPoint[];
   startAngle: number;
   endAngle: number;
+  duration: number;
 };
 
 type OrbitGeometry = {
@@ -25,6 +26,12 @@ type OrbitGeometry = {
 
 const FULL_TURN = Math.PI * 2;
 const ORBIT_LIFETIME_MS = 12000;
+const ORBIT_DURATION_SECONDS = 8.4;
+const ORBIT_TURNS = 1.45;
+// Back of the ring (away from camera) — depth opacity is 0 here, so emotes
+// enter invisibly and reveal as they travel around the subject.
+const ORBIT_ENTRY_ANGLE = -Math.PI / 2;
+const FADE_OUT_DURATION = 0.55;
 
 export function orbit(
   images: string[],
@@ -42,18 +49,13 @@ export function orbit(
     // split the count amounst the different emote images
     let imagenum = j % imgcount;
     setTimeout(() => {
-      createOrbit(images[imagenum], j, count, geometry);
+      createOrbit(images[imagenum], geometry);
     }, j * interval);
   }
 }
 
-function createOrbit(
-  image: string,
-  index: number,
-  totalCount: number,
-  geometry: OrbitGeometry
-): void {
-  const orbitPath = buildOrbit(index, totalCount, geometry);
+function createOrbit(image: string, geometry: OrbitGeometry): void {
+  const orbitPath = buildOrbit(geometry);
   const baseScale = helpers.Randomizer(0.82, 1.08);
   const div = document.createElement("div");
 
@@ -114,16 +116,9 @@ function createOrbitGeometry(): OrbitGeometry {
   };
 }
 
-function buildOrbit(
-  index: number,
-  totalCount: number,
-  geometry: OrbitGeometry
-): OrbitPath {
-  const baseAngle =
-    ((index % Math.max(totalCount, 1)) / Math.max(totalCount, 1)) * FULL_TURN;
-  const startAngle = baseAngle + helpers.Randomizer(-0.18, 0.18);
-  const orbitCount = helpers.Randomizer(1.2, 1.65);
-  const endAngle = startAngle + FULL_TURN * orbitCount;
+function buildOrbit(geometry: OrbitGeometry): OrbitPath {
+  const startAngle = ORBIT_ENTRY_ANGLE;
+  const endAngle = startAngle + FULL_TURN * ORBIT_TURNS;
 
   return {
     path: buildOrbitPath(
@@ -136,6 +131,7 @@ function buildOrbit(
     ),
     startAngle,
     endAngle,
+    duration: ORBIT_DURATION_SECONDS,
   };
 }
 
@@ -194,7 +190,8 @@ function renderOrbitDepth(
   fade: number
 ): void {
   const depth = getOrbitDepth(angle);
-  const opacity = lerp(0.4, 1, depth) * fade;
+  // Drop fully to 0 at the back so emotes read as passing behind the subject.
+  const opacity = depth * fade;
   const scale = baseScale * lerp(0.62, 1.18, depth);
   const blur = lerp(helpers.scaleRelativeToViewport(2.5), 0, depth);
   const brightness = lerp(0.72, 1.08, depth);
@@ -216,24 +213,16 @@ function animateOrbit(
   orbitPath: OrbitPath,
   baseScale: number
 ): void {
-  const duration = helpers.Randomizer(7, 9.5);
-  const fadeOutDuration = 0.55;
+  const duration = orbitPath.duration;
   const renderState = {
     angle: orbitPath.startAngle,
-    fade: 0,
+    fade: 1,
   };
   const timeline = gsap.timeline();
 
+  // Start at the shared back-of-ring spot (opacity 0 via depth) and travel
+  // immediately so depth reveals the emote as it comes around the subject.
   renderOrbitDepth(element, renderState.angle, baseScale, renderState.fade);
-
-  timeline.to(renderState, {
-    duration: 0.2,
-    fade: 1,
-    ease: "power1.out",
-    onUpdate: () => {
-      renderOrbitDepth(element, renderState.angle, baseScale, renderState.fade);
-    },
-  });
 
   timeline.to(
     element,
@@ -264,13 +253,13 @@ function animateOrbit(
   timeline.to(
     renderState,
     {
-      duration: fadeOutDuration,
+      duration: FADE_OUT_DURATION,
       fade: 0,
       ease: "power1.in",
       onUpdate: () => {
         renderOrbitDepth(element, renderState.angle, baseScale, renderState.fade);
       },
     },
-    Math.max(duration - fadeOutDuration, 0.2)
+    Math.max(duration - FADE_OUT_DURATION, 0)
   );
 }

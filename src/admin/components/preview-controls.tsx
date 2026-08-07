@@ -43,6 +43,7 @@ export function PreviewControls({ settings, onSettingsChange }: PreviewControlsP
     emoterain: "Emote Rain",
     choon: "Choon",
     gigantifyredeem: "Gigantify Emotes",
+    raids: "Raids",
   };
 
   const [activeTab, setActiveTab] = useState<"feature" | "animation">(

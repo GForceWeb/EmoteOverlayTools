@@ -6,9 +6,6 @@ const settings = OverlaySettings.settings;
 const REFERENCE_WIDTH = 1920;
 const REFERENCE_HEIGHT = 1080;
 
-// Create WebSocket connection to StreamerBot using configured URL
-const ws = new WebSocket(settings.streamerBotWebsocketUrl);
-
 // // Check for URL parameters on initial load, before admin settings are received
 // const urlParams = new URLSearchParams(window.location.search);
 // if (urlParams.get("server") !== null) {
@@ -75,7 +72,7 @@ export const globalVars: GlobalVars = {
   hypetrainCache,
   BotChat,
   divnumber: 0,
-  ws: ws,
+  ws: null,
   warp: document.getElementById("confetti-container") as HTMLElement,
 };
 

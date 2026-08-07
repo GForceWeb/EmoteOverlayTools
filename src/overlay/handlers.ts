@@ -1,5 +1,6 @@
 import { globalVars } from "./config.ts";
-import { WSData, AnimationSettings } from "../shared/types.ts";
+import { WSData, AnimationSettings, EmoteData } from "../shared/types.ts";
+import { normalizeChatEventData } from "../shared/streamerbotChat.ts";
 import OverlaySettings from "./settings";
 import {
   animationRegistry,
@@ -11,6 +12,9 @@ import {
 import helpers from "./helpers.ts";
 import animations from "./animations.ts";
 import logger from "./lib/logger.ts";
+
+const FALLBACK_TWITCH_AVATAR =
+  "https://static-cdn.jtvnw.net/jtv_user_pictures/8e051a26-051f-4abe-bcfa-e13a5d13fad0-profile_image-300x300.png";
 
 // Get settings reference (will be updated dynamically)
 function getSettings() {
@@ -186,14 +190,14 @@ function isFeatureEnabled(feature: string, subbedCheck: boolean): boolean {
 
 function chatMessageHandler(wsdata: WSData): void {
   const settings = getSettings();
-  const message = wsdata.data?.message?.message || "";
+  const chat = normalizeChatEventData(wsdata.data);
+  const message = chat.message;
   const lowermessage = message.toLowerCase();
-  const username = wsdata.data?.message?.username || "";
-  const userId = wsdata.data?.message?.userId || "";
-  const emotes = getEmoteImages(wsdata, message);
+  const username = chat.username;
+  const userId = chat.userId;
+  const emotes = getEmoteImages(chat.emotes, message);
 
-  const subbedCheck =
-    !settings.subOnly || (settings.subOnly && wsdata.data?.message?.subscriber);
+  const subbedCheck = !settings.subOnly || (settings.subOnly && chat.subscriber);
 
   switch (true) {
     case lowermessage.includes("!lurk"):
@@ -290,7 +294,7 @@ function chatMessageHandler(wsdata: WSData): void {
       break;
 
     default:
-      if (typeof wsdata.data?.message?.emotes != "undefined") {
+      if (chat.emotes.length > 0) {
         emoteMessageHandler(emotes);
       }
       break;
@@ -302,26 +306,85 @@ function actionsHandler(wsdata: WSData): void {
   let action = wsdata.data?.name;
 }
 
+function getPositiveInteger(value: unknown, fallback: number): number {
+  const parsed = typeof value === "number" ? value : Number(value);
 
+  if (!Number.isFinite(parsed) || parsed < 1) {
+    return fallback;
+  }
+
+  return Math.floor(parsed);
+}
+
+async function incomingRaidHandler(wsdata: WSData): Promise<void> {
+  const settings = getSettings();
+
+  if (!isFeatureEnabled("raids", true)) {
+    logger.info("Incoming Raid Not Enabled");
+    return;
+  }
+
+  if (!wsdata.data) {
+    logger.warning("Raid event missing data");
+    return;
+  }
+
+  const data = wsdata.data;
+  const displayName =
+    data.from_broadcaster_user_name ||
+    data.userName ||
+    data.user_name ||
+    data.user_login ||
+    "Raider";
+  const avatarLookup = data.from_broadcaster_user_id || displayName;
+  const shouldLookupById = Boolean(data.from_broadcaster_user_id);
+  const originalRaiderCount = getPositiveInteger(data.viewers, 1);
+  const raidSettings = settings.features.raids;
+  const maxRaiders = getPositiveInteger(raidSettings?.maxRaiders, 100);
+  const raiderCount = raidSettings?.capEnabled
+    ? Math.min(originalRaiderCount, maxRaiders)
+    : originalRaiderCount;
+
+  let avatarUrl = FALLBACK_TWITCH_AVATAR;
+
+  try {
+    avatarUrl = await helpers.getTwitchAvatar(avatarLookup, shouldLookupById);
+  } catch (error) {
+    logger.error(
+      `Error getting avatar for raid user ${displayName}: ${(error as Error).message}`
+    );
+  }
+
+  if (
+    !animations.hasOwnProperty("incomingRaid") ||
+    typeof animations.incomingRaid !== "function"
+  ) {
+    logger.error("Incoming raid animation function not found");
+    return;
+  }
+
+  const chargePasses = Math.min(
+    5,
+    Math.max(1, getPositiveInteger(raidSettings?.chargePasses, 1))
+  );
+
+  animations.incomingRaid({
+    avatarUrl,
+    displayName,
+    raiderCount,
+    originalRaiderCount,
+    chargePasses,
+  });
+}
 
 function summarizeAutomaticRewardPayload(wsdata: WSData): string {
   const dataRecord = helpers.asRecord(wsdata.data);
-  const rewardRecord = helpers.asRecord(dataRecord?.reward);
-  const emoteRecord =
-    helpers.asRecord(dataRecord?.gigantifiedEmote) || helpers.asRecord(dataRecord?.emote);
+  const emoteRecord = helpers.asRecord(dataRecord?.gigantified_emote);
 
   return JSON.stringify({
-    rewardType: helpers.getFirstString(wsdata.data, [["rewardType"], ["reward", "type"], ["reward", "rewardType"]]),
-    rewardTitle: helpers.getFirstString(wsdata.data, [["rewardTitle"], ["rewardName"], ["reward", "title"], ["reward", "name"]]),
-    gigantifiedEmoteUrl: helpers.getFirstString(wsdata.data, [
-      ["gigantifiedEmoteUrl"],
-      ["gigantifiedEmote", "url"],
-      ["gigantifiedEmote", "imageUrl"],
-      ["emote", "imageUrl"],
-      ["emote", "url"],
-    ]),
+    rewardType: helpers.getNestedString(wsdata.data, ["reward_type"]),
+    gigantifiedEmoteUrl: helpers.getNestedString(wsdata.data, ["gigantified_emote", "imageUrl"]),
     dataKeys: dataRecord ? Object.keys(dataRecord) : [],
-    rewardKeys: rewardRecord ? Object.keys(rewardRecord) : [],
     emoteKeys: emoteRecord ? Object.keys(emoteRecord) : [],
   });
 }
@@ -406,38 +469,22 @@ function gigantifyRedeemHandler(wsdata: WSData): void {
     return;
   }
 
-  const rewardType = helpers.getFirstString(wsdata.data, [
-    ["rewardType"],
-    ["reward", "type"],
-    ["reward", "rewardType"],
-  ]);
-  const rewardTitle = helpers.getFirstString(wsdata.data, [
-    ["rewardTitle"],
-    ["rewardName"],
-    ["reward", "title"],
-    ["reward", "name"],
-  ]);
-  const isGigantifyReward =
-    rewardType === "gigantify_an_emote" ||
-    (typeof rewardTitle === "string" && rewardTitle.toLowerCase().includes("gigantify"));
+  const rewardType = helpers.getNestedString(wsdata.data, ["reward_type"]);
 
   logger.info(
     `AutomaticRewardRedemption payload summary: ${summarizeAutomaticRewardPayload(wsdata)}`
   );
 
-  if (!isGigantifyReward) {
+  if (rewardType !== "gigantify_an_emote") {
     logger.info(
-      `Ignoring automatic reward redemption. rewardType=${rewardType || "<missing>"}, rewardTitle=${rewardTitle || "<missing>"}`
+      `Ignoring automatic reward redemption. rewardType=${rewardType || "<missing>"}`
     );
     return;
   }
 
-  const gigantifiedEmoteUrl = helpers.getFirstString(wsdata.data, [
-    ["gigantifiedEmoteUrl"],
-    ["gigantifiedEmote", "url"],
-    ["gigantifiedEmote", "imageUrl"],
-    ["emote", "imageUrl"],
-    ["emote", "url"],
+  const gigantifiedEmoteUrl = helpers.getNestedString(wsdata.data, [
+    "gigantified_emote",
+    "imageUrl",
   ]);
 
   if (!gigantifiedEmoteUrl) {
@@ -485,18 +532,15 @@ function extractEmojiImageUrls(message: string): string[] {
   return [...unique];
 }
 
-function getEmoteImages(wsdata: WSData, message?: string): string[] {
-  const emotes = wsdata.data?.message?.emotes || [];
-  const emotecount = emotes.length;
-
+function getEmoteImages(emotes: EmoteData[], message?: string): string[] {
   const images: string[] = [];
-  for (let i = 0; i < emotecount; i++) {
-    if (emotes[i] && emotes[i].imageUrl) {
-      images.push(emotes[i].imageUrl);
+  for (const emote of emotes) {
+    if (emote.imageUrl) {
+      images.push(emote.imageUrl);
     }
   }
 
-  const emojiUrls = extractEmojiImageUrls(message ?? wsdata.data?.message?.message ?? "");
+  const emojiUrls = extractEmojiImageUrls(message ?? "");
   for (const url of emojiUrls) {
     if (!images.includes(url)) {
       images.push(url);
@@ -645,14 +689,14 @@ function emoteMessageHandler(emotes: string[]): void {
 
 async function firstWordsHander(wsdata: WSData): Promise<void> {
   const settings = getSettings();
-  const subbedCheck =
-    !settings.subOnly || (settings.subOnly && wsdata.data?.message?.subscriber);
+  const chat = normalizeChatEventData(wsdata.data);
+  const subbedCheck = !settings.subOnly || (settings.subOnly && chat.subscriber);
   if (!isFeatureEnabled("firstwords", subbedCheck)) {
     logger.info("First Words Detected but Not Enabled");
     return;
   }
 
-  const username = wsdata.data?.message?.username || "";
+  const username = chat.username;
 
   try {
     const avatar = await helpers.getTwitchAvatar(username);
@@ -727,6 +771,11 @@ async function shoutoutCommand(lowermessage: string): Promise<void> {
 
 function botChat(message: string): void {
   const ws = globalVars.ws;
+  if (!ws || ws.readyState !== WebSocket.OPEN) {
+    logger.error("Unable to send bot chat message: WebSocket is not connected");
+    return;
+  }
+
   ws.send(
     JSON.stringify({
       request: "DoAction",
@@ -746,6 +795,7 @@ export default {
   actionsHandler,
   customEventHandler,
   gigantifyRedeemHandler,
+  incomingRaidHandler,
   emoteMessageHandler,
   firstWordsHander,
   cheersCommand,

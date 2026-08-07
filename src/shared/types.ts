@@ -1,5 +1,11 @@
 // Common Type Definitions
 
+export type BubblesPoppingBehaviour =
+  | "burst"
+  | "burstAndFall"
+  | "randomPerBubble"
+  | "randomPerActivation";
+
 export interface AnimationSettings {
   enabled: boolean;           // Legacy field for backward compatibility
   enabledManual: boolean;     // For !er command (manual trigger)
@@ -7,6 +13,8 @@ export interface AnimationSettings {
   count?: number;
   interval?: number;
   text?: string;
+  /** Bubbles: how bubbles finish — burst, fall, or random */
+  poppingBehaviour?: BubblesPoppingBehaviour;
 }
 
 // Use index signature to allow dynamic animation keys
@@ -26,6 +34,13 @@ export interface CheersFeatureSettings extends FeatureSettings {
   position: CheersPosition;
 }
 
+export interface RaidFeatureSettings extends FeatureSettings {
+  capEnabled: boolean;
+  maxRaiders: number;
+  /** How many times the raid pack charges across the screen (alternating direction). */
+  chargePasses: number;
+}
+
 export interface FeatureList {
   lurk: FeatureSettings;
   welcome: FeatureSettings;
@@ -35,6 +50,7 @@ export interface FeatureList {
   emoterain: FeatureSettings;
   choon: FeatureSettings;
   gigantifyredeem: FeatureSettings;
+  raids: RaidFeatureSettings;
 }
 
 export interface PreviewEmote {
@@ -64,13 +80,26 @@ export interface GlobalVars {
   hypetrainCache: string[];
   BotChat?: boolean;
   divnumber: number;
-  ws: WebSocket;
+  ws: WebSocket | null;
   warp: HTMLElement;
 }
 
 export interface EmoteData {
+  id?: string;
   name: string;
   imageUrl: string;
+  begin?: number;
+  end?: number;
+  startIndex?: number;
+  endIndex?: number;
+}
+
+export interface StreamerBotTwitchUser {
+  id?: string;
+  login?: string;
+  name?: string;
+  subscribed?: boolean;
+  subscriptionTier?: string;
 }
 
 export interface WSData {
@@ -79,9 +108,15 @@ export interface WSData {
     source?: string;
   };
   data?: {
-    eventName?: string;
+    id?: string;
     userId?: string;
-    args?: Record<string, unknown>;
+    user_id?: string;
+    user_login?: string;
+    user_name?: string;
+    user_input?: string;
+    text?: string;
+    user?: StreamerBotTwitchUser;
+    emotes?: EmoteData[];
     message?: {
       username?: string;
       userId?: string;
@@ -99,11 +134,12 @@ export interface WSData {
     from_broadcaster_user_id?: string;
     from_broadcaster_user_name?: string;
     viewers?: number;
-    rewardType?: string;
-    rewardTitle?: string;
-    gigantifiedEmoteId?: string;
-    gigantifiedEmoteName?: string;
-    gigantifiedEmoteUrl?: string;
+    reward_type?: string;
+    cost?: number;
+    message_text?: string;
+    message_emotes?: EmoteData[];
+    gigantified_emote?: EmoteData;
+    redeemed_at?: string;
   };
   actions?: any[];
   id?: string;

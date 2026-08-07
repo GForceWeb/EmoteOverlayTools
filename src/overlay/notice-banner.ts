@@ -4,6 +4,12 @@ const appVersion = pkg.version as string;
 // Check if user is NOT using the desktop app
 export function notAppUser(): boolean {
   const urlParams = new URLSearchParams(window.location.search);
+
+  // In-app admin preview intentionally uses ?source=preview; treat as app usage
+  if (urlParams.get("source") === "preview") {
+    return false;
+  }
+
   const hasUrlParams = urlParams.toString().length > 0;
   const isGitHubPages = window.location.hostname === 'gforceweb.github.io';
   const isLocalhost = window.location.hostname === 'localhost';

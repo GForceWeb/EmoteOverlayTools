@@ -1,77 +1,66 @@
-// Reports overlay browser-source presence to the Electron admin UI.
-// Live Preview clients send role "preview" and do not count as Overlay Connected.
+import logger from "./lib/logger";
 
-const HEARTBEAT_INTERVAL_MS = 4000;
-const CLIENT_ID_KEY = "eot-overlay-client-id";
+const HEARTBEAT_INTERVAL_MS = 5000;
 
-function createClientId(): string {
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
-    return crypto.randomUUID();
-  }
-  return `overlay-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-}
+let heartbeatTimer: number | null = null;
+let clientId: string | null = null;
 
-function getClientId(): string {
+function isPreviewSource(): boolean {
   try {
-    const existing = sessionStorage.getItem(CLIENT_ID_KEY);
-    if (existing) return existing;
-    const id = createClientId();
-    sessionStorage.setItem(CLIENT_ID_KEY, id);
-    return id;
-  } catch {
-    return createClientId();
-  }
-}
-
-function isPreviewClient(): boolean {
-  try {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("preview") === "1") {
-      return true;
-    }
-  } catch {
-    // ignore
-  }
-
-  // Live Preview is embedded in the admin iframe
-  try {
+    // Admin live preview is always an iframe; OBS browser source is top-level.
+    // Accessing window.top can throw for cross-origin embeds — treat that as preview/framed.
     if (window.self !== window.top) {
       return true;
     }
+    return new URLSearchParams(window.location.search).get("source") === "preview";
   } catch {
-    // Cross-origin iframe access can throw; treat as embedded preview
     return true;
   }
-
-  return false;
 }
 
-export function startOverlayPresenceHeartbeat(): void {
-  const clientId = getClientId();
-  const role = isPreviewClient() ? "preview" : "overlay";
+function getClientId(): string {
+  if (!clientId) {
+    clientId =
+      typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? crypto.randomUUID()
+        : `overlay-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  }
+  return clientId;
+}
 
-  const sendHeartbeat = () => {
-    fetch(`${window.location.origin}/api/overlay-presence`, {
+async function sendHeartbeat(): Promise<void> {
+  try {
+    await fetch(`${window.location.origin}/api/overlay/heartbeat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: clientId, role }),
-      keepalive: true,
-    }).catch(() => {
-      // Presence is best-effort; avoid noisy overlay errors
+      body: JSON.stringify({
+        clientId: getClientId(),
+        source: "overlay",
+      }),
     });
-  };
-
-  sendHeartbeat();
-  window.setInterval(sendHeartbeat, HEARTBEAT_INTERVAL_MS);
-
-  window.addEventListener("pagehide", () => {
-    // Final best-effort ping so expiry can start promptly if needed
-    navigator.sendBeacon?.(
-      `${window.location.origin}/api/overlay-presence`,
-      new Blob(
-        [JSON.stringify({ id: clientId, role })],
-        { type: "application/json" }
-      )
+  } catch (error) {
+    logger.error(
+      `Overlay heartbeat failed: ${error instanceof Error ? error.message : String(error)}`
     );
-  });
+  }
+}
+
+/**
+ * Start periodic heartbeats so the admin UI can detect a live OBS overlay.
+ * No-ops for the in-app preview (?source=preview).
+ */
+export function startOverlayPresence(): void {
+  if (isPreviewSource()) {
+    logger.info("Skipping overlay presence heartbeats in preview mode");
+    return;
+  }
+
+  if (heartbeatTimer !== null) {
+    return;
+  }
+
+  void sendHeartbeat();
+  heartbeatTimer = window.setInterval(() => {
+    void sendHeartbeat();
+  }, HEARTBEAT_INTERVAL_MS);
 }

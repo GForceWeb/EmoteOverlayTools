@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { MaximizeIcon, Minimize2, RefreshCwIcon, Eye } from "lucide-react";
 import { Button } from "@/admin/components/ui/button";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
@@ -19,12 +19,16 @@ const DEFAULT_PANEL_HEIGHT = 260;
 
 function toPreviewUrl(baseUrl: string): string {
   try {
-    const url = new URL(baseUrl);
-    url.searchParams.set("preview", "1");
+    const url = new URL(baseUrl, window.location.origin);
+    // Load the overlay page directly so a "/" redirect can't drop ?source=preview
+    if (url.pathname === "/" || url.pathname === "") {
+      url.pathname = "/overlay/index.html";
+    }
+    url.searchParams.set("source", "preview");
     return url.toString();
   } catch {
     const join = baseUrl.includes("?") ? "&" : "?";
-    return `${baseUrl}${join}preview=1`;
+    return `${baseUrl}${join}source=preview`;
   }
 }
 
@@ -208,14 +212,21 @@ export function PreviewPane({
   ]);
 
   const refreshPreview = () => {
-    if (!iframeRef.current) {
+    const iframe = iframeRef.current;
+    if (!iframe) {
       return;
     }
 
     setIframeLoaded(false);
-    // Reassign src instead of location.reload() — admin (e.g. :3000) and
-    // overlay iframe (e.g. :3030) are cross-origin in dev.
-    iframeRef.current.src = url;
+    // Admin (e.g. :3000) and overlay (:3030) are cross-origin, so
+    // contentWindow.location.reload() throws. Reassign src instead.
+    try {
+      const parsed = new URL(url);
+      parsed.searchParams.set("_", String(Date.now()));
+      iframe.src = parsed.toString();
+    } catch {
+      iframe.src = url;
+    }
   };
 
   const onDragStart = (event: React.PointerEvent<HTMLElement>) => {
@@ -348,7 +359,7 @@ export function PreviewPane({
             "panel-surface fixed z-30 flex cursor-grab items-center gap-2 px-3 py-2 text-xs font-medium text-foreground shadow-xl transition-colors hover:border-primary/50 hover:bg-accent/40 active:cursor-grabbing",
             isDragging && "cursor-grabbing select-none"
           )}
-          title="Drag to move · Click to expand"
+          title="Drag to move ┬À Click to expand"
         >
           <Eye className="h-3.5 w-3.5 text-primary" />
           Live Preview

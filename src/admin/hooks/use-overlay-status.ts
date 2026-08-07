@@ -2,11 +2,12 @@ import { useState, useEffect, useCallback } from "react";
 import type { ConnectionState } from "@/admin/hooks/use-connection-status";
 
 type OverlayStatusResponse = {
-  overlayConnected?: boolean;
-  previewConnected?: boolean;
-  overlayClients?: number;
-  previewClients?: number;
+  connected?: boolean;
+  clientCount?: number;
+  lastSeen?: number | null;
 };
+
+const OVERLAY_STALE_MS = 15000;
 
 export function useOverlayStatus(overlayUrl: string) {
   const [overlayState, setOverlayState] =
@@ -23,7 +24,7 @@ export function useOverlayStatus(overlayUrl: string) {
 
       try {
         // Presence of OBS/browser-source clients — Live Preview heartbeats are excluded.
-        const response = await fetch(`${overlayUrl}/api/overlay-status`, {
+        const response = await fetch(`${overlayUrl}/api/overlay/status`, {
           signal: controller.signal,
           cache: "no-store",
         });
@@ -33,7 +34,14 @@ export function useOverlayStatus(overlayUrl: string) {
         }
 
         const data = (await response.json()) as OverlayStatusResponse;
-        setOverlayState(data.overlayConnected ? "connected" : "disconnected");
+        const lastSeen =
+          typeof data.lastSeen === "number" ? data.lastSeen : null;
+        const isFresh =
+          lastSeen !== null && Date.now() - lastSeen < OVERLAY_STALE_MS;
+
+        setOverlayState(
+          data.connected && isFresh ? "connected" : "disconnected"
+        );
       } catch {
         setOverlayState("error");
       } finally {

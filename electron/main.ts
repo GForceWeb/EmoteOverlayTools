@@ -25,45 +25,6 @@ const wss = new WebSocketServer({ server });
 const settingsPath = path.join(app.getPath("userData"), "settings.json");
 let currentSettings = defaultConfig;
 
-type OverlayPresenceRole = "overlay" | "preview";
-type OverlayPresenceClient = {
-  id: string;
-  role: OverlayPresenceRole;
-  lastSeen: number;
-};
-
-const OVERLAY_PRESENCE_TTL_MS = 12_000;
-const overlayPresenceClients = new Map<string, OverlayPresenceClient>();
-
-function pruneOverlayPresence(now = Date.now()) {
-  for (const [id, client] of overlayPresenceClients) {
-    if (now - client.lastSeen > OVERLAY_PRESENCE_TTL_MS) {
-      overlayPresenceClients.delete(id);
-    }
-  }
-}
-
-function getOverlayPresenceStatus() {
-  pruneOverlayPresence();
-  let overlayClients = 0;
-  let previewClients = 0;
-
-  for (const client of overlayPresenceClients.values()) {
-    if (client.role === "preview") {
-      previewClients += 1;
-    } else {
-      overlayClients += 1;
-    }
-  }
-
-  return {
-    overlayConnected: overlayClients > 0,
-    previewConnected: previewClients > 0,
-    overlayClients,
-    previewClients,
-  };
-}
-
 function getOverlayMediaDirectory(): string | undefined {
   const possibleMediaPaths = [
     path.join(process.cwd(), "assets/img"),
@@ -210,48 +171,76 @@ async function setupExpressServer() {
     }
   );
 
-  // Overlay browser-source presence (excludes Live Preview clients)
+  // API endpoint to get Twitch avatar with caching
+  setupAvatarCacheEndpoint(expressApp);
+
+  // Overlay presence: OBS browser sources heartbeat here so the admin UI
+  // can tell when a real overlay (not the in-app preview) is connected.
+  const OVERLAY_HEARTBEAT_TTL_MS = 15000;
+  const overlayClients = new Map<string, number>();
+
+  const pruneOverlayClients = () => {
+    const cutoff = Date.now() - OVERLAY_HEARTBEAT_TTL_MS;
+    for (const [clientId, lastSeen] of overlayClients) {
+      if (lastSeen < cutoff) {
+        overlayClients.delete(clientId);
+      }
+    }
+  };
+
+  const getOverlayStatus = () => {
+    pruneOverlayClients();
+    const clientCount = overlayClients.size;
+    let lastSeen: number | null = null;
+    for (const timestamp of overlayClients.values()) {
+      if (lastSeen === null || timestamp > lastSeen) {
+        lastSeen = timestamp;
+      }
+    }
+    return {
+      connected: clientCount > 0,
+      clientCount,
+      lastSeen,
+    };
+  };
+
   expressApp.post(
-    "/api/overlay-presence",
+    "/api/overlay/heartbeat",
     (req: express.Request, res: express.Response) => {
       try {
-        const { id, role } = req.body ?? {};
-        if (typeof id !== "string" || !id.trim()) {
-          res.status(400).json({ error: "Missing client id" });
-          return;
-        }
-        if (role !== "overlay" && role !== "preview") {
-          res.status(400).json({ error: "Invalid role. Must be: overlay or preview" });
+        const { clientId, source } = req.body ?? {};
+
+        // Preview iframe heartbeats are ignored so Step 2 can track OBS only
+        if (source === "preview") {
+          res.json({ success: true, ignored: true });
           return;
         }
 
-        overlayPresenceClients.set(id, {
-          id,
-          role,
-          lastSeen: Date.now(),
-        });
-        res.json({ success: true, ...getOverlayPresenceStatus() });
+        if (!clientId || typeof clientId !== "string") {
+          res.status(400).json({ error: "Missing required field: clientId" });
+          return;
+        }
+
+        overlayClients.set(clientId, Date.now());
+        res.json({ success: true, ...getOverlayStatus() });
       } catch (error) {
-        console.error("Error updating overlay presence:", error);
-        res.status(500).json({ error: "Failed to update overlay presence" });
+        console.error("Error recording overlay heartbeat:", error);
+        res.status(500).json({ error: "Failed to record overlay heartbeat" });
       }
     }
   );
 
   expressApp.get(
-    "/api/overlay-status",
+    "/api/overlay/status",
     (_req: express.Request, res: express.Response) => {
       try {
-        res.json(getOverlayPresenceStatus());
+        res.json(getOverlayStatus());
       } catch (error) {
-        console.error("Error reading overlay status:", error);
-        res.status(500).json({ error: "Failed to read overlay status" });
+        console.error("Error getting overlay status:", error);
+        res.status(500).json({ error: "Failed to get overlay status" });
       }
     }
   );
-
-  // API endpoint to get Twitch avatar with caching
-  setupAvatarCacheEndpoint(expressApp);
 
   // Logging API endpoints
   expressApp.post("/api/log", (req: express.Request, res: express.Response) => {
@@ -321,8 +310,10 @@ async function setupExpressServer() {
         middlewareMode: true,
       },
     });
-    expressApp.get("/", (_req: express.Request, res: express.Response) => {
-      res.redirect("/overlay/index.html");
+    expressApp.get("/", (req: express.Request, res: express.Response) => {
+      const queryIndex = req.url.indexOf("?");
+      const query = queryIndex >= 0 ? req.url.slice(queryIndex) : "";
+      res.redirect(`/overlay/index.html${query}`);
     });
     expressApp.use(vite.middlewares);
   } else {
