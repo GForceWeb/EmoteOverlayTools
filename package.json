@@ -1,7 +1,7 @@
 {
     "name": "emote-overlay-tools",
     "author": "G-Force",
-    "version": "2.1.3",
+    "version": "2.2.0",
     "description": "G-Force's Emote Overlay Tools for OBS",
     "type": "module",
     "packageManager": "pnpm@10.11.0",
