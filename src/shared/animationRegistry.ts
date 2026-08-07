@@ -270,7 +270,8 @@ export const animationRegistry: Record<string, AnimationDefinition> = {
   bubbles: {
     name: "bubbles",
     displayName: "Bubbles",
-    description: "Emotes rise like translucent bubbles, drift in a light breeze, and pop above mid-screen",
+    description:
+      "Emotes rise like translucent bubbles, drift in a light breeze, and pop above mid-screen — some may pop early and drop their emote",
     defaultCount: 36,
     defaultInterval: 180,
     defaultEnabledManual: true,

@@ -9,7 +9,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/admin/components/ui/card";
-import type { Settings, AnimationSettings as AnimationSettingsType, PreviewEmote } from "@/shared/types";
+import type {
+  Settings,
+  AnimationSettings as AnimationSettingsType,
+  PreviewEmote,
+  BubblesPoppingBehaviour,
+} from "@/shared/types";
 import {
   Accordion,
   AccordionContent,
@@ -18,6 +23,13 @@ import {
 } from "@/admin/components/ui/accordion";
 import { Slider } from "@/admin/components/ui/slider";
 import { Button } from "@/admin/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/admin/components/ui/select";
 import { previewAnimation } from "@/admin/utils/preview-helpers";
 import { Play, RotateCcw } from "lucide-react";
 import {
@@ -28,6 +40,16 @@ import {
 } from "@/shared/animationRegistry";
 import { EmotePicker } from "@/admin/components/emote-picker";
 import { Separator } from "@/admin/components/ui/separator";
+
+const BUBBLES_POPPING_BEHAVIOUR_OPTIONS: {
+  value: BubblesPoppingBehaviour;
+  label: string;
+}[] = [
+  { value: "burst", label: "Burst" },
+  { value: "burstAndFall", label: "Burst and emote fall" },
+  { value: "randomPerBubble", label: "Random per bubble" },
+  { value: "randomPerActivation", label: "Random per activation" },
+];
 
 interface AnimationSettingsProps {
   settings: Settings;
@@ -50,6 +72,9 @@ export function AnimationSettings({
       count: def?.defaultCount ?? 50,
       interval: def?.defaultInterval ?? 50,
       text: def?.requiresText ? "Hype" : undefined,
+      ...(animationName === "bubbles"
+        ? { poppingBehaviour: "randomPerActivation" as const }
+        : {}),
     };
   };
 
@@ -72,6 +97,7 @@ export function AnimationSettings({
       count: existing.count ?? defaults.count,
       interval: existing.interval ?? defaults.interval,
       text: existing.text ?? defaults.text,
+      poppingBehaviour: existing.poppingBehaviour ?? defaults.poppingBehaviour,
     };
   };
 
@@ -149,6 +175,23 @@ export function AnimationSettings({
         [animation]: {
           ...currentConfig,
           text,
+        },
+      },
+    }));
+  };
+
+  const handlePoppingBehaviourChange = (
+    animation: string,
+    poppingBehaviour: BubblesPoppingBehaviour
+  ) => {
+    const currentConfig = getAnimationConfig(animation);
+    setSettings((prev) => ({
+      ...prev,
+      animations: {
+        ...prev.animations,
+        [animation]: {
+          ...currentConfig,
+          poppingBehaviour,
         },
       },
     }));
@@ -319,6 +362,33 @@ export function AnimationSettings({
                       }
                     />
                   </div>
+
+                  {def.name === "bubbles" && (
+                    <div className="space-y-2">
+                      <Label htmlFor={`${def.name}-popping-behaviour`}>
+                        Popping Behaviour
+                      </Label>
+                      <Select
+                        value={
+                          config.poppingBehaviour ?? "randomPerActivation"
+                        }
+                        onValueChange={(value: BubblesPoppingBehaviour) =>
+                          handlePoppingBehaviourChange(def.name, value)
+                        }
+                      >
+                        <SelectTrigger id={`${def.name}-popping-behaviour`}>
+                          <SelectValue placeholder="Select popping behaviour" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {BUBBLES_POPPING_BEHAVIOUR_OPTIONS.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
                 </>
               ) : null}
             </div>

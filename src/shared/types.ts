@@ -1,5 +1,11 @@
 // Common Type Definitions
 
+export type BubblesPoppingBehaviour =
+  | "burst"
+  | "burstAndFall"
+  | "randomPerBubble"
+  | "randomPerActivation";
+
 export interface AnimationSettings {
   enabled: boolean;           // Legacy field for backward compatibility
   enabledManual: boolean;     // For !er command (manual trigger)
@@ -7,6 +13,8 @@ export interface AnimationSettings {
   count?: number;
   interval?: number;
   text?: string;
+  /** Bubbles: how bubbles finish — burst, fall, or random */
+  poppingBehaviour?: BubblesPoppingBehaviour;
 }
 
 // Use index signature to allow dynamic animation keys

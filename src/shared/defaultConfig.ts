@@ -39,6 +39,10 @@ function generateDefaultAnimations(): AnimationList {
     if (def.requiresText) {
       animations[name].text = "Hype";
     }
+
+    if (name === "bubbles") {
+      animations[name].poppingBehaviour = "randomPerActivation";
+    }
   }
   
   return animations;
@@ -70,6 +74,8 @@ export function deepMergeAnimations(
         count: userSettings.count ?? defaultSettings.count,
         interval: userSettings.interval ?? defaultSettings.interval,
         text: userSettings.text ?? defaultSettings.text,
+        poppingBehaviour:
+          userSettings.poppingBehaviour ?? defaultSettings.poppingBehaviour,
       };
     } else {
       // New animation not in user's settings - use defaults
