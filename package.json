@@ -5,6 +5,11 @@
     "description": "G-Force's Emote Overlay Tools for OBS",
     "type": "module",
     "packageManager": "pnpm@10.11.0",
+    "pnpm": {
+        "onlyBuiltDependencies": [
+            "electron"
+        ]
+    },
     "main": "dist/electron/main.cjs",
     "devDependencies": {
         "@types/express": "^4.17.21",
@@ -34,6 +39,7 @@
         "dev": "vite",
         "build": "vite build",
         "preview": "vite preview",
+        "test:tetris": "node --test tests/tetris.test.mjs",
         "cypress:open": "cypress open",
         "electron:dev": "vite",
         "electron:start": "nodemon --exec \"electron .\" --ext ts,js,cjs --watch dist/electron",
