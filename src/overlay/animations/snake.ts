@@ -11,7 +11,10 @@ export function snake(
   // Configuration
   const gridSize = 80; // Size of each grid cell
   const maxFood = Math.min(count, 20); // Limit max food
-  const moveInterval = Math.max(50, speed); // Minimum speed limit
+  let moveInterval = Math.max(50, speed);
+  const minMoveInterval = 35;
+  const speedMultiplier = 0.97;
+  const mistakeChance = 0.08;
 
   // Game State
   let snakeBody: { x: number; y: number }[] = [];
@@ -20,10 +23,11 @@ export function snake(
   let direction = { x: 1, y: 0 }; // Moving right initially
   let nextDirection = { x: 1, y: 0 };
   let foodEatenCount = 0;
-  let gameLoopId: any;
+  let gameLoopId: ReturnType<typeof setTimeout>;
   let isGameRunning = true;
   let currentImageIndex = 0;
-  let isDoomed = false;
+  // A pending mistake skips a later necessary turn, after a few normal moves.
+  let movesUntilMistake: number | null = null;
 
   // Setup Container
   const container = document.createElement("div");
@@ -44,11 +48,12 @@ export function snake(
 
   if (cols < 5 || rows < 5) {
       console.error("Snake: Window too small for game");
+      helpers.removeelement(container.id);
       return;
   }
 
   // Initialize Snake
-  const startX = Math.max(2, Math.min(Math.floor(cols / 2), cols - 3));
+  const startX = Math.max(3, Math.min(Math.floor(cols / 2), cols - 2));
   const startY = Math.max(2, Math.min(Math.floor(rows / 2), rows - 3));
   
   // Create Head Elements (Split for chomping)
@@ -70,7 +75,6 @@ export function snake(
   headTop.style.overflow = "hidden";
   headTop.style.position = "absolute";
   headTop.style.top = "0";
-  headTop.style.top = "0";
   headTop.style.transformOrigin = "bottom left";
   
   const headTopImg = document.createElement("div");
@@ -87,7 +91,6 @@ export function snake(
   headBottom.style.overflow = "hidden";
   headBottom.style.position = "absolute";
   headBottom.style.bottom = "0";
-  headBottom.style.bottom = "0";
   headBottom.style.transformOrigin = "top left";
 
   const headBottomImg = document.createElement("div");
@@ -100,8 +103,6 @@ export function snake(
   headBottomImg.style.bottom = "0";
   headBottom.appendChild(headBottomImg);
 
-  headDiv.appendChild(headTop);
-  headDiv.appendChild(headBottom);
   headDiv.appendChild(headTop);
   headDiv.appendChild(headBottom);
   container.appendChild(headDiv);
@@ -159,14 +160,19 @@ export function snake(
       return;
     }
 
-    let validPosition = false;
-    let x = 0, y = 0;
-    while (!validPosition) {
-      x = Math.floor(Math.random() * (cols - 2)) + 1; // Avoid edges slightly
-      y = Math.floor(Math.random() * (rows - 2)) + 1;
-      
-      validPosition = !snakeBody.some(segment => segment.x === x && segment.y === y);
+    const freeCells: { x: number; y: number }[] = [];
+    for (let y = 1; y < rows - 1; y++) {
+      for (let x = 1; x < cols - 1; x++) {
+        if (!snakeBody.some(segment => segment.x === x && segment.y === y)) {
+          freeCells.push({ x, y });
+        }
+      }
     }
+    if (freeCells.length === 0) {
+      finishGame();
+      return;
+    }
+    const { x, y } = freeCells[Math.floor(Math.random() * freeCells.length)];
 
     const foodEl = document.createElement("div");
     foodEl.style.width = `${gridSize}px`;
@@ -198,88 +204,53 @@ export function snake(
     currentImageIndex++;
   }
 
+  function collisionAt(position: { x: number; y: number }): "wall" | "body" | null {
+    if (position.x < 0 || position.x >= cols || position.y < 0 || position.y >= rows) {
+      return "wall";
+    }
+    const eating = food && position.x === food.x && position.y === food.y;
+    // The last tail cell is free on the next move unless this move grows the snake.
+    const occupied = eating ? snakeBody : snakeBody.slice(0, -1);
+    return occupied.some(segment => segment.x === position.x && segment.y === position.y)
+      ? "body" : null;
+  }
+
   function updateDirection() {
     if (!food) return;
-
     const head = snakeBody[0];
-    
-    // Define all possible moves
-    let possibleMoves = [
-        { x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: 1 }, { x: 0, y: -1 }
+    // Prefer continuing straight when two routes are equally close to food.
+    const possibleMoves = [
+      direction,
+      { x: -direction.y, y: direction.x },
+      { x: direction.y, y: -direction.x },
     ];
+    const safeMoves = possibleMoves.filter(move =>
+      !collisionAt({ x: head.x + move.x, y: head.y + move.y })
+    );
 
-    // Filter out reverse moves (cannot turn 180 degrees)
-    possibleMoves = possibleMoves.filter(m => !(m.x === -direction.x && m.y === -direction.y));
+    nextDirection = direction;
+    if (safeMoves.length === 0) return;
 
-    if (isDoomed) {
-        // DOOMED MODE: Try to crash into self
-        // 1. Look for immediate collision
-        const crashMove = possibleMoves.find(move => {
-            const targetX = head.x + move.x;
-            const targetY = head.y + move.y;
-            // Check if this move hits a body segment
-            return snakeBody.some(seg => seg.x === targetX && seg.y === targetY);
-        });
-
-        if (crashMove) {
-            nextDirection = crashMove;
-            return;
-        }
-
-        // 2. If no immediate crash, steer towards the middle of the body
-        if (snakeBody.length > 2) {
-             const targetBodyPart = snakeBody[Math.floor(snakeBody.length / 2)];
-             possibleMoves.sort((a, b) => {
-                const distA = Math.abs((head.x + a.x) - targetBodyPart.x) + Math.abs((head.y + a.y) - targetBodyPart.y);
-                const distB = Math.abs((head.x + b.x) - targetBodyPart.x) + Math.abs((head.y + b.y) - targetBodyPart.y);
-                return distA - distB; // Move CLOSER to body
-            });
-             nextDirection = possibleMoves[0];
-             return;
-        }
-    }
-
-    // NORMAL MODE: Move towards food
-    const dx = food.x - head.x;
-    const dy = food.y - head.y;
-
-    // Filter out moves that cause immediate collision
-    const safeMoves = possibleMoves.filter(move => {
-        const targetX = head.x + move.x;
-        const targetY = head.y + move.y;
-        // Check if this move hits a body segment
-        // Note: We don't check the very last tail segment because it will move away (unless we eat, but we can't predict that perfectly here easily, safer to just avoid it)
-        // Actually, if we eat, tail stays. If we don't, tail moves.
-        // To be safe, avoid all current body segments.
-        return !snakeBody.some(seg => seg.x === targetX && seg.y === targetY);
-    });
-
-    if (safeMoves.length === 0) {
-        // No safe moves! We are trapped.
-        // Just keep going in current direction if possible (already filtered out reverse)
-        // or pick any move and accept fate.
-        // Let's try to pick the one that keeps us alive longest? 
-        // For now, just pick the first available move from original list (which excludes reverse)
-        if (possibleMoves.length > 0) {
-             nextDirection = possibleMoves[0];
-        }
+    if (movesUntilMistake !== null) {
+      const forward = { x: head.x + direction.x, y: head.y + direction.y };
+      const collision = collisionAt(forward);
+      const clipsTail = snakeBody.slice(4, -1).some(segment =>
+        segment.x === forward.x && segment.y === forward.y
+      );
+      // Keep pursuing food until a missed turn would clip the rear body or a wall.
+      // Never deliberately turn into the neck or steer toward the body.
+      if (movesUntilMistake === 0 && (collision === "wall" || (collision === "body" && clipsTail))) {
         return;
+      }
+      movesUntilMistake = Math.max(0, movesUntilMistake - 1);
     }
 
-    // Sort safe moves by distance to food
     safeMoves.sort((a, b) => {
-        const distA = Math.abs((head.x + a.x) - food!.x) + Math.abs((head.y + a.y) - food!.y);
-        const distB = Math.abs((head.x + b.x) - food!.x) + Math.abs((head.y + b.y) - food!.y);
-        return distA - distB;
+      const distA = Math.abs(head.x + a.x - food!.x) + Math.abs(head.y + a.y - food!.y);
+      const distB = Math.abs(head.x + b.x - food!.x) + Math.abs(head.y + b.y - food!.y);
+      return distA - distB;
     });
-
-    // Add some randomness/noise to make it "natural"
-    if (Math.random() < 0.2 && safeMoves.length > 1) {
-         // Occasionally pick the second best move
-         nextDirection = safeMoves[1];
-    } else {
-         nextDirection = safeMoves[0];
-    }
+    nextDirection = Math.random() < 0.2 && safeMoves.length > 1 ? safeMoves[1] : safeMoves[0];
   }
 
   function move() {
@@ -289,50 +260,21 @@ export function snake(
     const head = snakeBody[0];
     const newHead = { x: head.x + direction.x, y: head.y + direction.y };
 
-    console.log(`Snake Move: Head(${head.x},${head.y}) -> New(${newHead.x},${newHead.y}) Dir(${direction.x},${direction.y}) BodyLen:${snakeBody.length}`);
-
-    // Check Death Conditions
-    // 1. Wall Collision (Wrap or Die? Let's Die for now or just stop)
-    if (newHead.x < 0 || newHead.x >= cols || newHead.y < 0 || newHead.y >= rows) {
-        // Hit wall - for this animation, maybe just wrap or bounce? 
-        // Let's just end game for safety
-        endGame("Wall Collision");
-        return;
+    const collision = collisionAt(newHead);
+    if (collision) {
+      endGame(collision);
+      return;
     }
 
-    // 2. Self Collision
-    // Start checking from index 1 (neck) to avoid head colliding with itself? 
-    // Actually head is at 0. We check if any OTHER segment is at newHead.
-    // But we haven't unshifted newHead yet. So we check all existing segments.
-    // BUT, the tail will move away if we don't eat.
-    // So if newHead == tail, it's safe (unless we eat).
-    // For simplicity, strict check:
-    if (snakeBody.some((segment, index) => {
-        // Ignore tail if we are not eating? No, we don't know if we eat yet.
-        // Let's just check all.
-        return segment.x === newHead.x && segment.y === newHead.y;
-    })) {
-         // "Accidental" death
-         endGame("Self Collision");
-         return;
-    }
-
-
-
-    // Move Body
-    // Create new head element (or move tail to head)
-    // Actually, we just move the visual elements. 
-    // The head element is special (chomping), so we move it.
-    // The body segments follow.
-    
-    // Logic: Add new head position. If food eaten, keep tail. Else remove tail.
-    snakeBody.unshift({ x: newHead.x, y: newHead.y }); // Add new head coord
+    // Use the same duration for the whole move, even when this meal speeds up the next one.
+    const stepInterval = moveInterval;
+    snakeBody.unshift(newHead);
 
     // Update Head Visual Position
     gsap.to(headDiv, {
         left: newHead.x * gridSize,
         top: newHead.y * gridSize,
-        duration: moveInterval / 1000,
+        duration: stepInterval / 1000,
         ease: "none"
     });
 
@@ -342,16 +284,19 @@ export function snake(
     if (direction.x === -1) rotation = 180;
     if (direction.y === 1) rotation = 90;
     if (direction.y === -1) rotation = -90;
-    gsap.to(headDiv, { rotation: rotation, duration: 0.1 });
+    gsap.to(headDiv, { rotation, duration: Math.min(0.1, stepInterval / 1000), overwrite: "auto" });
 
 
     // Check Food
     if (food && newHead.x === food.x && newHead.y === food.y) {
         // Eat Food
         foodEatenCount++;
+        moveInterval = Math.max(minMoveInterval, moveInterval * speedMultiplier);
         
         // Use food element as new body part (Neck)
         const newSegment = food.element;
+        gsap.killTweensOf(newSegment);
+        gsap.set(newSegment, { scale: 1 });
         newSegment.style.borderRadius = "50%";
         newSegment.style.opacity = "0.8";
         
@@ -360,21 +305,11 @@ export function snake(
         
         food = null;
         
-        // Chance to become doomed
-        if (foodEatenCount > 3 && Math.random() < 0.10) {
-             isDoomed = true;
-             console.log("Snake is DOOMED!");
+        if (movesUntilMistake === null && foodEatenCount > 3 && Math.random() < mistakeChance) {
+             movesUntilMistake = 3;
         }
-
-        spawnFood();
     } else {
-        // Remove Tail
         snakeBody.pop();
-        // We don't remove visual element here because we move them all.
-        // Wait, if we didn't eat, the number of segments stays the same.
-        // snakeBody length decreased by 1 (pop).
-        // bodyElements length is constant.
-        // So bodyElements[i] maps to snakeBody[i+1].
     }
 
     // Animate Body Segments
@@ -386,29 +321,78 @@ export function snake(
             gsap.to(el, {
                 left: targetPos.x * gridSize,
                 top: targetPos.y * gridSize,
-                duration: moveInterval / 1000,
+                duration: stepInterval / 1000,
                 ease: "none"
             });
         }
     });
     
-    updateDirection();
+    // Complete this move before choosing the next one or starting the exit animation.
+    gameLoopId = setTimeout(() => {
+      if (!food) spawnFood();
+      if (!isGameRunning) return;
+      updateDirection();
+      move();
+    }, stepInterval);
   }
 
-  function endGame(reason: string = "Unknown") {
-    console.log("Snake Game Ended: " + reason);
+  function stopGame() {
     isGameRunning = false;
-    clearInterval(gameLoopId);
-    
-    // Death animation
-    gsap.to(container, { opacity: 0, duration: 1, onComplete: () => {
-        helpers.removeelement(container.id);
-    }});
+    clearTimeout(gameLoopId);
+    gsap.killTweensOf([headTop, headBottom]);
+    gsap.to([headTop, headBottom], { rotation: 0, duration: 0.08 });
+  }
+
+  function cleanup() {
+    gsap.killTweensOf([container, headTop, headBottom, ...Array.from(container.children)]);
+    helpers.removeelement(container.id);
+  }
+
+  function endGame(reason: "wall" | "body") {
+    console.log("Snake Game Ended: " + reason);
+    stopGame();
+    gsap.killTweensOf([headDiv, ...bodyElements]);
+
+    const head = snakeBody[0];
+    // Advance into the impact, keeping the avatar visible at screen edges.
+    const impactX = Math.max(0, Math.min(window.innerWidth - gridSize,
+      (head.x + direction.x * 0.32) * gridSize));
+    const impactY = Math.max(0, Math.min(window.innerHeight - gridSize,
+      (head.y + direction.y * 0.32) * gridSize));
+    headDiv.style.borderRadius = "50%";
+    headDiv.style.boxShadow = "0 0 0 4px #ff7868, 0 0 28px #ff5848";
+    gsap.to(headDiv, {
+      left: impactX, top: impactY,
+      scaleX: 0.8, scaleY: 1.12,
+      duration: 0.1, ease: "power2.out",
+      onComplete: () => {
+        gsap.to(headDiv, {
+          left: impactX - direction.x * gridSize * 0.08,
+          top: impactY - direction.y * gridSize * 0.08,
+          scaleX: 1, scaleY: 1, duration: 0.18, ease: "power2.out",
+        });
+      },
+    });
+
+    const impact = document.createElement("div");
+    Object.assign(impact.style, {
+      position: "absolute",
+      left: `${Math.max(12, Math.min(window.innerWidth - 12, (head.x + 0.5 + direction.x * 0.5) * gridSize))}px`,
+      top: `${Math.max(12, Math.min(window.innerHeight - 12, (head.y + 0.5 + direction.y * 0.5) * gridSize))}px`,
+      width: "36px", height: "36px", marginLeft: "-18px", marginTop: "-18px",
+      border: "4px solid #ffe6a3", borderRadius: "50%", boxSizing: "border-box",
+      boxShadow: "0 0 20px #ff7868", zIndex: "1001",
+    });
+    container.appendChild(impact);
+    gsap.to(impact, { scale: 2.4, opacity: 0, duration: 0.6, ease: "power2.out" });
+    if (food) gsap.to(food.element, { opacity: 0.3, duration: 0.2 });
+
+    // Hold the frozen snake and marked collision site before fading together.
+    gsap.to(container, { opacity: 0, delay: 1, duration: 0.4, onComplete: cleanup });
   }
 
   function finishGame() {
-      isGameRunning = false;
-      clearInterval(gameLoopId);
+      stopGame();
       
       // Move offscreen
       // Pick a direction away from center or just continue current direction
@@ -434,13 +418,13 @@ export function snake(
           ease: "power2.in"
       });
       
-      setTimeout(() => {
-          helpers.removeelement(container.id);
-      }, 3000);
+      setTimeout(cleanup, (2 + Math.max(0, bodyElements.length - 1) * 0.05) * 1000);
   }
 
   // Start Game
   spawnFood();
-  updateDirection();
-  gameLoopId = setInterval(move, moveInterval);
+  if (isGameRunning) {
+    updateDirection();
+    gameLoopId = setTimeout(move, moveInterval);
+  }
 }
