@@ -50,7 +50,7 @@ export function AppHeader({
       <div className="flex items-center gap-3 px-4 py-2.5 md:px-5">
         <div className="flex shrink-0 items-center gap-2.5">
           <img
-            src="/img/app-icon.png"
+            src="../img/app-icon.png"
             alt="Emote Overlay Tools"
             className="h-8 w-8 rounded-lg object-contain"
             draggable={false}

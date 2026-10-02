@@ -14,6 +14,9 @@ import type {
   AnimationSettings as AnimationSettingsType,
   PreviewEmote,
   BubblesPoppingBehaviour,
+  ShapePositionMovement,
+  SpiralPathBehaviour,
+  WaveStyle,
 } from "@/shared/types";
 import {
   Accordion,
@@ -40,16 +43,18 @@ import {
 } from "@/shared/animationRegistry";
 import { EmotePicker } from "@/admin/components/emote-picker";
 import { Separator } from "@/admin/components/ui/separator";
-
-const BUBBLES_POPPING_BEHAVIOUR_OPTIONS: {
-  value: BubblesPoppingBehaviour;
-  label: string;
-}[] = [
-  { value: "burst", label: "Burst" },
-  { value: "burstAndFall", label: "Burst and emote fall" },
-  { value: "randomPerBubble", label: "Random per bubble" },
-  { value: "randomPerActivation", label: "Random per activation" },
-];
+import {
+  BUBBLES_POPPING_BEHAVIOUR_OPTIONS,
+  SHAPE_POSITION_MOVEMENT_OPTIONS,
+  SPIRAL_PATH_BEHAVIOUR_OPTIONS,
+  WAVE_STYLE_OPTIONS,
+} from "@/admin/utils/setting-options";
+import {
+  getDefaultAnimationConfig,
+  resolveAnimationConfig,
+  SHAPE_ANIMATIONS_WITH_POSITION_MOVEMENT,
+  WAVE_ANIMATIONS_WITH_STYLE,
+} from "@/admin/utils/animation-config";
 
 interface AnimationSettingsProps {
   settings: Settings;
@@ -63,43 +68,11 @@ export function AnimationSettings({
   const [expandedAnimations, setExpandedAnimations] = useState<string[]>([]);
 
   // Get default animation config from registry
-  const getDefaultConfig = (animationName: string): AnimationSettingsType => {
-    const def = animationRegistry[animationName];
-    return {
-      enabled: def?.defaultEnabledManual || def?.defaultEnabledKappagen || true,
-      enabledManual: def?.defaultEnabledManual ?? true,
-      enabledKappagen: def?.defaultEnabledKappagen ?? true,
-      count: def?.defaultCount ?? 50,
-      interval: def?.defaultInterval ?? 50,
-      text: def?.requiresText ? "Hype" : undefined,
-      ...(animationName === "bubbles"
-        ? { poppingBehaviour: "randomPerActivation" as const }
-        : {}),
-    };
-  };
+  const getDefaultConfig = getDefaultAnimationConfig;
 
   // Get animation config from settings, with proper defaults from registry
-  const getAnimationConfig = (animationName: string): AnimationSettingsType => {
-    const def = animationRegistry[animationName];
-    const existing = settings.animations[animationName];
-    const defaults = getDefaultConfig(animationName);
-    
-    // If no existing settings, return defaults
-    if (!existing) {
-      return defaults;
-    }
-    
-    return {
-      enabled: existing.enabled ?? defaults.enabled,
-      enabledManual: existing.enabledManual ?? existing.enabled ?? defaults.enabledManual,
-      // Use enabledKappagen, fallback to legacy enabledRandom, then to defaults
-      enabledKappagen: existing.enabledKappagen ?? (existing as any).enabledRandom ?? defaults.enabledKappagen,
-      count: existing.count ?? defaults.count,
-      interval: existing.interval ?? defaults.interval,
-      text: existing.text ?? defaults.text,
-      poppingBehaviour: existing.poppingBehaviour ?? defaults.poppingBehaviour,
-    };
-  };
+  const getAnimationConfig = (animationName: string): AnimationSettingsType =>
+    resolveAnimationConfig(settings, animationName);
 
   const handleManualToggle = (animation: string, enabled: boolean) => {
     const currentConfig = getAnimationConfig(animation);
@@ -192,6 +165,54 @@ export function AnimationSettings({
         [animation]: {
           ...currentConfig,
           poppingBehaviour,
+        },
+      },
+    }));
+  };
+
+  const handlePositionMovementChange = (
+    animation: string,
+    positionMovement: ShapePositionMovement
+  ) => {
+    const currentConfig = getAnimationConfig(animation);
+    setSettings((prev) => ({
+      ...prev,
+      animations: {
+        ...prev.animations,
+        [animation]: {
+          ...currentConfig,
+          positionMovement,
+        },
+      },
+    }));
+  };
+
+  const handlePathBehaviourChange = (
+    animation: string,
+    pathBehaviour: SpiralPathBehaviour
+  ) => {
+    const currentConfig = getAnimationConfig(animation);
+    setSettings((prev) => ({
+      ...prev,
+      animations: {
+        ...prev.animations,
+        [animation]: {
+          ...currentConfig,
+          pathBehaviour,
+        },
+      },
+    }));
+  };
+
+  const handleWaveStyleChange = (animation: string, waveStyle: WaveStyle) => {
+    const currentConfig = getAnimationConfig(animation);
+    setSettings((prev) => ({
+      ...prev,
+      animations: {
+        ...prev.animations,
+        [animation]: {
+          ...currentConfig,
+          waveStyle,
         },
       },
     }));
@@ -387,6 +408,81 @@ export function AnimationSettings({
                         </SelectTrigger>
                         <SelectContent>
                           {BUBBLES_POPPING_BEHAVIOUR_OPTIONS.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
+                  {def.name === "spiral" && (
+                    <div className="space-y-2">
+                      <Label htmlFor={`${def.name}-path-behaviour`}>
+                        Spiral Behaviour
+                      </Label>
+                      <Select
+                        value={config.pathBehaviour ?? "unified"}
+                        onValueChange={(value: SpiralPathBehaviour) =>
+                          handlePathBehaviourChange(def.name, value)
+                        }
+                      >
+                        <SelectTrigger id={`${def.name}-path-behaviour`}>
+                          <SelectValue placeholder="Select spiral behaviour" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {SPIRAL_PATH_BEHAVIOUR_OPTIONS.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
+                  {SHAPE_ANIMATIONS_WITH_POSITION_MOVEMENT.has(def.name) && (
+                    <div className="space-y-2">
+                      <Label htmlFor={`${def.name}-position-movement`}>
+                        Position/Movement
+                      </Label>
+                      <Select
+                        value={config.positionMovement ?? "centered"}
+                        onValueChange={(value: ShapePositionMovement) =>
+                          handlePositionMovementChange(def.name, value)
+                        }
+                      >
+                        <SelectTrigger id={`${def.name}-position-movement`}>
+                          <SelectValue placeholder="Select position/movement" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {SHAPE_POSITION_MOVEMENT_OPTIONS.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
+                  {WAVE_ANIMATIONS_WITH_STYLE.has(def.name) && (
+                    <div className="space-y-2">
+                      <Label htmlFor={`${def.name}-wave-style`}>
+                        Wave Type
+                      </Label>
+                      <Select
+                        value={config.waveStyle ?? "sway"}
+                        onValueChange={(value: WaveStyle) =>
+                          handleWaveStyleChange(def.name, value)
+                        }
+                      >
+                        <SelectTrigger id={`${def.name}-wave-style`}>
+                          <SelectValue placeholder="Select wave type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {WAVE_STYLE_OPTIONS.map((option) => (
                             <SelectItem key={option.value} value={option.value}>
                               {option.label}
                             </SelectItem>

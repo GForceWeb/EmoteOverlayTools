@@ -1,5 +1,12 @@
 import { globalVars } from "../config.ts";
+import OverlaySettings from "../settings";
 import { gsap } from "gsap";
+import type { ShapePositionMovement } from "@/shared/types";
+import {
+  applyShapeMovement,
+  resolveShapePositionMovement,
+  type ShapeMovementHandle,
+} from "../lib/shapeMovement.ts";
 
 // A dodecahedron has 12 pentagonal faces
 const FACE_COUNT = 12;
@@ -124,19 +131,45 @@ export function dodecahedron(
   // Append container to document
   globalVars.warp.appendChild(container);
 
-  // Animate the dodecahedron (continuous center rotation)
-  const spinTween = animateDodecahedron(dodeca, speedPercent);
+  const movementMode = resolveShapePositionMovement(
+    getConfiguredPositionMovement()
+  );
+  const spinTween =
+    movementMode === "diceRoll" ? null : animateDodecahedron(dodeca, speedPercent);
+  const movement: ShapeMovementHandle = applyShapeMovement(
+    container,
+    dodeca,
+    movementMode,
+    size,
+    speedPercent,
+    spinTween
+  );
 
   // Remove after animation
   setTimeout(() => {
     if (container.parentNode) {
-      // Stop animation to avoid leaks
-      if (spinTween) {
-        spinTween.kill();
-      }
+      movement.kill();
+      spinTween?.kill();
       container.parentNode.removeChild(container);
     }
   }, 10000);
+}
+
+function getConfiguredPositionMovement(): ShapePositionMovement {
+  const configured =
+    OverlaySettings.settings.animations.dodecahedron?.positionMovement;
+  if (
+    configured === "centered" ||
+    configured === "dvd" ||
+    configured === "diceRoll" ||
+    configured === "randomise"
+  ) {
+    return configured;
+  }
+  if ((configured as string) === "dropIn") {
+    return "diceRoll";
+  }
+  return "centered";
 }
 
 function createPentagonFace(
@@ -206,4 +239,3 @@ function getFaceImages(images: string[]): string[] {
   }
   return faces;
 }
-

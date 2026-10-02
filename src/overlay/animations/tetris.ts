@@ -1,21 +1,17 @@
 import { globalVars } from "../config.ts";
 import helpers from "../helpers.js";
-import { tetrominos } from "../lib/emotetetris.js";
+import {
+  canPlacePiece, clearRows, completedRows, findBestPlacement, isAboveCeiling, pieceTypes,
+  type GameGrid, type Position, type TetrominoGrid,
+} from "../lib/tetris-game.js";
 import { gsap } from "gsap";
-
-interface Position {
-  x: number;
-  y: number;
-}
-
-type TetrominoGrid = (0 | 1)[][];
-type GameGrid = (string | null)[][];
 
 export function tetris(
   images: string[],
   pieces: number = 20,
   interval: number = 100
 ): void {
+  if (!images.length || !Number.isFinite(pieces) || pieces <= 0) return;
   // Initialize game grid (20 rows x 10 columns)
   const GRID_HEIGHT = 20;
   const GRID_WIDTH = 10;
@@ -44,9 +40,6 @@ export function tetris(
   const maxCellSize = 60;
   const finalCellSize = Math.max(minCellSize, Math.min(maxCellSize, cellSize));
   
-  // Log the calculated cell size for debugging
-  console.log(`Tetris animation: Window ${windowWidth}x${windowHeight}, Cell size: ${finalCellSize}px`);
-
   // Create grid container
   const gridContainer = document.createElement("div");
   gridContainer.id = "tetris-grid-" + globalVars.divnumber++;
@@ -83,32 +76,12 @@ export function tetris(
     }
   }
 
-  // Get all possible piece types (L, P, Z, S, T, I, Q)
-  const pieceTypes = Object.keys(tetrominos)
-    .filter((key) => key.endsWith("1"))
-    .map((key) => key[0]);
-
   // Track current animation state
   let currentPiece: TetrominoGrid | null = null;
   let currentPiecePos: Position = { x: 0, y: 0 };
   let piecesPlaced = 0;
   let currentImageIndex = 0;
-
-  function getRandomPiece(): TetrominoGrid {
-    const type = pieceTypes[Math.floor(Math.random() * pieceTypes.length)];
-    const rotation = Math.floor(Math.random() * 4) + 1;
-    return tetrominos[`${type}${rotation}`] as TetrominoGrid;
-  }
-
-  function getPieceWidth(piece: TetrominoGrid): number {
-    let width = 0;
-    for (let x = 0; x < 4; x++) {
-      for (let y = 0; y < 4; y++) {
-        if (piece[y][x]) width = Math.max(width, x + 1);
-      }
-    }
-    return width;
-  }
+  let state: "falling" | "clearing" | "finished" = "falling";
 
   function updateCell(x: number, y: number, image: string | null): void {
     if (y >= 0 && y < GRID_HEIGHT && x >= 0 && x < GRID_WIDTH) {
@@ -151,26 +124,6 @@ export function tetris(
     }
   }
 
-  function canPlacePiece(piece: TetrominoGrid, pos: Position): boolean {
-    for (let y = 0; y < 4; y++) {
-      for (let x = 0; x < 4; x++) {
-        if (piece[y][x]) {
-          const newX = pos.x + x;
-          const newY = pos.y + y;
-
-          if (newX < 0 || newX >= GRID_WIDTH || newY >= GRID_HEIGHT) {
-            return false;
-          }
-
-          if (newY >= 0 && grid[newY][newX] !== null) {
-            return false;
-          }
-        }
-      }
-    }
-    return true;
-  }
-
   function placePiece(piece: TetrominoGrid, pos: Position): void {
     const image = images[currentImageIndex];
     currentImageIndex = (currentImageIndex + 1) % images.length;
@@ -182,32 +135,10 @@ export function tetris(
         }
       }
     }
-
-    // Check for completed rows
-    checkForCompletedRows();
-  }
-
-  function checkForCompletedRows(): void {
-    const completedRows: number[] = [];
-
-    // Find completed rows
-    for (let y = 0; y < GRID_HEIGHT; y++) {
-      if (grid[y].every((cell) => cell !== null)) {
-        completedRows.push(y);
-      }
-    }
-
-    if (completedRows.length > 0) {
-      // Animate row explosion
-      animateRowExplosion(completedRows);
-    }
   }
 
   function animateRowExplosion(rows: number[]): void {
-    // Pause the main game loop temporarily
-    const originalPiece = currentPiece;
-    const originalPos = { ...currentPiecePos };
-    currentPiece = null;
+    state = "clearing";
 
     // Get cells from completed rows for animation
     const cellsToAnimate: HTMLElement[] = [];
@@ -224,11 +155,11 @@ export function tetris(
     const timeline = gsap.timeline({
       onComplete: () => {
         // Remove completed rows and shift pieces down
-        removeCompletedRows(rows);
-        // Resume the game
-        currentPiece = originalPiece;
-        currentPiecePos = originalPos;
+        grid = clearRows(grid, rows);
+        gsap.set(cellsToAnimate, { scale: 1, opacity: 1, backgroundColor: "transparent" });
         renderGrid();
+        state = "falling";
+        continueGame();
       },
     });
 
@@ -265,60 +196,78 @@ export function tetris(
     });
   }
 
-  function removeCompletedRows(rows: number[]): void {
-    // Sort rows in descending order to handle multiple rows properly
-    rows.sort((a, b) => b - a);
+  function finish(gameOver: boolean): void {
+    if (state === "finished") return;
+    state = "finished";
+    currentPiece = null;
+    const cleanup = () => helpers.removeelement(gridContainer.id);
+    if (!gameOver) {
+      gsap.to(gridContainer, { opacity: 0, duration: 1, ease: "power2.out", onComplete: cleanup });
+      return;
+    }
 
-    rows.forEach((rowIndex) => {
-      // Remove the completed row
-      grid.splice(rowIndex, 1);
-      // Add a new empty row at the top
-      grid.unshift(Array(GRID_WIDTH).fill(null));
+    const message = document.createElement("div");
+    message.className = "tetris-game-over";
+    message.textContent = "GAME OVER";
+    gridContainer.appendChild(message);
+    gsap.set(message, {
+      position: "absolute", top: "40%", left: 0, width: "100%",
+      textAlign: "center", fontFamily: "monospace", fontWeight: "bold",
+      fontSize: finalCellSize * 0.85 + "px", color: "white",
+      backgroundColor: "rgba(100, 0, 0, 0.85)", padding: "0.5em 0",
+      zIndex: 1,
     });
+    gsap.timeline({ onComplete: cleanup })
+      .to(gridContainer, { backgroundColor: "rgba(255, 40, 40, 0.35)", duration: 0.15, repeat: 3, yoyo: true })
+      .to(gridContainer, { y: finalCellSize, opacity: 0, duration: 0.7, delay: 0.6, ease: "power2.in" });
   }
 
-  function spawnNewPiece(): void {
-    currentPiece = getRandomPiece();
-    const pieceWidth = getPieceWidth(currentPiece);
-    currentPiecePos = {
-      x: Math.floor(Math.random() * (GRID_WIDTH - pieceWidth + 1)),
-      y: -4,
-    };
-    piecesPlaced++;
+  function continueGame(): void {
+    if (grid[0].some((cell) => cell !== null)) {
+      finish(true);
+    } else if (piecesPlaced >= pieces) {
+      finish(false);
+    } else {
+      setTimeout(update, interval);
+    }
   }
 
   function update(): void {
+    if (state !== "falling") return;
     if (!currentPiece) {
-      spawnNewPiece();
+      const type = pieceTypes[Math.floor(Math.random() * pieceTypes.length)];
+      const placement = findBestPlacement(grid, type);
+      if (!placement) {
+        finish(true);
+        return;
+      }
+      currentPiece = placement.piece;
+      currentPiecePos = { x: placement.x, y: -currentPiece.length };
     }
 
     // Try moving piece down
     const nextPos = { ...currentPiecePos, y: currentPiecePos.y + 1 };
 
-    if (currentPiece && canPlacePiece(currentPiece, nextPos)) {
+    if (canPlacePiece(grid, currentPiece, nextPos)) {
       currentPiecePos = nextPos;
-    } else if (currentPiece) {
-      // Place piece and spawn new one
+    } else {
+      if (isAboveCeiling(currentPiece, currentPiecePos)) {
+        finish(true);
+        return;
+      }
       placePiece(currentPiece, currentPiecePos);
       currentPiece = null;
+      piecesPlaced++;
+      renderGrid();
+      const rows = completedRows(grid);
+      if (rows.length) animateRowExplosion(rows);
+      else continueGame();
+      return;
     }
 
     renderGrid();
 
-    // Continue animation if pieces remain
-    if (piecesPlaced < pieces) {
-      setTimeout(update, interval);
-    } else {
-      // Fade out and clean up after animation is done
-      gsap.to(gridContainer, {
-        opacity: 0,
-        duration: 1,
-        ease: "power2.out",
-        onComplete: () => {
-          helpers.removeelement(gridContainer.id);
-        },
-      });
-    }
+    setTimeout(update, interval);
   }
 
   // Start animation

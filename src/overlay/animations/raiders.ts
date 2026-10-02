@@ -1,6 +1,22 @@
 import { gsap } from "gsap";
 import { globalVars } from "../config.ts";
 import helpers from "../helpers.ts";
+import type { RaidAnimationStyle } from "../../shared/types.ts";
+import {
+  raidAirRaid,
+} from "./raid-airraid.ts";
+import {
+  raidCountOff,
+} from "./raid-countoff.ts";
+import {
+  raidGrandPrix,
+} from "./raid-grandprix.ts";
+import {
+  raidMurmuration,
+} from "./raid-murmuration.ts";
+import {
+  raidWave,
+} from "./raid-wave.ts";
 
 export interface IncomingRaidAnimationOptions {
   avatarUrl: string;
@@ -9,7 +25,24 @@ export interface IncomingRaidAnimationOptions {
   originalRaiderCount?: number;
   /** Number of alternating charges across the screen (1–5). */
   chargePasses?: number;
+  /** Which raid animation to play; "random" picks a new style each raid. */
+  style?: RaidAnimationStyle;
 }
+
+/** Styles eligible for the "random" pick: the five overhauled animations. */
+const RANDOM_POOL = [
+  "countoff",
+  "murmuration",
+  "airraid",
+  "wave",
+  "grandprix",
+] as const satisfies readonly Exclude<RaidAnimationStyle, "random" | "stampede">[];
+
+const KNOWN_STYLES: RaidAnimationStyle[] = [
+  "random",
+  "stampede",
+  ...RANDOM_POOL,
+];
 
 interface Palette {
   skin: string;
@@ -350,10 +383,43 @@ function createSpeedStreaks(wrapper: HTMLDivElement, count: number): void {
 }
 
 /**
- * Incoming raid: avatar-led cartoon pack charges across the overlay.
- * Repeats `chargePasses` times, alternating left→right and right→left.
+ * Incoming raid dispatcher. Resolves the configured style ("random" picks a
+ * fresh overhauled style each raid) and hands off to the matching animation.
  */
 export function incomingRaid(options: IncomingRaidAnimationOptions): void {
+  const requested = options.style;
+  const style: RaidAnimationStyle =
+    requested && KNOWN_STYLES.includes(requested) && requested !== "random"
+      ? requested
+      : RANDOM_POOL[Math.floor(Math.random() * RANDOM_POOL.length)];
+
+  switch (style) {
+    case "stampede":
+      raidStampede(options);
+      break;
+    case "countoff":
+      raidCountOff(options);
+      break;
+    case "murmuration":
+      raidMurmuration(options);
+      break;
+    case "airraid":
+      raidAirRaid(options);
+      break;
+    case "wave":
+      raidWave(options);
+      break;
+    case "grandprix":
+      raidGrandPrix(options);
+      break;
+  }
+}
+
+/**
+ * Classic stampede: avatar-led cartoon pack charges across the overlay.
+ * Repeats `chargePasses` times, alternating left→right and right→left.
+ */
+export function raidStampede(options: IncomingRaidAnimationOptions): void {
   const raiderCount = clampRaiderCount(options.raiderCount);
   const chargePasses = clampChargePasses(options.chargePasses);
   const originalCount = options.originalRaiderCount ?? raiderCount;
@@ -666,7 +732,8 @@ export function incomingRaid(options: IncomingRaidAnimationOptions): void {
 
 export async function raider(
   username: string = "gforce_bot",
-  raiderCount: number = 60
+  raiderCount: number = 60,
+  style?: RaidAnimationStyle
 ): Promise<void> {
   let avatarUrl =
     "https://static-cdn.jtvnw.net/jtv_user_pictures/8e051a26-051f-4abe-bcfa-e13a5d13fad0-profile_image-300x300.png";
@@ -683,5 +750,6 @@ export async function raider(
     raiderCount,
     originalRaiderCount: raiderCount,
     chargePasses: 1,
+    style,
   });
 }

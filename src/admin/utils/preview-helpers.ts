@@ -33,7 +33,9 @@ const getPreviewEmotes = (settings: Settings): EmoteData[] => {
 };
 
 /**
- * Preview an animation by sending a message to the iframe
+ * Preview an animation by sending a message to the iframe.
+ * The config is included so the overlay can hot-merge sub-settings
+ * (e.g. poppingBehaviour, waveStyle) before the animation runs.
  */
 export const previewAnimation = (
   animation: string,
@@ -74,6 +76,7 @@ export const previewAnimation = (
     {
       type: "PREVIEW_ANIMATION",
       animation: animation,
+      config: config,
       wsdata: wsMessage,
     },
     "*"
@@ -83,12 +86,21 @@ export const previewAnimation = (
 };
 
 /**
+ * Options for feature previews
+ */
+export interface PreviewFeatureOptions {
+  /** Explicit raider count for raid previews (random when omitted) */
+  viewers?: number;
+}
+
+/**
  * Preview a feature by sending a message to the iframe
  */
 export const previewFeature = (
   feature: string,
   config: any,
-  settings: Settings
+  settings: Settings,
+  options?: PreviewFeatureOptions
 ): void => {
   const iframe = getOverlayIframe();
   if (!iframe) return;
@@ -96,7 +108,10 @@ export const previewFeature = (
   const previewEmotes = getPreviewEmotes(settings);
 
   if (feature === "raids") {
-    const viewers = Math.floor(Math.random() * 96) + 5;
+    const viewers =
+      options?.viewers && options.viewers >= 1
+        ? Math.floor(options.viewers)
+        : Math.floor(Math.random() * 96) + 5;
     const raiderName = settings.twitchUsername || "gforce_bot";
 
     const wsMessage: WSData = {
@@ -134,26 +149,25 @@ export const previewFeature = (
     const wsMessage: WSData = {
       event: {
         source: "Admin",
-        type: "AutomaticRewardRedemption",
+        type: "PowerUpRedemption",
       },
       data: {
         id: "preview-gigantify-redeem",
-        user_id: "123456789",
-        user_login: (settings.twitchUsername || "gforce_bot").toLowerCase(),
-        user_name: settings.twitchUsername || "gforce_bot",
-        user_input: "",
-        reward_type: "gigantify_an_emote",
-        cost: 0,
-        message_text: gigantifiedEmoteName,
-        message_emotes: [],
-        gigantified_emote: {
-          id: previewEmotes[0]?.id || "25",
-          name: gigantifiedEmoteName,
-          imageUrl: gigantifiedEmoteUrl,
-          begin: 0,
-          end: gigantifiedEmoteName.length,
+        user: {
+          id: "123456789",
+          login: (settings.twitchUsername || "gforce_bot").toLowerCase(),
+          name: settings.twitchUsername || "gforce_bot",
         },
-        redeemed_at: new Date().toISOString(),
+        type: "gigantify_an_emote",
+        bits: 0,
+        text: gigantifiedEmoteName,
+        emote: {
+          text: gigantifiedEmoteName,
+          imageUrl: gigantifiedEmoteUrl,
+          type: "emote",
+          zeroWidth: false,
+        },
+        redeemedAt: new Date().toISOString(),
       },
     };
 

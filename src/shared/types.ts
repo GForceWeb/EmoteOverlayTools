@@ -6,6 +6,21 @@ export type BubblesPoppingBehaviour =
   | "randomPerBubble"
   | "randomPerActivation";
 
+export type SpiralPathBehaviour =
+  | "unified"
+  | "randomPerEmote"
+  | "randomPerActivation";
+
+/** Cube / dodecahedron: where the shape sits and how it moves */
+export type ShapePositionMovement =
+  | "centered"
+  | "dvd"
+  | "diceRoll"
+  | "randomise";
+
+/** Right / left wave: the path style emotes use while crossing the screen */
+export type WaveStyle = "sway" | "ocean" | "both";
+
 export interface AnimationSettings {
   enabled: boolean;           // Legacy field for backward compatibility
   enabledManual: boolean;     // For !er command (manual trigger)
@@ -15,6 +30,12 @@ export interface AnimationSettings {
   text?: string;
   /** Bubbles: how bubbles finish — burst, fall, or random */
   poppingBehaviour?: BubblesPoppingBehaviour;
+  /** Spiral: how the spiral path is chosen per activation */
+  pathBehaviour?: SpiralPathBehaviour;
+  /** Cube / dodecahedron: position and movement style */
+  positionMovement?: ShapePositionMovement;
+  /** Right / left wave: swaying drift, literal ocean wave, or random per trigger */
+  waveStyle?: WaveStyle;
 }
 
 // Use index signature to allow dynamic animation keys
@@ -34,9 +55,21 @@ export interface CheersFeatureSettings extends FeatureSettings {
   position: CheersPosition;
 }
 
+/** Which incoming-raid animation plays: a fixed style or "random" per raid. */
+export type RaidAnimationStyle =
+  | "random"
+  | "stampede"
+  | "countoff"
+  | "murmuration"
+  | "airraid"
+  | "wave"
+  | "grandprix";
+
 export interface RaidFeatureSettings extends FeatureSettings {
   capEnabled: boolean;
   maxRaiders: number;
+  /** Which raid animation style to play ("random" picks a new one each raid). */
+  animationStyle: RaidAnimationStyle;
   /** How many times the raid pack charges across the screen (alternating direction). */
   chargePasses: number;
 }
@@ -135,11 +168,25 @@ export interface WSData {
     from_broadcaster_user_name?: string;
     viewers?: number;
     reward_type?: string;
+    rewardType?: string;
+    reward?: { type?: string; rewardType?: string };
+    type?: string;
+    bits?: number;
+    emote?: {
+      imageUrl?: string;
+      url?: string;
+      text?: string;
+      type?: string;
+      zeroWidth?: boolean;
+    };
+    gigantifiedEmoteUrl?: string;
+    gigantifiedEmote?: { imageUrl?: string; url?: string };
     cost?: number;
     message_text?: string;
     message_emotes?: EmoteData[];
     gigantified_emote?: EmoteData;
     redeemed_at?: string;
+    redeemedAt?: string;
   };
   actions?: any[];
   id?: string;

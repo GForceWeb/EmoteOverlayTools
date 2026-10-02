@@ -1,6 +1,12 @@
 import { globalVars } from "../config.ts";
-import helpers from "../helpers.ts";
+import OverlaySettings from "../settings";
 import { gsap } from "gsap";
+import type { ShapePositionMovement } from "@/shared/types";
+import {
+  applyShapeMovement,
+  resolveShapePositionMovement,
+  type ShapeMovementHandle,
+} from "../lib/shapeMovement.ts";
 
 interface CubeSide {
   front: HTMLElement;
@@ -98,19 +104,42 @@ export function cube(
   // Append container to document
   globalVars.warp.appendChild(container);
 
-  // Animate the cube (continuous center rotation)
-  const spinTween = animateCube(cube, speedPercent);
+  const movementMode = resolveShapePositionMovement(getConfiguredPositionMovement());
+  const spinTween =
+    movementMode === "diceRoll" ? null : animateCube(cube, speedPercent);
+  const movement: ShapeMovementHandle = applyShapeMovement(
+    container,
+    cube,
+    movementMode,
+    size,
+    speedPercent,
+    spinTween
+  );
 
   // Remove after animation
   setTimeout(() => {
     if (container.parentNode) {
-      // Stop animation to avoid leaks
-      if (spinTween) {
-        spinTween.kill();
-      }
+      movement.kill();
+      spinTween?.kill();
       container.parentNode.removeChild(container);
     }
   }, 10000);
+}
+
+function getConfiguredPositionMovement(): ShapePositionMovement {
+  const configured = OverlaySettings.settings.animations.cube?.positionMovement;
+  if (
+    configured === "centered" ||
+    configured === "dvd" ||
+    configured === "diceRoll" ||
+    configured === "randomise"
+  ) {
+    return configured;
+  }
+  if ((configured as string) === "dropIn") {
+    return "diceRoll";
+  }
+  return "centered";
 }
 
 function createCubeSide(
