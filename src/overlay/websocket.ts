@@ -30,6 +30,7 @@ function subscribeToEvents(ws: WebSocket): void {
           "ChatMessage",
           "FirstWord",
           "AutomaticRewardRedemption",
+          "PowerUpRedemption",
           "HypeTrainStart",
           "HypeTrainUpdate",
           "HypeTrainLevelUp",
@@ -61,7 +62,7 @@ const handleElectronMessage = (event: MessageEvent) => {
   // Optional: Validate the origin for security
   // if (event.origin !== "your-expected-origin") return;
 
-  const { type, feature, config, wsdata } = event.data;
+  const { type, feature, animation, config, wsdata } = event.data;
 
   if (
     type === "PREVIEW_FEATURE" &&
@@ -76,6 +77,26 @@ const handleElectronMessage = (event: MessageEvent) => {
           ...OverlaySettings.settings.features[
             feature as keyof typeof OverlaySettings.settings.features
           ],
+          ...config,
+        },
+      },
+    });
+  }
+
+  // Preview animation sub-settings (e.g. poppingBehaviour, waveStyle) are
+  // read from settings by the animation modules, so hot-merge the previewed
+  // config before replaying the synthetic chat message.
+  if (
+    type === "PREVIEW_ANIMATION" &&
+    animation &&
+    config &&
+    animation in OverlaySettings.settings.animations
+  ) {
+    OverlaySettings.updateSettings({
+      animations: {
+        ...OverlaySettings.settings.animations,
+        [animation]: {
+          ...OverlaySettings.settings.animations[animation],
           ...config,
         },
       },
@@ -248,7 +269,7 @@ function handleMessage(msg: string): void {
       return;
     }
 
-    if (eventType == "AutomaticRewardRedemption") {
+    if (eventType == "AutomaticRewardRedemption" || eventType == "PowerUpRedemption") {
       handlers.gigantifyRedeemHandler(wsdata);
       return;
     }

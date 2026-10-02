@@ -16,19 +16,24 @@ export function solitaire(
   container.style.height = "100%";
   container.style.pointerEvents = "none";
   container.style.overflow = "hidden";
+  // Own stacking context so the -1 trails paint above the page background
+  // (a negative z-index inside the root stacking context would fall behind body's
+  // background in preview mode) while still sitting behind the leader cards.
+  container.style.zIndex = "0";
   globalVars.warp.appendChild(container);
 
-  const cardWidth = 100;
-  const cardHeight = 100; // Assuming square emotes or similar aspect ratio
-  const gravity = 0.1435;
+  const cardWidth = helpers.scaleRelativeToViewport(100);
+  const cardHeight = cardWidth; // Assuming square emotes or similar aspect ratio
+  const gravity = helpers.scaleRelativeToHeight(0.1435);
   const bounceFactor = 0.8;
-  const screenWidth = window.innerWidth;
-  const screenHeight = window.innerHeight;
 
   let activeCards = 0;
 
   // Helper to create a card
   const createCard = (index: number) => {
+    // Read viewport at spawn time so cards spawned later match the current window size
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
     let imgUrl = "https://static-cdn.jtvnw.net/emoticons/v2/425618/default/dark/2.0";
     if (images.length > 0) {
         imgUrl = images[index % images.length];
@@ -47,14 +52,14 @@ export function solitaire(
     // Classic solitaire starts from a deck position, but here we might want them to rain or explode.
     // Let's start them from random positions at the top or center.
     // Actually, let's have them cascade from the top left or random x at top.
-    let x = Math.random() * (screenWidth - cardWidth);
+    let x = Math.random() * Math.max(screenWidth - cardWidth, 0);
     let y = -cardHeight;
     
     // Velocity
-    let vx = (Math.random() - 0.5) * 10 + 2; // Random horizontal speed
+    let vx = (Math.random() - 0.5) * helpers.scaleRelativeToWidth(10) + helpers.scaleRelativeToWidth(2); // Random horizontal speed
     if (Math.random() < 0.5) vx = -vx; // Random direction
     // Ensure some movement
-    if (Math.abs(vx) < 2) vx = 5;
+    if (Math.abs(vx) < helpers.scaleRelativeToWidth(2)) vx = helpers.scaleRelativeToWidth(5);
 
     let vy = 0;
 

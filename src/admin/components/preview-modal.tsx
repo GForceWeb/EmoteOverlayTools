@@ -83,7 +83,7 @@ export function PreviewModal({
 
         <div className="flex flex-1 flex-col md:flex-row w-full min-h-0">
           {showControls && (
-            <div className="w-full md:w-64 border-r border-border bg-card p-4 overflow-y-auto">
+            <div className="w-full md:w-80 border-r border-border bg-card p-4 overflow-y-auto">
               <PreviewControls settings={settings} onSettingsChange={onSettingsChange} />
             </div>
           )}

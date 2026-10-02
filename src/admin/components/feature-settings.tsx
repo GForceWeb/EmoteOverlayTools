@@ -9,7 +9,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/admin/components/ui/card";
-import type { CheersPosition, Settings } from "@/shared/types";
+import type {
+  CheersPosition,
+  RaidAnimationStyle,
+  Settings,
+} from "@/shared/types";
 import { Label } from "@/admin/components/ui/label";
 import { Separator } from "@/admin/components/ui/separator";
 import { Button } from "@/admin/components/ui/button";
@@ -22,6 +26,13 @@ import {
   SelectValue,
 } from "@/admin/components/ui/select";
 import { previewFeature } from "@/admin/utils/preview-helpers";
+import {
+  CHEERS_POSITION_OPTIONS,
+  CHEERS_QUANTITY_OPTIONS,
+  FEATURE_DESCRIPTIONS,
+  FEATURE_LABELS,
+  RAID_STYLE_OPTIONS,
+} from "@/admin/utils/setting-options";
 
 interface FeatureSettingsProps {
   settings: Settings;
@@ -32,24 +43,6 @@ export function FeatureSettings({
   settings,
   setSettings,
 }: FeatureSettingsProps) {
-  const cheersPositionLabels: Record<CheersPosition, string> = {
-    center: "Center",
-    left: "Left Side",
-    right: "Right Side",
-  };
-
-  const featureLabels: Record<keyof Settings["features"], string> = {
-    lurk: "Lurk",
-    welcome: "Welcome",
-    kappagen: "Kappagen",
-    cheers: "Cheers",
-    hypetrain: "Hype Train",
-    emoterain: "Emote Rain",
-    choon: "Choon",
-    gigantifyredeem: "Gigantify Emote Redeems",
-    raids: "Raids",
-  };
-
   const handleFeatureToggle = (
     feature: keyof Settings["features"],
     enabled: boolean
@@ -139,22 +132,22 @@ export function FeatureSettings({
     }));
   };
 
+  const handleRaidAnimationStyleChange = (style: RaidAnimationStyle) => {
+    setSettings((prev) => ({
+      ...prev,
+      features: {
+        ...prev.features,
+        raids: {
+          ...prev.features.raids,
+          animationStyle: style,
+        },
+      },
+    }));
+  };
+
   const onPreviewFeature = (feature: keyof Settings["features"]) => {
     const featureConfig = settings.features[feature];
     previewFeature(feature, featureConfig, settings);
-  };
-
-  const featureDescriptions: Record<keyof Settings["features"], string> = {
-    lurk: "Show animations when viewers go into lurk mode",
-    welcome: "Display welcome messages for new viewers",
-    kappagen: "Generate Kappa emotes on certain events",
-    cheers: "Special animations for Twitch Bits cheers",
-    hypetrain: "Animations during Hype Train events",
-    emoterain: "Make it rain emotes on command",
-    choon: "Music-related animations and effects",
-    gigantifyredeem:
-      "Animate Twitch Gigantify an Emote power-up redemptions",
-    raids: "Animate incoming raids with the raiding channel leading an army.",
   };
 
   return (
@@ -191,8 +184,8 @@ export function FeatureSettings({
         <div className="space-y-3">
           {Object.entries(settings.features)
             .sort(([a], [b]) =>
-              featureLabels[a as keyof Settings["features"]].localeCompare(
-                featureLabels[b as keyof Settings["features"]]
+              FEATURE_LABELS[a as keyof Settings["features"]].localeCompare(
+                FEATURE_LABELS[b as keyof Settings["features"]]
               )
             )
             .map(([feature, { enabled }], index, sortedFeatures) => (
@@ -200,10 +193,10 @@ export function FeatureSettings({
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0 space-y-0.5">
                   <Label htmlFor={`feature-${feature}`}>
-                    {featureLabels[feature as keyof Settings["features"]]}
+                    {FEATURE_LABELS[feature as keyof Settings["features"]]}
                   </Label>
                   <p className="text-xs text-muted-foreground">
-                    {featureDescriptions[feature as keyof Settings["features"]]}
+                    {FEATURE_DESCRIPTIONS[feature as keyof Settings["features"]]}
                   </p>
                 </div>
                 <div className="flex shrink-0 items-center space-x-2">
@@ -244,8 +237,11 @@ export function FeatureSettings({
                           <SelectValue placeholder="Select quantity" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="1">1 animation</SelectItem>
-                          <SelectItem value="2">2 animations</SelectItem>
+                          {CHEERS_QUANTITY_OPTIONS.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                       <p className="text-xs text-muted-foreground">
@@ -266,13 +262,11 @@ export function FeatureSettings({
                           <SelectValue placeholder="Select position" />
                         </SelectTrigger>
                         <SelectContent>
-                          {Object.entries(cheersPositionLabels).map(
-                            ([value, label]) => (
-                              <SelectItem key={value} value={value}>
-                                {label}
-                              </SelectItem>
-                            )
-                          )}
+                          {CHEERS_POSITION_OPTIONS.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                       <p className="text-xs text-muted-foreground">
@@ -286,6 +280,32 @@ export function FeatureSettings({
               )}
               {feature === "raids" && (
                 <div className="rounded-lg border border-border/60 bg-secondary/20 p-4 space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="raids-animation-style">Animation style</Label>
+                    <Select
+                      value={settings.features.raids.animationStyle ?? "random"}
+                      onValueChange={(value: RaidAnimationStyle) =>
+                        handleRaidAnimationStyleChange(value)
+                      }
+                    >
+                      <SelectTrigger id="raids-animation-style">
+                        <SelectValue placeholder="Select animation style" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {RAID_STYLE_OPTIONS.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">
+                      {settings.features.raids.animationStyle === "random"
+                        ? "Each raid plays a random style from the overhauled animations."
+                        : "Every raid plays the selected animation style."}
+                    </p>
+                  </div>
+
                   <div className="flex items-center justify-between gap-4">
                     <div className="space-y-0.5">
                       <Label htmlFor="raids-cap-enabled">
@@ -323,28 +343,30 @@ export function FeatureSettings({
                     </div>
                   )}
 
-                  <div className="space-y-2">
-                    <div className="flex justify-between gap-4">
-                      <Label htmlFor="raids-charge-passes">
-                        Charge passes:{" "}
-                        {settings.features.raids.chargePasses ?? 1}
-                      </Label>
+                  {settings.features.raids.animationStyle === "stampede" && (
+                    <div className="space-y-2">
+                      <div className="flex justify-between gap-4">
+                        <Label htmlFor="raids-charge-passes">
+                          Charge passes:{" "}
+                          {settings.features.raids.chargePasses ?? 1}
+                        </Label>
+                      </div>
+                      <Slider
+                        id="raids-charge-passes"
+                        min={1}
+                        max={5}
+                        step={1}
+                        value={[settings.features.raids.chargePasses ?? 1]}
+                        onValueChange={(value) =>
+                          handleRaidChargePassesChange(value[0])
+                        }
+                      />
+                      <p className="text-sm text-muted-foreground">
+                        How many times the Stampede charges across the screen,
+                        alternating direction each pass.
+                      </p>
                     </div>
-                    <Slider
-                      id="raids-charge-passes"
-                      min={1}
-                      max={5}
-                      step={1}
-                      value={[settings.features.raids.chargePasses ?? 1]}
-                      onValueChange={(value) =>
-                        handleRaidChargePassesChange(value[0])
-                      }
-                    />
-                    <p className="text-sm text-muted-foreground">
-                      How many times the raid charges across the screen,
-                      alternating direction each pass.
-                    </p>
-                  </div>
+                  )}
                 </div>
               )}
               {index < sortedFeatures.length - 1 && (

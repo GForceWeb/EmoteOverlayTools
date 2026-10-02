@@ -31,6 +31,7 @@
         "vite-plugin-electron-renderer": "^0.14.5"
     },
     "scripts": {
+        "test": "node --test tests/*.test.mjs",
         "dev": "vite",
         "build": "vite build",
         "preview": "vite preview",

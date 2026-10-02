@@ -43,6 +43,18 @@ function generateDefaultAnimations(): AnimationList {
     if (name === "bubbles") {
       animations[name].poppingBehaviour = "randomPerActivation";
     }
+
+    if (name === "spiral") {
+      animations[name].pathBehaviour = "unified";
+    }
+
+    if (name === "cube" || name === "dodecahedron") {
+      animations[name].positionMovement = "centered";
+    }
+
+    if (name === "rightwave" || name === "leftwave") {
+      animations[name].waveStyle = "sway";
+    }
   }
   
   return animations;
@@ -76,6 +88,11 @@ export function deepMergeAnimations(
         text: userSettings.text ?? defaultSettings.text,
         poppingBehaviour:
           userSettings.poppingBehaviour ?? defaultSettings.poppingBehaviour,
+        pathBehaviour:
+          userSettings.pathBehaviour ?? defaultSettings.pathBehaviour,
+        positionMovement:
+          userSettings.positionMovement ?? defaultSettings.positionMovement,
+        waveStyle: userSettings.waveStyle ?? defaultSettings.waveStyle,
       };
     } else {
       // New animation not in user's settings - use defaults
@@ -147,6 +164,7 @@ export const defaultConfig: Settings = {
       enabled: true,
       capEnabled: true,
       maxRaiders: 100,
+      animationStyle: "random",
       chargePasses: 2,
     },
   },

@@ -1,71 +1,192 @@
 import { globalVars } from "../config.ts";
 import helpers from "../helpers.ts";
 import { gsap } from "gsap";
+import { MotionPathPlugin } from "gsap/MotionPathPlugin";
+import OverlaySettings from "../settings";
+import type { SpiralPathBehaviour } from "@/shared/types";
+
+gsap.registerPlugin(MotionPathPlugin);
+
+const FULL_TURN = Math.PI * 2;
+const SPIRAL_LIFETIME_MS = 15000;
+const SPIRAL_DURATION_SECONDS = 13;
+const FADE_OUT_DURATION_SECONDS = 2;
+const FADE_OUT_START_SECONDS = 11.5;
+const MIN_TURNS = 2.75;
+const MAX_TURNS = 3.75;
+const POINTS_PER_TURN = 48;
+const MAX_START_RADIUS = 70;
+const UNIFIED_START_ANGLE = -Math.PI / 2;
+const UNIFIED_TURNS = 3.25;
+
+type SpiralPoint = {
+  x: number;
+  y: number;
+};
+
+type SpiralGeometry = {
+  centerX: number;
+  centerY: number;
+  startRadius: number;
+  endRadius: number;
+  startAngle: number;
+  turns: number;
+  direction: number;
+};
 
 export function spiral(
   images: string[],
   count: number = 100,
   interval: number = 75
 ): void {
+  if (images.length === 0) {
+    return;
+  }
+
   let imgcount = images.length;
+  const activationGeometry = createActivationGeometry(
+    getConfiguredPathBehaviour()
+  );
 
   for (let j = 0; j < count; j++) {
     // split the count amounst the different emote images
     let imagenum = j % imgcount;
     setTimeout(() => {
-      createSpiral(images[imagenum]);
+      createSpiral(images[imagenum], activationGeometry);
     }, j * interval);
   }
 }
 
-function createSpiral(image: string): void {
-  var Div = document.createElement("div");
-  Div.id = globalVars.divnumber.toString();
+function getConfiguredPathBehaviour(): SpiralPathBehaviour {
+  const configured =
+    OverlaySettings.settings.animations.spiral?.pathBehaviour;
+  if (
+    configured === "unified" ||
+    configured === "randomPerEmote" ||
+    configured === "randomPerActivation"
+  ) {
+    return configured;
+  }
+  return "unified";
+}
+
+function createActivationGeometry(
+  behaviour: SpiralPathBehaviour
+): SpiralGeometry | undefined {
+  switch (behaviour) {
+    case "unified":
+      return createUnifiedSpiralGeometry();
+    case "randomPerActivation":
+      return createRandomSpiralGeometry();
+    case "randomPerEmote":
+    default:
+      return undefined;
+  }
+}
+
+function createUnifiedSpiralGeometry(): SpiralGeometry {
+  return {
+    centerX: innerWidth / 2,
+    centerY: innerHeight / 2,
+    startRadius: 0,
+    endRadius: Math.hypot(innerWidth, innerHeight) / 2,
+    startAngle: UNIFIED_START_ANGLE,
+    turns: UNIFIED_TURNS,
+    direction: 1,
+  };
+}
+
+function createRandomSpiralGeometry(): SpiralGeometry {
+  return {
+    centerX: innerWidth / 2,
+    centerY: innerHeight / 2,
+    startRadius: helpers.scaleRelativeToViewport(
+      helpers.Randomizer(0, MAX_START_RADIUS)
+    ),
+    endRadius: Math.hypot(innerWidth, innerHeight) / 2,
+    startAngle: helpers.Randomizer(0, FULL_TURN),
+    turns: helpers.Randomizer(MIN_TURNS, MAX_TURNS),
+    direction: helpers.randomSign(),
+  };
+}
+
+function createSpiral(image: string, geometry?: SpiralGeometry): void {
+  const div = document.createElement("div");
+  div.id = globalVars.divnumber.toString();
   globalVars.divnumber++;
 
-  //create at random Y height at left edge of screen
-  gsap.set(Div, {
+  const spiralGeometry = geometry ?? createRandomSpiralGeometry();
+  const startPoint = getSpiralPoint(spiralGeometry, 0);
+
+  gsap.set(div, {
     className: "spiral-element",
-    x: innerWidth / 2,
-    y: innerHeight / 2,
+    x: startPoint.x,
+    y: startPoint.y,
     z: helpers.Randomizer(-200, 200),
     backgroundImage: "url(" + image + ")",
   });
 
-  globalVars.warp.appendChild(Div);
+  globalVars.warp.appendChild(div);
 
   // Run animation
-  spiral_animation(Div);
+  spiral_animation(div, spiralGeometry);
   //Destroy element after X seconds so we don't eat up resources over time!
   setTimeout(() => {
-    helpers.removeelement(Div.id);
-  }, 15000);
+    helpers.removeelement(div.id);
+  }, SPIRAL_LIFETIME_MS);
 }
 
-function spiral_animation(element: HTMLElement): void {
-  //Travel left to right
-  let spiralstartx = innerWidth / 2;
-  let spiralstarty = innerHeight / 2;
-  let spiralPath =
-    "c -47 0 -85.1 -36.09 -85.1 -80.69 c 0 -52.43 44.84 -94.94 100.15 -94.94 c 65.08 0 117.84 50.01 117.84 111.69 c 0 72.58 -62.07 131.41 -138.63 131.41 c -90.09 0 -163.09 -69.21 -163.09 -154.59 c 0 -100.45 85.87 -181.88 191.87 -181.88 c 124.67 0 225.74 95.83 225.74 214 c 0 139 -118.9 251.73 -265.6 251.73 c -172.56 0 -312.44 -132.59 -312.44 -296.15 c 0 -192.42 164.57 -348.42 367.57 -348.42 c 238.83 0 432.44 183.52 432.44 409.9 c 0 266.34 -227.75 482.24 -508.75 482.24 c -330.53 0 -598.5 -254 -598.5 -567.3 c 0 -368.67 315.26 -667.5 704.15 -667.5 c 457.52 0 828.42 351.57 828.42 785.25";
+function getSpiralPoint(
+  geometry: SpiralGeometry,
+  progress: number
+): SpiralPoint {
+  const angle =
+    geometry.startAngle +
+    geometry.direction * FULL_TURN * geometry.turns * progress;
+  const radius =
+    geometry.startRadius +
+    (geometry.endRadius - geometry.startRadius) * progress;
 
-  let finalPath = "M " + spiralstartx + " " + spiralstarty + " " + spiralPath;
+  return {
+    x: geometry.centerX + Math.cos(angle) * radius,
+    y: geometry.centerY + Math.sin(angle) * radius,
+  };
+}
 
-  gsap.to(element, {
-    duration: 13,
-    // ease: "slow(0.7, 0.7, false)",
+function buildSpiralPath(geometry: SpiralGeometry): SpiralPoint[] {
+  const pointCount = Math.max(48, Math.ceil(geometry.turns * POINTS_PER_TURN));
+  const points: SpiralPoint[] = [];
+
+  for (let pointIndex = 0; pointIndex <= pointCount; pointIndex++) {
+    points.push(getSpiralPoint(geometry, pointIndex / pointCount));
+  }
+
+  return points;
+}
+
+function spiral_animation(
+  element: HTMLElement,
+  geometry: SpiralGeometry
+): void {
+  const timeline = gsap.timeline();
+
+  timeline.to(element, {
+    duration: SPIRAL_DURATION_SECONDS,
     ease: "power1.in",
-    delay: 0,
     motionPath: {
       alignOrigin: [0.5, 0.5],
-      path: finalPath,
+      path: buildSpiralPath(geometry),
+      curviness: 1.1,
     },
   });
 
-  gsap.to(element, {
-    opacity: 0,
-    duration: 2,
-    delay: 11.5,
-    ease: Sine.easeOut,
-  });
+  timeline.to(
+    element,
+    {
+      opacity: 0,
+      duration: FADE_OUT_DURATION_SECONDS,
+      ease: "sine.out",
+    },
+    FADE_OUT_START_SECONDS
+  );
 }

@@ -83,25 +83,25 @@ function getAnimationParams(animationName: string): { count: number; interval: n
 }
 
 /**
- * Build the pool of animations enabled for kappagen random selection (!k)
- * This filters based on enabledKappagen and excludes group children
- * (groups handle their own child selection)
+ * Build a pool of enabled animations, excluding group children
+ * (groups handle their own child selection).
  */
-function buildRandomAnimationPool(): AnimationDefinition[] {
+function buildAnimationPool(
+  isEnabled: (animationName: string) => boolean
+): AnimationDefinition[] {
   const pool: AnimationDefinition[] = [];
-  
+
   for (const [name, registryDef] of Object.entries(animationRegistry)) {
     // Skip group children - they're selected through their parent group
     if (registryDef.group) {
       continue;
     }
-    
-    // Check if enabled for random pool
-    if (isAnimationEnabledKappagen(name)) {
+
+    if (isEnabled(name)) {
       // For groups, check if at least one child is enabled
       if (registryDef.isGroup && registryDef.children) {
         const enabledChildren = registryDef.children.filter((childName) =>
-          isAnimationEnabledKappagen(childName)
+          isEnabled(childName)
         );
         if (enabledChildren.length > 0) {
           pool.push(registryDef);
@@ -111,7 +111,7 @@ function buildRandomAnimationPool(): AnimationDefinition[] {
       }
     }
   }
-  
+
   return pool;
 }
 
@@ -147,6 +147,42 @@ function isValidAnimationName(animationName: string): boolean {
 }
 
 /**
+ * When a command is used without emotes, fall back to the chatter's Twitch avatar.
+ */
+async function resolveEmoteImages(
+  images: string[],
+  username: string
+): Promise<string[]> {
+  if (images.length > 0) {
+    return images;
+  }
+
+  logger.info(
+    `No emotes supplied; using Twitch avatar for ${username || "unknown user"}`
+  );
+
+  if (!username) {
+    return [FALLBACK_TWITCH_AVATAR];
+  }
+
+  try {
+    const avatar = await helpers.getTwitchAvatar(username);
+    if (avatar && avatar.startsWith("http")) {
+      return [avatar];
+    }
+    logger.warning(
+      `Avatar lookup for ${username} returned an unexpected value; using fallback`
+    );
+  } catch (error) {
+    logger.error(
+      `Error getting avatar fallback for ${username}: ${(error as Error).message}`
+    );
+  }
+
+  return [FALLBACK_TWITCH_AVATAR];
+}
+
+/**
  * Execute an animation with special handling for requirements
  */
 async function executeAnimation(
@@ -163,21 +199,23 @@ async function executeAnimation(
     logger.error(`Animation function not found: ${animationName}`);
     return;
   }
+
+  const resolvedImages = await resolveEmoteImages(images, username);
   
   // Handle special requirements
   if (animationDef?.requiresAvatar) {
     try {
       const avatar = await helpers.getTwitchAvatar(username);
-      animations[animationName](images, count, interval, avatar);
+      animations[animationName](resolvedImages, count, interval, avatar);
     } catch (error) {
       logger.error(`Error getting avatar for ${animationName}: ${(error as Error).message}`);
-      animations[animationName](images, count, interval);
+      animations[animationName](resolvedImages, count, interval);
     }
   } else if (animationDef?.requiresText) {
     const displayText = text || getSettings().animations[animationName]?.text || "Hype";
-    animations[animationName](images, displayText, interval);
+    animations[animationName](resolvedImages, displayText, interval);
   } else {
-    animations[animationName](images, count, interval);
+    animations[animationName](resolvedImages, count, interval);
   }
 }
 
@@ -374,16 +412,39 @@ async function incomingRaidHandler(wsdata: WSData): Promise<void> {
     raiderCount,
     originalRaiderCount,
     chargePasses,
+    style: raidSettings?.animationStyle ?? "random",
   });
+}
+
+function getGigantifyRewardData(wsdata: WSData) {
+  return {
+    rewardType: helpers.getFirstString(wsdata.data, [
+      ["type"],
+      ["reward_type"],
+      ["rewardType"],
+      ["reward", "type"],
+      ["reward", "rewardType"],
+    ]),
+    gigantifiedEmoteUrl: helpers.getFirstString(wsdata.data, [
+      ["emote", "imageUrl"],
+      ["gigantified_emote", "imageUrl"],
+      ["gigantifiedEmoteUrl"],
+      ["gigantifiedEmote", "imageUrl"],
+      ["gigantifiedEmote", "url"],
+      ["emote", "url"],
+    ]),
+  };
 }
 
 function summarizeAutomaticRewardPayload(wsdata: WSData): string {
   const dataRecord = helpers.asRecord(wsdata.data);
-  const emoteRecord = helpers.asRecord(dataRecord?.gigantified_emote);
+  const emoteRecord = helpers.asRecord(
+    dataRecord?.emote ?? dataRecord?.gigantified_emote ?? dataRecord?.gigantifiedEmote
+  );
 
   return JSON.stringify({
-    rewardType: helpers.getNestedString(wsdata.data, ["reward_type"]),
-    gigantifiedEmoteUrl: helpers.getNestedString(wsdata.data, ["gigantified_emote", "imageUrl"]),
+    ...getGigantifyRewardData(wsdata),
+    eventType: wsdata.event?.type,
     dataKeys: dataRecord ? Object.keys(dataRecord) : [],
     emoteKeys: emoteRecord ? Object.keys(emoteRecord) : [],
   });
@@ -469,23 +530,18 @@ function gigantifyRedeemHandler(wsdata: WSData): void {
     return;
   }
 
-  const rewardType = helpers.getNestedString(wsdata.data, ["reward_type"]);
+  const { rewardType, gigantifiedEmoteUrl } = getGigantifyRewardData(wsdata);
 
   logger.info(
-    `AutomaticRewardRedemption payload summary: ${summarizeAutomaticRewardPayload(wsdata)}`
+    `${wsdata.event?.type || "Redemption"} payload summary: ${summarizeAutomaticRewardPayload(wsdata)}`
   );
 
   if (rewardType !== "gigantify_an_emote") {
     logger.info(
-      `Ignoring automatic reward redemption. rewardType=${rewardType || "<missing>"}`
+      `Ignoring emote reward redemption. rewardType=${rewardType || "<missing>"}`
     );
     return;
   }
-
-  const gigantifiedEmoteUrl = helpers.getNestedString(wsdata.data, [
-    "gigantified_emote",
-    "imageUrl",
-  ]);
 
   if (!gigantifiedEmoteUrl) {
     logger.warning(
@@ -562,22 +618,38 @@ function checkCountMaximum(count: number): number {
  * Handle !k (kappagen) command - picks a random enabled animation
  */
 async function kappagenHandler(lowermessage: string, images: string[], username: string): Promise<void> {
-  // Build pool of enabled animations
-  const pool = buildRandomAnimationPool();
-  
+  await runRandomEnabledAnimation(
+    lowermessage,
+    images,
+    username,
+    isAnimationEnabledKappagen,
+    "No animations enabled for random pool"
+  );
+}
+
+/**
+ * Pick and run a random animation from an enabled pool (shared by !k and bare !er).
+ */
+async function runRandomEnabledAnimation(
+  lowermessage: string,
+  images: string[],
+  username: string,
+  isEnabled: (animationName: string) => boolean,
+  emptyPoolMessage: string
+): Promise<void> {
+  const pool = buildAnimationPool(isEnabled);
+
   if (pool.length === 0) {
-    logger.info("No animations enabled for random pool");
+    logger.info(emptyPoolMessage);
     return;
   }
-  
-  // Pick a random animation from the pool
+
   const randomIndex = Math.floor(Math.random() * pool.length);
   let selectedAnimationDef = pool[randomIndex];
   let animationName = selectedAnimationDef.name;
-  
-  // If it's a group, select a child
+
   if (selectedAnimationDef.isGroup) {
-    const childName = selectEnabledGroupChild(selectedAnimationDef, isAnimationEnabledKappagen);
+    const childName = selectEnabledGroupChild(selectedAnimationDef, isEnabled);
     if (!childName) {
       logger.info(`No enabled children for group: ${animationName}`);
       return;
@@ -585,17 +657,16 @@ async function kappagenHandler(lowermessage: string, images: string[], username:
     animationName = childName;
     selectedAnimationDef = getAnimationDefinition(childName) || selectedAnimationDef;
   }
-  
-  // Get count and interval from command or settings
+
   const params = getAnimationParams(animationName);
   let count = helpers.getCommandValue(lowermessage, "count") ?? params.count;
   count = checkCountMaximum(count);
   let interval = helpers.getCommandValue(lowermessage, "interval") ?? params.interval;
-  
+
   logger.info(
     `Rolled: ${randomIndex}. Running: ${animationName} with ${count} emote(s) every ${interval} ms`
   );
-  
+
   await executeAnimation(animationName, images, count, interval, username);
 }
 
@@ -608,7 +679,15 @@ async function emoteRainHandler(message: string, images: string[], username: str
   const matches = regexp.exec(lowermessage);
   
   if (!matches || !matches[1]) {
-    logger.info("No animation specified for !er");
+    // Bare !er with no animation name — pick a random !er-enabled animation
+    logger.info("No animation specified for !er; picking a random enabled animation");
+    await runRandomEnabledAnimation(
+      lowermessage,
+      images,
+      username,
+      isAnimationEnabledManual,
+      "No animations enabled for manual execution"
+    );
     return;
   }
   
