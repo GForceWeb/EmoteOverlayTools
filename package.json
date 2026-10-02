@@ -36,10 +36,11 @@
         "vite-plugin-electron-renderer": "^0.14.5"
     },
     "scripts": {
-        "test": "node --test tests/*.test.mjs",
+        "test": "node --test tests/*.test.mjs tests/*.test.cjs",
         "dev": "vite",
         "build": "vite build",
         "preview": "vite preview",
+        "test:snake": "node --test tests/snake.test.cjs",
         "test:tetris": "node --test tests/tetris.test.mjs",
         "cypress:open": "cypress open",
         "electron:dev": "vite",
