@@ -146,6 +146,7 @@ export function deepMergeSettings(
 }
 
 export const defaultConfig: Settings = {
+  connectionMode: "streamerbot",
   streamerBotWebsocketUrl: "ws://localhost:8080/",
   overlayServerPort: 3030,
   twitchUsername: "",

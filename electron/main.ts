@@ -8,6 +8,9 @@ import { defaultConfig, deepMergeSettings } from "../src/shared/defaultConfig";
 import { setupAvatarCacheEndpoint } from "./avatar-cache";
 import { writeLog, getLogs, getAvailableDates, cleanOldLogs, log } from "./logger";
 import { registerUpdaterIpc, setupAutoUpdater } from "./updater";
+import { TwitchClient } from "./twitch-client";
+import { createTwitchTokenStore } from "./twitch-token-store";
+import type { ConnectionMode } from "../src/shared/twitch";
 
 // On Windows, set this as early as possible so taskbar grouping uses our identity/icon.
 if (process.platform === "win32") {
@@ -24,6 +27,27 @@ const server = http.createServer(expressApp);
 const wss = new WebSocketServer({ server });
 const settingsPath = path.join(app.getPath("userData"), "settings.json");
 let currentSettings = defaultConfig;
+
+function broadcast(data: unknown): void {
+  const message = JSON.stringify(data);
+  for (const client of wss.clients) {
+    if (client.readyState === client.OPEN) client.send(message);
+  }
+}
+
+const twitchClient = new TwitchClient({
+  clientId: process.env.TWITCH_CLIENT_ID || "",
+  store: createTwitchTokenStore(path.join(app.getPath("userData"), "twitch-credentials.bin")),
+  onEvent: broadcast,
+  onStatus: (status) => {
+    mainWindow?.webContents.send("twitch-status", status);
+    if (status.username && currentSettings.connectionMode === "twitch" && currentSettings.twitchUsername !== status.username) {
+      currentSettings = { ...currentSettings, twitchUsername: status.username };
+      fs.writeFileSync(settingsPath, JSON.stringify(currentSettings, null, 2));
+      broadcast({ type: "settings-updated", settings: currentSettings });
+    }
+  },
+});
 
 function getOverlayMediaDirectory(): string | undefined {
   const possibleMediaPaths = [
@@ -172,7 +196,11 @@ async function setupExpressServer() {
   );
 
   // API endpoint to get Twitch avatar with caching
-  setupAvatarCacheEndpoint(expressApp);
+  setupAvatarCacheEndpoint(expressApp, () =>
+    currentSettings.connectionMode === "twitch"
+      ? (user, useId) => twitchClient.getAvatar(user, useId)
+      : undefined
+  );
 
   // Overlay presence: OBS browser sources heartbeat here so the admin UI
   // can tell when a real overlay (not the in-app preview) is connected.
@@ -338,6 +366,7 @@ async function setupExpressServer() {
 function setupWebSocketServer() {
   wss.on("connection", (ws) => {
     console.log("WebSocket client connected");
+    ws.send(JSON.stringify({ type: "settings-updated", settings: currentSettings }));
 
     // Handle messages from clients
     ws.on("message", (message) => {
@@ -529,11 +558,14 @@ app.whenReady().then(async () => {
   // Clean up old log files on startup
   cleanOldLogs();
   log("info", "Application started");
+
+  overlayServerPort = currentSettings.overlayServerPort;
   
   await setupExpressServer();
   setupWebSocketServer();
   createWindow();
   createTray(); // Call createTray here
+  void twitchClient.setEnabled(currentSettings.connectionMode === "twitch");
 
   // Set up auto-updater + IPC (works in packaged and dev when configured)
   void setupAutoUpdater(() => mainWindow);
@@ -545,6 +577,8 @@ app.whenReady().then(async () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
 });
+
+app.on("before-quit", () => twitchClient.stop());
 
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
@@ -579,11 +613,34 @@ ipcMain.handle("save-settings", async (event, newSettings) => {
     const mergedSettings = deepMergeSettings(newSettings, defaultConfig);
     fs.writeFileSync(settingsPath, JSON.stringify(mergedSettings, null, 2));
     currentSettings = mergedSettings;
+    broadcast({ type: "settings-updated", settings: currentSettings });
+    void twitchClient.setEnabled(currentSettings.connectionMode === "twitch");
     return { success: true };
   } catch (error) {
     console.error("Failed to save settings:", error);
     return { success: false, error: (error as Error).message };
   }
+});
+
+ipcMain.handle("set-connection-mode", async (_event, mode: ConnectionMode) => {
+  if (mode !== "twitch" && mode !== "streamerbot") throw new Error("Unknown connection mode.");
+  const updatedSettings = { ...currentSettings, connectionMode: mode };
+  fs.writeFileSync(settingsPath, JSON.stringify(updatedSettings, null, 2));
+  currentSettings = updatedSettings;
+  broadcast({ type: "settings-updated", settings: currentSettings });
+  void twitchClient.setEnabled(mode === "twitch");
+  return twitchClient.getStatus();
+});
+
+ipcMain.handle("twitch-status", () => twitchClient.getStatus());
+ipcMain.handle("twitch-login", async () => {
+  const status = await twitchClient.startLogin();
+  if (status.verificationUri) await shell.openExternal(status.verificationUri);
+  return status;
+});
+ipcMain.handle("twitch-disconnect", async () => {
+  await twitchClient.disconnect();
+  return twitchClient.getStatus();
 });
 
 ipcMain.handle("change-server-port", async (event, newPort) => {

@@ -69,9 +69,7 @@ export function GeneralSettings({
       <CardHeader className="space-y-1 px-5 py-4">
         <CardTitle className="font-display text-base">Settings &amp; Connection</CardTitle>
         <CardDescription>
-          {isFirstRun
-            ? "Welcome — connect Streamer.Bot and OBS, then set your Twitch username"
-            : "Connect Streamer.Bot / OBS and configure global defaults"}
+          Emote Reactor needs to receive events from Twitch. Select your preferred events provider.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-5 px-5 pb-5">
@@ -101,9 +99,11 @@ export function GeneralSettings({
               id="twitchUsername"
               name="twitchUsername"
               value={settings.twitchUsername}
+              disabled={settings.connectionMode === "twitch"}
               onChange={handleInputChange}
               placeholder="Your Twitch username"
             />
+            {settings.connectionMode === "twitch" && <p className="text-xs text-muted-foreground">Set automatically when you log in with Twitch.</p>}
           </div>
 
           <div className="space-y-2">

@@ -20,7 +20,7 @@ globalThis.__gigantifyTest = state;
 // Keep the real event router and handlers; replace browser rendering and I/O.
 const mocks = {
   animations: "({gigantify: images => state.calls.push(images)})",
-  settings: "({settings: state.settings})",
+  settings: "({settings: state.settings, get serverAvailable() { return state.serverAvailable; }, updateSettings: settings => Object.assign(state.settings, settings)})",
   config: "({globalVars: state.globalVars})",
   "lib/logger": "Object.fromEntries(['info', 'warning', 'error'].map(level => [level, message => state.logs.push({level, message})]))",
 };
@@ -140,4 +140,41 @@ test("admin preview exercises the current power-up payload", () => {
   assert.equal(preview.wsdata.data.type, "gigantify_an_emote");
   websocket.handleMessage(JSON.stringify(preview.wsdata));
   assert.deepEqual(state.calls, [[emoteUrl]]);
+});
+
+test("direct mode uses the local relay and switches Streamer.Bot subscriptions without reloading", () => {
+  const sockets = [];
+  state.serverAvailable = true;
+  state.settings.connectionMode = "twitch";
+  state.globalVars.ws = null;
+  globalThis.window = { WebSocket: true, location: { protocol: "http:", host: "localhost:3030" }, addEventListener() {} };
+  globalThis.WebSocket = class {
+    static OPEN = 1;
+    static CONNECTING = 0;
+    readyState = 0;
+    requests = [];
+    constructor(url) { this.url = url; sockets.push(this); }
+    send(message) { this.requests.push(JSON.parse(message)); }
+    close() { this.readyState = 3; this.onclose?.(); }
+  };
+  websocket.connectws();
+  assert.equal(sockets.length, 1);
+  const relay = sockets[0];
+  assert.equal(relay.url, "ws://localhost:3030");
+  assert.deepEqual(relay.requests, []);
+  const message = { event: { source: "Twitch", type: "PowerUpRedemption" }, data: { type: "gigantify_an_emote", emote: { imageUrl: emoteUrl } } };
+  relay.onmessage({ data: JSON.stringify(message) });
+  assert.deepEqual(state.calls, [[emoteUrl]]);
+  relay.onmessage({ data: JSON.stringify({ type: "settings-updated", settings: { connectionMode: "streamerbot", streamerBotWebsocketUrl: "ws://localhost:8080/" } }) });
+  assert.equal(sockets.length, 2);
+  assert.equal(sockets[1].url, "ws://localhost:8080/");
+  sockets[1].onopen();
+  assert.ok(sockets[1].requests.some(request => request.request === "Subscribe"));
+  relay.onmessage({ data: JSON.stringify(message) });
+  assert.equal(state.calls.length, 1);
+  relay.onmessage({ data: JSON.stringify({ type: "settings-updated", settings: { connectionMode: "twitch", streamerBotWebsocketUrl: "ws://localhost:8080/" } }) });
+  assert.equal(sockets[1].readyState, 3);
+  assert.equal(sockets.length, 2);
+  relay.onmessage({ data: JSON.stringify(message) });
+  assert.equal(state.calls.length, 2);
 });

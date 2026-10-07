@@ -93,6 +93,7 @@ export interface PreviewEmote {
 }
 
 export interface Settings {
+  connectionMode: "streamerbot" | "twitch";
   streamerBotWebsocketUrl: string;
   overlayServerPort: number;
   twitchUsername: string;

@@ -6,8 +6,10 @@ My desire to work on this project came from the lack of Twitch Animated emote su
 
 ## Prerequisites
 
-- Streamer.Bot is required for all install types
-   - Ensure the WebSocket server is enabled and running in Streamer.Bot (Servers/Clients -> WebSocket Server -> Start Server)
+- Desktop users can choose **Connect directly to Twitch** or **Use Streamer.Bot** in Setup.
+   - Direct Twitch mode opens Twitch login in your browser. Log in as the broadcaster and authorize access to your channel. Keep Emote Overlay Tools running while streaming.
+   - Streamer.Bot mode requires its WebSocket server to be enabled and running (Servers/Clients -> WebSocket Server -> Start Server).
+- The hosted browser source currently uses Streamer.Bot. Direct Twitch login is available in the desktop application.
 
 ## Installation Options
 
@@ -16,6 +18,7 @@ My desire to work on this project came from the lack of Twitch Animated emote su
 - Benefits: Most customizable experience, includes a built-in tester/preview, and runs a local self-contained web server for your OBS Browser Source.
 - Download and install the latest release of Emote Overlay Tools from the [releases page](https://github.com/gforceweb/EmoteOverlayTools/releases)
 - Launch the application
+- Open Setup and choose direct Twitch login or your existing Streamer.Bot connection
 - Copy the provided OBS Browser Source URL and add it as a Browser Source in OBS
 - Configure your settings in the app interface
 - Test animations directly from the app
@@ -64,6 +67,7 @@ The desktop application provides several benefits:
 - Maximum Emotes Per Action: Sets a hard cap on the number of emotes that can be included in a single action. Can help prevent lag if your setup struggles with too many emotes.
 - Restrict Commands to Subs Only: If enabled, only users with a Twitch Subscriber role can use the !k and !er commands.
 - SB Server Address: Leave as `localhost:8080` unless you run Streamer.Bot on a different machine to OBS
+- Connection mode: Select Streamer.Bot or direct Twitch. Mode changes apply immediately; the OBS Browser Source URL stays the same.
 
 ```
     welcome
@@ -160,6 +164,36 @@ The repository is structured as follows (key folders only):
 - `/assets` — Static assets (images, etc.)
 
 ## Development Setup
+
+### Twitch Developer application
+
+Register an application in the [Twitch Developer Console](https://dev.twitch.tv/console/apps) with **Client Type: Public**. Use a desktop/application integration category appropriate for the app. Copy its Client ID into the repository-root `.env`:
+
+```dotenv
+TWITCH_CLIENT_ID="your_twitch_application_client_id"
+```
+
+This is the only Twitch application credential required. The desktop app uses Twitch's [device code grant flow](https://dev.twitch.tv/docs/authentication/getting-tokens-oauth/#device-code-grant-flow), which supports public clients and refresh tokens without a Client Secret. This flow does not use an OAuth redirect URI. If the registration form asks for one, `http://localhost` can be entered as an unused registration value. Do not add `TWITCH_CLIENT_SECRET` or any user access/refresh tokens to `.env`.
+
+Vite reads `.env` from the repository root and embeds the public Client ID into the Electron main process. Restart development or rebuild the desktop release after changing it. Builds without a Client ID still support Streamer.Bot and explain why Twitch login is unavailable.
+
+The broadcaster grants these read scopes during login:
+
+| Scope | Used for |
+| --- | --- |
+| `user:read:chat` | Chat messages, Twitch emotes, subscriber/founder badges, and overlay commands |
+| `channel:read:subscriptions` | Subscriptions, resubs, and subscription gifts |
+| `bits:read` | Bits contributions and Gigantify Power-ups |
+| `channel:read:hype_train` | Hype Train start, progress, levels, and end |
+| `channel:read:redemptions` | Automatic reward redemptions |
+
+The app uses one [EventSub WebSocket connection](https://dev.twitch.tv/docs/eventsub/handling-websocket-events/) in its main process and relays events to all local overlays and previews. It also retrieves avatars through the Twitch API in direct mode. Access and refresh tokens are encrypted with Electron `safeStorage` in `twitch-credentials.bin` under the app's user-data directory. Tokens are never put in settings, renderer state, OBS URLs, or logs. Linux requires a working system keyring. Disconnect removes local credentials and attempts to revoke the access token; switching to Streamer.Bot retains the encrypted login for later use.
+
+Direct mode covers the Twitch events consumed by the overlay, rather than every event type Twitch offers. Some event types require an Affiliate/Partner channel or the corresponding permission. Failed optional subscriptions are shown in Setup while chat remains connected. Streamer.Bot custom actions/events, including externally generated coin-flip results and MaxOutMultiply, remain specific to Streamer.Bot mode.
+
+First-message welcomes are tracked from messages received while the app is running and reset on `stream.online`. Restarting the app or changing modes resets that local tracking. Temporary connection loss does not reset it. Twitch does not replay events missed during a disconnected session.
+
+After configuring the Client ID, verify real login and consent, chat and emotes, raids, eligible channel rewards and Hype Trains, restarting with saved credentials, and disconnecting. Automated tests cover these flows with mocked Twitch responses; they do not replace a live Twitch check.
 
 1. Install dependencies:
 

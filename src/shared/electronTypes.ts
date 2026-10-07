@@ -1,5 +1,12 @@
+import type { ConnectionMode, TwitchStatus } from "./twitch";
+
 // Define the ElectronAPI type for TypeScript
 interface ElectronAPI {
+  setConnectionMode: (mode: ConnectionMode) => Promise<TwitchStatus>;
+  getTwitchStatus: () => Promise<TwitchStatus>;
+  loginTwitch: () => Promise<TwitchStatus>;
+  disconnectTwitch: () => Promise<TwitchStatus>;
+  onTwitchStatus: (callback: (status: TwitchStatus) => void) => () => void;
   testAnimation: (
     animationType: string,
     params: any
