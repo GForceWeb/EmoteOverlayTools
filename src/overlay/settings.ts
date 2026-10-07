@@ -7,6 +7,7 @@ class OverlaySettings {
   private static instance: OverlaySettings;
   public settings: Settings;
   public ready: Promise<void>;
+  public serverAvailable = false;
 
   // Move settings properties to class level
   private constructor() {
@@ -62,6 +63,7 @@ class OverlaySettings {
     try {
       const response = await fetch(`${window.location.origin}/api/settings`);
       if (response.ok) {
+        this.serverAvailable = true;
         const data = await response.json();
         logger.info("Settings loaded from HTTP API");
         this.updateSettings(data);

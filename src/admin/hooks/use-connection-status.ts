@@ -22,7 +22,7 @@ export function getWebSocketUrl(streamerBotWebsocketUrl: string) {
   return url;
 }
 
-export function useConnectionStatus(settings: Settings) {
+export function useConnectionStatus(settings: Settings, enabled = true) {
   const [connectionState, setConnectionState] =
     useState<ConnectionState>("disconnected");
   const [lastAttempt, setLastAttempt] = useState<Date | null>(null);
@@ -34,6 +34,17 @@ export function useConnectionStatus(settings: Settings) {
 
   const testConnection = useCallback(
     async (isManualTest = false) => {
+      if (!enabled) {
+        if (wsRef.current) {
+          wsRef.current.onclose = null;
+          wsRef.current.onerror = null;
+          wsRef.current.onopen = null;
+          wsRef.current.close();
+          wsRef.current = null;
+        }
+        setConnectionState("disconnected");
+        return;
+      }
       setConnectionState("connecting");
       setLastAttempt(new Date());
 
@@ -149,7 +160,7 @@ export function useConnectionStatus(settings: Settings) {
         }
       }
     },
-    [wsUrl, toast]
+    [wsUrl, toast, enabled]
   );
 
   useEffect(() => {
@@ -161,12 +172,13 @@ export function useConnectionStatus(settings: Settings) {
   }, [testConnection]);
 
   useEffect(() => {
+    if (!enabled) return;
     const interval = setInterval(() => {
       testConnection();
     }, 5 * 60 * 1000);
 
     return () => clearInterval(interval);
-  }, [testConnection]);
+  }, [testConnection, enabled]);
 
   useEffect(() => {
     return () => {

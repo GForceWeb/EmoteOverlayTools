@@ -3,6 +3,15 @@ import { contextBridge, ipcRenderer } from "electron";
 // Expose protected methods that allow the renderer process to use
 // the ipcRenderer without exposing the entire object
 contextBridge.exposeInMainWorld("electronAPI", {
+  setConnectionMode: (mode: "streamerbot" | "twitch") => ipcRenderer.invoke("set-connection-mode", mode),
+  getTwitchStatus: () => ipcRenderer.invoke("twitch-status"),
+  loginTwitch: () => ipcRenderer.invoke("twitch-login"),
+  disconnectTwitch: () => ipcRenderer.invoke("twitch-disconnect"),
+  onTwitchStatus: (callback: (status: unknown) => void) => {
+    const subscription = (_event: unknown, status: unknown) => callback(status);
+    ipcRenderer.on("twitch-status", subscription);
+    return () => ipcRenderer.removeListener("twitch-status", subscription);
+  },
   // Send test commands to animations
   testAnimation: (animationType: string, params: any) => {
     return ipcRenderer.invoke("test-animation", animationType, params);

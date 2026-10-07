@@ -22,7 +22,10 @@ async function fetchTwitchAvatar(user: string, useId: boolean): Promise<string> 
   return response.text();
 }
 
-export function setupAvatarCacheEndpoint(expressApp: Express): void {
+export function setupAvatarCacheEndpoint(
+  expressApp: Express,
+  getDirectLookup?: () => ((user: string, useId: boolean) => Promise<string>) | undefined
+): void {
   expressApp.get(
     "/api/twitch-avatar/:user",
     async (req: Request, res: Response) => {
@@ -31,7 +34,8 @@ export function setupAvatarCacheEndpoint(expressApp: Express): void {
         const useId = req.query.id === "true";
 
         // Normalize cache key (lowercase username + id flag)
-        const cacheKey = `${user.toLowerCase()}:${useId}`;
+        const directLookup = getDirectLookup?.();
+        const cacheKey = `${directLookup ? "twitch" : "decapi"}:${user.toLowerCase()}:${useId}`;
 
         // Check cache first
         const cached = avatarCache.get(cacheKey);
@@ -43,7 +47,7 @@ export function setupAvatarCacheEndpoint(expressApp: Express): void {
 
         // Cache miss or expired - fetch from decapi.me
         log("info", `Avatar cache miss for ${user}, fetching from decapi.me`);
-        const avatarUrl = await fetchTwitchAvatar(user, useId);
+        const avatarUrl = await (directLookup?.(user, useId) ?? fetchTwitchAvatar(user, useId));
 
         // Store in cache
         avatarCache.set(cacheKey, {

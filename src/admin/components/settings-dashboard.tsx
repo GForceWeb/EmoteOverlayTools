@@ -17,6 +17,8 @@ import { useConnectionStatus } from "@/admin/hooks/use-connection-status";
 import { useOverlayStatus } from "@/admin/hooks/use-overlay-status";
 import { defaultConfig, deepMergeSettings } from "@/shared/defaultConfig";
 import { cn } from "@/admin/lib/utils";
+import { useTwitchConnection } from "@/admin/hooks/use-twitch-connection";
+import type { ConnectionMode } from "@/shared/twitch";
 
 function isFirstRunSettings(settings: Settings) {
   return !settings.twitchUsername?.trim();
@@ -28,7 +30,15 @@ export function SettingsDashboard() {
   const [activeTab, setActiveTab] = useState<AppTab>("features");
   const [isFirstRun, setIsFirstRun] = useState(false);
 
-  const connection = useConnectionStatus(settings);
+  const connection = useConnectionStatus(settings, !isLoading && settings.connectionMode !== "twitch");
+  const twitch = useTwitchConnection();
+
+  useEffect(() => {
+    if (settings.connectionMode === "twitch" && twitch.status.username) {
+      setSettings(previous => ({ ...previous, twitchUsername: twitch.status.username! }));
+      setIsFirstRun(false);
+    }
+  }, [settings.connectionMode, twitch.status.username]);
 
   const getBaseUrl = () => {
     return settings.overlayServerPort
@@ -140,6 +150,16 @@ export function SettingsDashboard() {
   const showSave = activeTab !== "support";
 
   const setupGuideProps = {
+    connectionMode: settings.connectionMode,
+    onConnectionModeChange: async (mode: ConnectionMode) => {
+      try {
+        await window.electronAPI.setConnectionMode(mode);
+        setSettings(previous => ({ ...previous, connectionMode: mode }));
+      } catch (error) {
+        toast({ title: "Could not change connection mode", description: error instanceof Error ? error.message : String(error), variant: "destructive" });
+      }
+    },
+    twitch: { status: twitch.status, onLogin: twitch.login, onDisconnect: twitch.disconnect },
     overlayUrl,
     websocketUrl: settings.streamerBotWebsocketUrl,
     onWebsocketUrlChange: (value: string) => {
@@ -162,11 +182,12 @@ export function SettingsDashboard() {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <AppHeader
+        connectionMode={settings.connectionMode}
         activeTab={activeTab}
         onTabChange={setActiveTab}
-        sbConnectionState={connection.connectionState}
+        sbConnectionState={settings.connectionMode === "twitch" ? twitch.status.state : connection.connectionState}
         overlayConnectionState={overlay.overlayState}
-        onRetestSb={() => connection.testConnection(true)}
+        onRetestSb={() => settings.connectionMode === "twitch" ? twitch.refresh() : connection.testConnection(true)}
         onRetestOverlay={() => overlay.testOverlay(true)}
       />
 

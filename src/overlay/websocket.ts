@@ -7,8 +7,8 @@ import OverlaySettings from "./settings.ts";
 import logger from "./lib/logger.ts";
 
 let Botchat: boolean = false;
-let isElectron = false;
 let reconnectTimer: number | null = null;
+let localSocket: WebSocket | null = null;
 
 function scheduleReconnect(): void {
   if (reconnectTimer !== null) {
@@ -108,35 +108,11 @@ const handleElectronMessage = (event: MessageEvent) => {
   }
 };
 
-// Check if running in Electron
-function checkElectron(): boolean {
-  // Check if window.electronAPI exists (defined in our preload script)
-  if (typeof window !== "undefined" && window.electronAPI) {
-    return true;
-  }
-
-  // Check for Electron process
-  if (
-    typeof navigator === "object" &&
-    typeof navigator.userAgent === "string" &&
-    navigator.userAgent.indexOf("Electron") >= 0
-  ) {
-    return true;
-  }
-
-  return false;
-}
-
 function connectws(): void {
-  isElectron = checkElectron();
-
-  if (isElectron) {
-    logger.info("Running in Electron environment, using IPC for messages");
-    setupElectronCommunication();
-
-    window.addEventListener("message", handleElectronMessage);
-    return;
-  }
+  // The preview iframe has no preload API. Use the local server in OBS and Electron alike.
+  window.addEventListener?.("message", handleElectronMessage);
+  connectLocalServer();
+  if (OverlaySettings.settings.connectionMode === "twitch") return;
 
   if ("WebSocket" in window) {
     if (
@@ -175,47 +151,44 @@ function connectws(): void {
   }
 }
 
-// Setup Electron communication if in Electron environment
-function setupElectronCommunication(): void {
-  if (typeof window !== "undefined" && window.electronAPI) {
-    // Listen for WebSocket messages from the Electron main process
-    window.electronAPI.onWebSocketMessage((data) => {
-      console.log("Received message from Electron:", data);
-
-      // Process test animation commands from admin panel
-      if (data.type === "test-animation") {
-        // Convert test animation into Streamer.Bot message format
-        const wsdata = {
-          event: {
-            type: "ChatMessage",
-          },
-          data: {
-            message: {
-              message: `!er ${data.animationType}${
-                data.params?.count ? ` count ${data.params.count}` : ""
-              }`,
-              username: data.params?.username || "TestUser",
-              emotes: [
-                {
-                  // Use a default Twitch emote for testing
-                  imageUrl:
-                    "https://static-cdn.jtvnw.net/emoticons/v1/425618/2.0",
-                  name: "test",
-                },
-              ],
-              subscriber: true, // Allow sub-only animations in test mode
-            },
-          },
-        };
-
-        // Use the same message handler as regular Streamer.Bot messages
-        handleMessage(JSON.stringify(wsdata));
-      } else {
-        // Process regular WebSocket messages
-        handleMessage(JSON.stringify(data));
+function connectLocalServer(): void {
+  // Hosted browser sources continue to connect directly to Streamer.Bot.
+  if (!OverlaySettings.serverAvailable || (localSocket && localSocket.readyState <= WebSocket.OPEN)) return;
+  const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+  const socket = new WebSocket(`${protocol}//${window.location.host}`);
+  localSocket = socket;
+  socket.onmessage = event => {
+    const data = JSON.parse(event.data);
+    if (data.type === "settings-updated") {
+      const previousMode = OverlaySettings.settings.connectionMode;
+      const previousUrl = OverlaySettings.settings.streamerBotWebsocketUrl;
+      OverlaySettings.updateSettings(data.settings);
+      if (previousMode !== data.settings.connectionMode || previousUrl !== data.settings.streamerBotWebsocketUrl) {
+        if (globalVars.ws) {
+          globalVars.ws.onclose = null;
+          globalVars.ws.close();
+          globalVars.ws = null;
+        }
+        connectws();
       }
-    });
-  }
+    } else if (data.type === "test-animation") {
+      handleMessage(JSON.stringify({
+        event: { type: "ChatMessage", source: "Admin" },
+        data: { message: {
+          message: `!er ${data.animationType} ${data.params?.count || ""}`,
+          username: data.params?.username || "TestUser", subscriber: true,
+          emotes: [{ name: "LUL", imageUrl: "https://static-cdn.jtvnw.net/emoticons/v2/425618/default/dark/3.0" }],
+        } },
+      }));
+    } else if (OverlaySettings.settings.connectionMode === "twitch") {
+      handleMessage(event.data);
+    }
+  };
+  socket.onerror = () => socket.close();
+  socket.onclose = () => {
+    if (localSocket === socket) localSocket = null;
+    scheduleReconnect();
+  };
 }
 
 // Function to process WebSocket messages
@@ -296,7 +269,7 @@ function handleMessage(msg: string): void {
     }
 
     //Hype Train Events
-    if (settings.features.hypetrain || settings.enableAllFeatures) {
+    if (settings.features.hypetrain?.enabled || settings.enableAllFeatures) {
       //Hype Train Start - Start the repeating train animation with the train head image and the first cart
       if (eventType == "HypeTrainStart") {
         animations.hypetrain.hypetrainstart();

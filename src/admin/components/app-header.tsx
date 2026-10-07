@@ -29,6 +29,7 @@ const SECONDARY_TABS: { value: AppTab; label: string }[] = [
 ];
 
 interface AppHeaderProps {
+  connectionMode?: "streamerbot" | "twitch";
   activeTab: AppTab;
   onTabChange: (tab: AppTab) => void;
   sbConnectionState: ConnectionState;
@@ -38,6 +39,7 @@ interface AppHeaderProps {
 }
 
 export function AppHeader({
+  connectionMode = "streamerbot",
   activeTab,
   onTabChange,
   sbConnectionState,
@@ -89,11 +91,11 @@ export function AppHeader({
 
         <div className="flex shrink-0 items-center gap-1.5">
           <StatusPill
-            label="SB"
-            fullLabel="Streamer.Bot"
+            label={connectionMode === "twitch" ? "Twitch" : "SB"}
+            fullLabel={connectionMode === "twitch" ? "Twitch" : "Streamer.Bot"}
             state={sbConnectionState}
             onClick={onRetestSb}
-            title="Click to retest Streamer.Bot connection"
+            title={connectionMode === "twitch" ? "Click to refresh Twitch connection status" : "Click to retest Streamer.Bot connection"}
             showRefresh
           />
           <StatusPill
