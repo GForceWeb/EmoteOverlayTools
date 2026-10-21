@@ -2,6 +2,12 @@
 
 All notable changes to Emote Overlay Tools are documented in this file.
 
+## Unreleased
+
+### Added
+
+- Lightning animation via `!er lightning`, enabled in Kappagen by default. A single cloud travels across the screen with emote lightning and occasional forked strikes. The default count of 200 produces eight strikes.
+
 ## [2.2.0] - 2026-08-07
 
 ### New Animations

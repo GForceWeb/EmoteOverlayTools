@@ -75,6 +75,17 @@ export const animationRegistry: Record<string, AnimationDefinition> = {
     defaultEnabledManual: true,
     defaultEnabledKappagen: true,
   },
+  lightning: {
+    name: "lightning",
+    displayName: "Lightning",
+    description: "A single storm cloud travels across the screen, firing emote lightning with occasional forks. One strike per 25 count, up to 10 strikes.",
+    defaultCount: 200,
+    defaultInterval: 50,
+    countLabel: "Emote Budget (25 per strike, max 10 strikes)",
+    intervalLabel: "Strike Pace (lower is faster)",
+    defaultEnabledManual: true,
+    defaultEnabledKappagen: true,
+  },
   explode: {
     name: "explode",
     displayName: "Explode",

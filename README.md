@@ -83,6 +83,7 @@ A set of specific animation commands that accept emotes along with optional quan
 
 - !er rain
 - !er rise
+- !er lightning
 - !er volcano
 - !er firework
 - !er explode
@@ -106,6 +107,12 @@ All animations have default values for quantity and interval so there's never a 
 ```
 
 This would trigger the rain animation with the gforce_hype emote, raining 250 emotes with a 50ms interval between emotes.
+
+### Lightning
+
+`!er lightning` sends a single storm cloud across the screen, striking the ground with emote lightning. Each strike has a 15% chance of forking. Lightning is enabled in the Kappagen pool by default and can be configured or previewed in the app's animation settings.
+
+Count sets an emote budget, with one strike per 25 count, rounded up and capped at ten strikes. The default count of 200 gives eight strikes in a ten-second pass. The interval sets the strike pace: 50 gives 700 ms between strikes, with the gap limited to 600–1400 ms.
 
 ## Visual Lurk
 
