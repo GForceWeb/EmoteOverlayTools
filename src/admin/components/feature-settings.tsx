@@ -25,7 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/admin/components/ui/select";
-import { previewFeature } from "@/admin/utils/preview-helpers";
+import type { PreviewRequest } from "@/admin/utils/preview-helpers";
 import {
   CHEERS_POSITION_OPTIONS,
   CHEERS_QUANTITY_OPTIONS,
@@ -37,11 +37,13 @@ import {
 interface FeatureSettingsProps {
   settings: Settings;
   setSettings: React.Dispatch<React.SetStateAction<Settings>>;
+  onPreview: (request: PreviewRequest) => void;
 }
 
 export function FeatureSettings({
   settings,
   setSettings,
+  onPreview,
 }: FeatureSettingsProps) {
   const handleFeatureToggle = (
     feature: keyof Settings["features"],
@@ -147,7 +149,7 @@ export function FeatureSettings({
 
   const onPreviewFeature = (feature: keyof Settings["features"]) => {
     const featureConfig = settings.features[feature];
-    previewFeature(feature, featureConfig, settings);
+    onPreview({ type: "feature", name: feature, config: featureConfig, settings });
   };
 
   return (

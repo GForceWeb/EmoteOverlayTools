@@ -33,7 +33,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/admin/components/ui/select";
-import { previewAnimation } from "@/admin/utils/preview-helpers";
+import type { PreviewRequest } from "@/admin/utils/preview-helpers";
 import { Play, RotateCcw } from "lucide-react";
 import {
   animationRegistry,
@@ -59,11 +59,13 @@ import {
 interface AnimationSettingsProps {
   settings: Settings;
   setSettings: React.Dispatch<React.SetStateAction<Settings>>;
+  onPreview: (request: PreviewRequest) => void;
 }
 
 export function AnimationSettings({
   settings,
   setSettings,
+  onPreview,
 }: AnimationSettingsProps) {
   const [expandedAnimations, setExpandedAnimations] = useState<string[]>([]);
 
@@ -231,7 +233,7 @@ export function AnimationSettings({
 
   const onPreviewAnimation = (animation: string) => {
     const config = getAnimationConfig(animation);
-    previewAnimation(animation, config, settings);
+    onPreview({ type: "animation", name: animation, config, settings });
   };
 
   // Render a single animation item

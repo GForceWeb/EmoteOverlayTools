@@ -20,6 +20,6 @@ async function loadAnimations() {
 }
 
 // Initialize animations
-loadAnimations();
+export const animationsReady = loadAnimations();
 
 export default animations;

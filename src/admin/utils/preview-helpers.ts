@@ -1,5 +1,16 @@
 import type { Settings, WSData, EmoteData } from "@/shared/types";
 
+export type PreviewRequest = {
+  settings: Settings;
+} & (
+  | { type: "animation"; name: string; config: Settings["animations"][string] }
+  | {
+      type: "feature";
+      name: keyof Settings["features"];
+      config: Settings["features"][keyof Settings["features"]];
+    }
+);
+
 /**
  * Get a reference to the overlay iframe
  * @returns The iframe element or null if not found

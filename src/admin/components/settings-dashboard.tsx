@@ -17,6 +17,7 @@ import { useConnectionStatus } from "@/admin/hooks/use-connection-status";
 import { useOverlayStatus } from "@/admin/hooks/use-overlay-status";
 import { defaultConfig, deepMergeSettings } from "@/shared/defaultConfig";
 import { cn } from "@/admin/lib/utils";
+import type { PreviewRequest } from "@/admin/utils/preview-helpers";
 
 function isFirstRunSettings(settings: Settings) {
   return !settings.twitchUsername?.trim();
@@ -27,6 +28,7 @@ export function SettingsDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<AppTab>("features");
   const [isFirstRun, setIsFirstRun] = useState(false);
+  const [previewRequest, setPreviewRequest] = useState<PreviewRequest | null>(null);
 
   const connection = useConnectionStatus(settings);
 
@@ -179,12 +181,17 @@ export function SettingsDashboard() {
         >
           <div className="panel-surface overflow-hidden">
             {activeTab === "features" && (
-              <FeatureSettings settings={settings} setSettings={setSettings} />
+              <FeatureSettings
+                settings={settings}
+                setSettings={setSettings}
+                onPreview={setPreviewRequest}
+              />
             )}
             {activeTab === "animations" && (
               <AnimationSettings
                 settings={settings}
                 setSettings={setSettings}
+                onPreview={setPreviewRequest}
               />
             )}
             {activeTab === "setup" && (
@@ -209,6 +216,7 @@ export function SettingsDashboard() {
         settings={settings}
         onSettingsChange={setSettings}
         visible={showPreview}
+        previewRequest={previewRequest}
       />
 
       <Footer

@@ -10,6 +10,7 @@ import { RefreshCwIcon, XIcon } from "lucide-react";
 import { useRef, useState, type RefCallback } from "react";
 import { PreviewControls } from "@/admin/components/preview-controls";
 import type { Settings } from "@/shared/types";
+import { cn } from "@/admin/lib/utils";
 
 interface PreviewModalProps {
   isOpen: boolean;
@@ -44,12 +45,16 @@ export function PreviewModal({
         if (!open) onClose();
       }}
     >
+      {/* The 16:9 preview determines the height; controls scroll beside it. */}
       <DialogContent
         ref={modalContentRef}
-        className="max-w-[90vw] w-[1200px] max-h-[90vh] flex flex-col p-0 gap-0 rounded-lg overflow-hidden"
+        className={cn(
+          "max-w-[calc(100vw-2rem)] max-h-[calc(100dvh-2rem)] flex flex-col p-0 gap-0 rounded-lg overflow-hidden",
+          showControls ? "w-[2290px]" : "w-[1970px]"
+        )}
         hideCloseButton={true}
       >
-        <DialogHeader className="px-4 py-2 flex flex-row items-center justify-between border-b bg-background">
+        <DialogHeader className="h-14 shrink-0 px-4 py-2 flex flex-row items-center justify-between border-b bg-background">
           <DialogTitle className="text-foreground">
             Expanded Preview
           </DialogTitle>
@@ -81,17 +86,17 @@ export function PreviewModal({
           </div>
         </DialogHeader>
 
-        <div className="flex flex-1 flex-col md:flex-row w-full min-h-0">
+        <div className="flex flex-col md:flex-row w-full min-h-0 overflow-y-auto">
           {showControls && (
-            <div className="w-full md:w-80 border-r border-border bg-card p-4 overflow-y-auto">
+            <div className="w-full max-h-[min(240px,40dvh)] shrink-0 md:w-80 md:max-h-none md:[contain:size] border-b md:border-b-0 md:border-r border-border bg-card p-4 overflow-y-auto">
               <PreviewControls settings={settings} onSettingsChange={onSettingsChange} />
             </div>
           )}
           <div
-            className="flex flex-1 min-h-[320px] items-center justify-center overflow-auto bg-muted/20 p-4 md:p-6"
+            className="flex flex-1 min-w-0 items-center justify-center bg-muted/20 p-4 md:p-6"
           >
             <div
-              className="relative aspect-video w-full max-w-5xl overflow-hidden rounded-md border bg-black"
+              className="relative aspect-video w-full max-w-[1920px] md:max-w-[min(1920px,calc((100dvh-138px)*16/9))] shrink-0 overflow-hidden rounded-md bg-black ring-1 ring-border"
               data-testid="modal-preview-host"
               ref={previewHostRef}
             >

@@ -1,6 +1,6 @@
 import "../css/style.css";
 import websockets from "./websocket.ts";
-import animations from "./animations.ts";
+import animations, { animationsReady } from "./animations.ts";
 import config from "./config.ts";
 import OverlaySettings from "./settings";
 import handlers from "./handlers.ts";
@@ -28,7 +28,7 @@ async function init(): Promise<void> {
   // Show notice banner for non-app users (GitHub Pages, self-hosted, or with URL params)
   showNoticeBanner();
 
-  await OverlaySettings.ready;
+  await Promise.all([OverlaySettings.ready, animationsReady]);
   websockets.connectws();
 
   // Expose animations to the global window object for debugging
@@ -51,6 +51,10 @@ async function init(): Promise<void> {
     };
     handlers.chatMessageHandler(wsdata);
   };
+
+  if (window.parent !== window) {
+    window.parent.postMessage({ type: "PREVIEW_READY" }, "*");
+  }
 }
 
 // Start the application

@@ -62,7 +62,7 @@ const handleElectronMessage = (event: MessageEvent) => {
   // Optional: Validate the origin for security
   // if (event.origin !== "your-expected-origin") return;
 
-  const { type, feature, animation, config, wsdata } = event.data;
+  const { type, feature, animation, config, wsdata } = event.data ?? {};
 
   if (
     type === "PREVIEW_FEATURE" &&
@@ -128,13 +128,14 @@ function checkElectron(): boolean {
 }
 
 function connectws(): void {
+  // HTTP preview iframes also receive commands from the admin window.
+  window.addEventListener("message", handleElectronMessage);
   isElectron = checkElectron();
 
   if (isElectron) {
     logger.info("Running in Electron environment, using IPC for messages");
     setupElectronCommunication();
 
-    window.addEventListener("message", handleElectronMessage);
     return;
   }
 

@@ -5,6 +5,11 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react
 import { PreviewModal } from "@/admin/components/preview-modal";
 import type { Settings } from "@/shared/types";
 import { cn } from "@/admin/lib/utils";
+import {
+  previewAnimation,
+  previewFeature,
+  type PreviewRequest,
+} from "@/admin/utils/preview-helpers";
 
 type PreviewPosition = { x: number; y: number };
 
@@ -78,6 +83,7 @@ interface PreviewPaneProps {
   settings: Settings;
   onSettingsChange?: (settings: Settings) => void;
   visible?: boolean;
+  previewRequest?: PreviewRequest | null;
 }
 
 export function PreviewPane({
@@ -85,11 +91,12 @@ export function PreviewPane({
   settings,
   onSettingsChange,
   visible = true,
+  previewRequest,
 }: PreviewPaneProps) {
   const [url, setUrl] = useState(() => toPreviewUrl(previewUrl));
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
-  const [iframeLoaded, setIframeLoaded] = useState(false);
+  const [iframeReady, setIframeReady] = useState(false);
   const [position, setPosition] = useState<PreviewPosition>(() =>
     typeof window === "undefined"
       ? { x: PANEL_MARGIN, y: HEADER_CLEARANCE }
@@ -98,6 +105,8 @@ export function PreviewPane({
   const [isDragging, setIsDragging] = useState(false);
 
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
+  const iframeReadyRef = useRef(false);
+  const lastPlayedRequestRef = useRef<PreviewRequest | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
   const dragOffsetRef = useRef({ x: 0, y: 0 });
   const positionRef = useRef(position);
@@ -116,6 +125,12 @@ export function PreviewPane({
   useEffect(() => {
     setUrl(toPreviewUrl(previewUrl));
   }, [previewUrl]);
+
+  useEffect(() => {
+    if (previewRequest) {
+      setIsModalOpen(true);
+    }
+  }, [previewRequest]);
 
   useEffect(() => {
     try {
@@ -155,17 +170,24 @@ export function PreviewPane({
       "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
     iframe.allowFullscreen = true;
 
-    const handleLoad = () => {
-      setIframeLoaded(true);
+    const handleReady = (event: MessageEvent) => {
+      if (
+        event.source !== iframe.contentWindow ||
+        event.data?.type !== "PREVIEW_READY"
+      ) {
+        return;
+      }
+      iframeReadyRef.current = true;
+      setIframeReady(true);
     };
 
-    iframe.addEventListener("load", handleLoad);
+    window.addEventListener("message", handleReady);
     iframeRef.current = iframe;
-    setIframeLoaded(false);
+    setIframeReady(false);
     iframe.src = toPreviewUrl(previewUrl);
 
     return () => {
-      iframe.removeEventListener("load", handleLoad);
+      window.removeEventListener("message", handleReady);
       iframe.remove();
       iframeRef.current = null;
     };
@@ -179,7 +201,8 @@ export function PreviewPane({
     }
 
     if (iframe.getAttribute("src") !== url) {
-      setIframeLoaded(false);
+      iframeReadyRef.current = false;
+      setIframeReady(false);
       iframe.src = url;
     }
   }, [url]);
@@ -201,6 +224,10 @@ export function PreviewPane({
       return;
     }
 
+    // Moving an iframe reloads it. Wait until its settings, animations, and
+    // preview listener are ready before sending the pending command.
+    iframeReadyRef.current = false;
+    setIframeReady(false);
     targetHost.appendChild(iframe);
   }, [
     visible,
@@ -211,13 +238,42 @@ export function PreviewPane({
     hiddenHostElement,
   ]);
 
+  useEffect(() => {
+    if (
+      !previewRequest ||
+      previewRequest === lastPlayedRequestRef.current ||
+      !isModalOpen ||
+      !iframeReady ||
+      !iframeReadyRef.current ||
+      iframeRef.current?.parentElement !== modalHostElement
+    ) {
+      return;
+    }
+
+    lastPlayedRequestRef.current = previewRequest;
+    if (previewRequest.type === "animation") {
+      previewAnimation(
+        previewRequest.name,
+        previewRequest.config,
+        previewRequest.settings
+      );
+    } else {
+      previewFeature(
+        previewRequest.name,
+        previewRequest.config,
+        previewRequest.settings
+      );
+    }
+  }, [previewRequest, isModalOpen, iframeReady, modalHostElement]);
+
   const refreshPreview = () => {
     const iframe = iframeRef.current;
     if (!iframe) {
       return;
     }
 
-    setIframeLoaded(false);
+    iframeReadyRef.current = false;
+    setIframeReady(false);
     // Admin (e.g. :3000) and overlay (:3030) are cross-origin, so
     // contentWindow.location.reload() throws. Reassign src instead.
     try {
@@ -427,7 +483,7 @@ export function PreviewPane({
               data-testid="sidebar-preview-host"
               ref={setFloatHostElement}
             >
-              {!iframeLoaded && (
+              {!iframeReady && (
                 <div className="absolute inset-0 flex items-center justify-center text-xs text-muted-foreground">
                   Loading preview...
                 </div>
@@ -439,12 +495,15 @@ export function PreviewPane({
 
       <PreviewModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          lastPlayedRequestRef.current = previewRequest ?? null;
+          setIsModalOpen(false);
+        }}
         onRefresh={refreshPreview}
         previewHostRef={setModalHostElement}
         settings={settings}
         onSettingsChange={onSettingsChange}
-        isPreviewReady={iframeLoaded}
+        isPreviewReady={iframeReady}
       />
     </>
   );
