@@ -1,5 +1,6 @@
 /* Raid animation styles live in raiders.css; Vite inlines this @import at build time. */
 @import "./raiders.css";
+@import "./hypetrain.css";
 
 body {
   overflow: hidden;
@@ -316,15 +317,6 @@ body,
   position: absolute;
   background-size: inherit;
   background-repeat: no-repeat;
-}
-
-.train-cart {
-  margin-top: calc(var(--reference-pixel) * 25);
-}
-
-.cart-image {
-  width: var(--emote-size-standard);
-  height: var(--emote-size-standard);
 }
 
 .coinHeads, .coinEdge, .coinLine, .coinTails, #flipBtn {

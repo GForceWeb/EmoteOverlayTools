@@ -1,5 +1,22 @@
 // Common Type Definitions
 
+export interface HypeTrainContribution {
+  user_id?: string;
+  user_login?: string;
+  user_name?: string;
+  type?: string;
+  total?: number;
+}
+
+export interface HypeTrainEventData {
+  level?: number;
+  progress?: number;
+  goal?: number;
+  is_test?: boolean;
+  last_contribution?: HypeTrainContribution;
+  top_contributions?: HypeTrainContribution[];
+}
+
 export type BubblesPoppingBehaviour =
   | "burst"
   | "burstAndFall"
@@ -110,7 +127,7 @@ export interface Settings {
 
 export interface GlobalVars {
   channelsub?: boolean; // TODO: Check if the channel is a gforce sub
-  hypetrainCache: string[];
+  hypetrainCache: { username: string; id?: string; name?: string; timestamp: number }[];
   BotChat?: boolean;
   divnumber: number;
   ws: WebSocket | null;
@@ -136,12 +153,15 @@ export interface StreamerBotTwitchUser {
 }
 
 export interface WSData {
+  status?: string;
+  error?: string;
   event?: {
     type?: string;
     source?: string;
   };
-  data?: {
+    data?: HypeTrainEventData & {
     id?: string;
+    isTest?: boolean;
     userId?: string;
     user_id?: string;
     user_login?: string;
@@ -159,9 +179,6 @@ export interface WSData {
       emotes?: EmoteData[];
     };
     userName?: string;
-    last_contribution?: {
-      user_id?: string;
-    };
     name?: string;
     coinFlipResult?: string;
     from_broadcaster_user_id?: string;

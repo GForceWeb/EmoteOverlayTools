@@ -277,7 +277,7 @@ function chatMessageHandler(wsdata: WSData): void {
 
     case lowermessage.includes("!jointrain"):
       if (settings.debug) {
-        animations.hypetrainprogression(userId);
+        animations.hypetrainprogression(userId, true);
       } else {
         logger.info("Join Train Command Not Enabled");
       }
@@ -321,13 +321,13 @@ function chatMessageHandler(wsdata: WSData): void {
       //Only run if debug is enabled OR message comes from the admin panel
       if (
         isFeatureEnabled(
-          "kappagen",
+          "hypetrain",
           (subbedCheck && settings.debug) || wsdata.event?.source == "Admin"
         )
       ) {
         animations.hypetrainpreview(username);
       } else {
-        logger.info("KappaGen Not Enabled or User Not Subscribed");
+        logger.info("Hype Train Preview Not Enabled or User Not Subscribed");
       }
       break;
 

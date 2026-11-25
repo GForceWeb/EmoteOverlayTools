@@ -38,7 +38,7 @@ function subscribeToEvents(ws: WebSocket): void {
           "Raid",
           "Cheer",
           "Sub",
-          "Resub",
+          "ReSub",
           "GiftBomb",
           "GiftSub",
         ],
@@ -150,6 +150,7 @@ function connectws(): void {
 
     const ws = new WebSocket(OverlaySettings.settings.streamerBotWebsocketUrl);
     globalVars.ws = ws;
+    logger.info("Connecting overlay to Streamer.bot WebSocket");
 
     ws.onclose = function (): void {
       if (globalVars.ws === ws) {
@@ -157,14 +158,17 @@ function connectws(): void {
       }
 
       scheduleReconnect();
+      logger.warning("Overlay disconnected from Streamer.bot; reconnecting in 10 seconds");
     };
 
     ws.onerror = function (): void {
+      logger.error("Overlay Streamer.bot WebSocket connection failed");
       ws.close();
     };
 
     //Enable all Events
     ws.onopen = function (): void {
+      logger.info("Overlay connected to Streamer.bot; requesting event subscription");
       subscribeToEvents(ws);
     };
 
@@ -227,6 +231,15 @@ function handleMessage(msg: string): void {
 
     console.log(wsdata);
 
+    if (wsdata.id === "123" && wsdata.status) {
+      if (wsdata.status === "ok") {
+        logger.info("Streamer.bot event subscription accepted");
+      } else {
+        logger.error(`Streamer.bot event subscription failed: ${wsdata.error || wsdata.status}`);
+      }
+      return;
+    }
+
     //SetupChecks
     if (
       typeof wsdata.actions != "undefined" &&
@@ -255,6 +268,15 @@ function handleMessage(msg: string): void {
 
     let eventType = wsdata.event.type;
 
+    if (["HypeTrainStart", "HypeTrainUpdate", "HypeTrainLevelUp", "HypeTrainEnd"].includes(eventType)) {
+      const enabled = !!(settings.features.hypetrain?.enabled || settings.enableAllFeatures);
+      logger.info(`Hype Train event received: ${wsdata.event.source || "Unknown"}.${eventType}; level=${wsdata.data?.level ?? "unspecified"}; test=${wsdata.data?.is_test ?? wsdata.data?.isTest ?? "unspecified"}; enabled=${enabled}`);
+      if (!enabled) {
+        logger.warning(`Hype Train ${eventType} ignored: feature disabled`);
+        return;
+      }
+    }
+
     //Pass to ChatMessageHandler
     if (eventType == "ChatMessage") {
       handlers.chatMessageHandler(wsdata);
@@ -270,58 +292,69 @@ function handleMessage(msg: string): void {
       return;
     }
 
+    if (
+      wsdata.event.source !== "Admin" &&
+      (eventType == "Sub" ||
+        eventType == "ReSub" ||
+        eventType == "Resub" ||
+        eventType == "GiftBomb" ||
+        eventType == "GiftSub" ||
+        eventType == "PowerUpRedemption" ||
+        eventType == "Cheer")
+    ) {
+      // Cheer uses message.username. Subs use userName
+      const data = wsdata.data;
+      const userName = data?.user?.login || data?.user_login || getEventUsername(data);
+      const displayName = getEventUsername(data);
+      const userId = data?.user?.id || data?.user_id || data?.userId || data?.message?.userId;
+
+      // Retain the recent contributors who may be about to trigger a train.
+      if (userName) {
+        const now = Date.now();
+        globalVars.hypetrainCache = globalVars.hypetrainCache.filter(user => user.timestamp >= now - 120000);
+        globalVars.hypetrainCache.push({ username: userName, id: userId, name: displayName, timestamp: now });
+
+        // Current Hype Train updates no longer guarantee a last contribution.
+        // Board contributors from their own Twitch events while a train is active.
+        if (settings.features.hypetrain?.enabled || settings.enableAllFeatures) {
+          animations.hypetrainprogression(userName, false, { id: userId, name: displayName });
+        }
+      }
+    }
+
     if (eventType == "AutomaticRewardRedemption" || eventType == "PowerUpRedemption") {
       handlers.gigantifyRedeemHandler(wsdata);
       return;
     }
 
-    if (
-      eventType == "Sub" ||
-      eventType == "Resub" ||
-      eventType == "GiftBomb" ||
-      eventType == "GiftSub" ||
-      eventType == "Cheer"
-    ) {
-      // Cheer uses message.username. Subs use userName
-      let userName = getEventUsername(wsdata.data);
-
-      //Add user to the front of the array
-      if (userName) {
-        globalVars.hypetrainCache.unshift(userName);
-
-        //clear the end of cache if too long
-        if (globalVars.hypetrainCache[3]) {
-          globalVars.hypetrainCache.pop();
-        }
-      }
-    }
-
     //Hype Train Events
-    if (settings.features.hypetrain || settings.enableAllFeatures) {
+    if (settings.features.hypetrain?.enabled || settings.enableAllFeatures) {
       //Hype Train Start - Start the repeating train animation with the train head image and the first cart
       if (eventType == "HypeTrainStart") {
-        animations.hypetrain.hypetrainstart();
+        animations.hypetrainstart(wsdata.data?.level);
+        animations.hypetrainupdate(wsdata.data);
         return;
       }
 
       //Hype Train Level Up - Add a cart to the end of the train
       if (eventType == "HypeTrainLevelUp") {
-        animations.hypetrain.hypetrainlevelup();
+        animations.hypetrainlevelup(wsdata.data?.level);
+        animations.hypetrainupdate(wsdata.data);
         return;
       }
 
       //Hype Progression - Add a user to the current train cart
       if (eventType == "HypeTrainUpdate") {
-        const userId = wsdata.data?.last_contribution?.user_id;
-        if (userId) {
-          animations.hypetrain.hypetrainprogression(userId);
+        if (Number.isInteger(wsdata.data?.level)) {
+          animations.hypetrainlevelup(wsdata.data.level);
         }
+        animations.hypetrainupdate(wsdata.data);
         return;
       }
 
       //Hype Train Finish - Remove the Train
       if (eventType == "HypeTrainEnd") {
-        animations.hypetrain.hypetrainfinish();
+        animations.hypetrainfinish();
         return;
       }
     }

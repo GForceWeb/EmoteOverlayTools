@@ -1,0 +1,287 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Hype Express</title><style>
+/* Hype Express. Dimensions are authored at 1080p and scaled as one illustration. */
+.train-wrapper.hype-express {
+  --hype-ink: #152f39;
+  --hype-cream: #fff0c9;
+  position: fixed;
+  left: 0;
+  bottom: clamp(22px, 6vh, 80px);
+  width: 0;
+  height: 0;
+  z-index: 30;
+  pointer-events: none;
+  font-family: "Trebuchet MS", "Verdana", sans-serif;
+  color: var(--hype-cream);
+  isolation: isolate;
+  will-change: transform;
+}
+.hype-express * { box-sizing: border-box; }
+.hype-consist {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: flex-end;
+  gap: 24px;
+  width: max-content;
+  transform: scale(var(--train-scale, 1));
+  transform-origin: right bottom;
+  filter: drop-shadow(0 5px 0 #0b172a66) drop-shadow(0 8px 14px #0004);
+}
+.hype-engine { position: relative; width: 350px; height: 310px; flex: 0 0 350px; }
+.hype-engine-body { position: absolute; inset: 28px 0 46px; animation: hype-chug .62s ease-in-out infinite alternate; }
+.hype-engine svg { width: 350px; height: 230px; display: block; overflow: visible; }
+.hype-engine-name { position: absolute; top: 143px; left: 137px; width: 126px; text-align: center; color: #fff5d6; font-size: 13px; font-weight: 900; letter-spacing: 1px; text-shadow: 0 2px #922c2b; }
+.hype-engine-number { position: absolute; top: 138px; left: 44px; width: 44px; text-align: center; color: #ffe1a0; font: bold 16px Georgia, serif; letter-spacing: 3px; }
+.hype-wheel { position: absolute; width: 53px; height: 53px; border: 5px solid #173139; border-radius: 50%; background: #e9ad59; box-shadow: 0 0 0 3px #f9dfa0, inset 0 0 0 3px #a36e3a; z-index: 4; }
+.hype-wheel-spokes { position: absolute; inset: 4px; border-radius: 50%; background: repeating-conic-gradient(from 0deg, #244e51 0deg 12deg, transparent 12deg 60deg); animation: hype-wheel-turn 1.28s linear infinite; }
+.hype-wheel-hub { position: absolute; inset: 36%; border-radius: 50%; background: #fff0c9; box-shadow: 0 0 0 3px #b57838; }
+.hype-drive-wheel { width: 76px; height: 76px; bottom: -5px; }
+.hype-drive-wheel .hype-wheel-spokes { animation-duration: 1.85s; }
+.hype-drive-wheel-a { left: 34px; }
+.hype-drive-wheel-b { left: 137px; }
+.hype-pilot-wheel { bottom: -5px; left: 252px; }
+.hype-coupling-rod { position: absolute; width: 108px; height: 9px; bottom: 26px; left: 69px; background: #ffe9b5; border: 2px solid #a57840; border-radius: 8px; z-index: 5; animation: hype-rod 1.85s linear infinite; }
+.hype-smoke { position: absolute; left: 247px; top: 77px; width: 45px; height: 20px; }
+.hype-puff { position: absolute; width: 30px; height: 24px; border-radius: 48%; background: #fff0d9; animation: hype-puff 2.7s ease-out infinite; animation-delay: calc(var(--puff) * -.54s); }
+.hype-carriage { position: relative; flex: 0 0 auto; width: max-content; min-width: 390px; height: 310px; padding-top: 7px; animation: hype-chug .75s ease-in-out infinite alternate; }
+.hype-car-roof { height: 37px; position: relative; display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 0 16px 4px; background: var(--car-accent); color: var(--hype-ink); border: 3px solid var(--hype-cream); border-radius: 16px 16px 3px 3px; box-shadow: inset 0 -4px #152f3920; }
+.hype-progress-percent { margin-left: auto; font-size: 15px; font-weight: 900; font-variant-numeric: tabular-nums; }
+.hype-car-progress { position: absolute; left: 0; right: 0; bottom: 0; height: 5px; overflow: hidden; background: #152f3933; }
+.hype-car-progress[hidden], .hype-progress-percent[hidden] { display: none; }
+.hype-car-progress-fill { display: block; height: 100%; width: var(--level-progress, 0%); background: #153e46; box-shadow: 3px 0 10px #fff6c3; transition: width .85s cubic-bezier(.2,.7,.2,1); }
+.hype-level { font-size: 15px; font-weight: 900; letter-spacing: 2px; white-space: nowrap; }
+.hype-passenger-count { font-size: 11px; font-weight: bold; letter-spacing: 1.5px; white-space: nowrap; }
+.hype-passenger-deck { display: grid; grid-template-rows: repeat(2, 90px); grid-auto-flow: column; grid-auto-columns: 120px; justify-content: center; min-height: 186px; min-width: 390px; padding: 4px 10px 2px; border-left: 5px solid var(--hype-cream); border-right: 5px solid var(--hype-cream); background: linear-gradient(#163844f2, #132b37f5); position: relative; }
+.hype-passenger-deck::after { content: ""; position: absolute; left: 0; right: 0; top: 94px; height: 2px; background: #ffe7b22b; pointer-events: none; }
+.hype-car-sill { position: relative; height: 35px; display: grid; place-items: center; border: 3px solid var(--hype-cream); border-radius: 0 0 9px 9px; background: var(--car-accent); color: var(--hype-ink); }
+.hype-car-lettering { font-size: 9px; font-weight: 900; letter-spacing: 2px; }
+.hype-car-rivets::before, .hype-car-rivets::after { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--hype-ink); position: absolute; top: 12px; }
+.hype-car-rivets::before { left: 9px; }.hype-car-rivets::after { right: 9px; }
+.hype-car-chassis { position: relative; margin: 0 12px; height: 13px; background: #152f39; border-bottom: 3px solid #deb16a; }
+.hype-car-wheel-a { left: 24px; top: -3px; }.hype-car-wheel-b { right: 24px; top: -3px; }
+.hype-coupler { position: absolute; right: -29px; bottom: 39px; width: 30px; height: 9px; border: 2px solid #ffe5af; border-radius: 4px; background: #284650; z-index: -1; }
+.hype-carriage-entering { animation: hype-car-couple 1.25s both, hype-chug .75s 1.25s ease-in-out infinite alternate; }
+.hype-coupling-sparks { position: absolute; right: -19px; bottom: 38px; width: 1px; height: 1px; pointer-events: none; }
+.hype-coupling-spark { position: absolute; width: 5px; height: 5px; border-radius: 1px; background: #ffe6a1; opacity: 0; }
+.hype-carriage-entering .hype-coupling-spark { animation: hype-couple-spark .65s .66s ease-out both; }
+@keyframes hype-car-couple {
+  0% { transform: translate(-190px, -18px) rotate(-6deg); opacity: 0; }
+  15% { opacity: 1; }
+  60% { transform: translate(13px, 0) rotate(1.5deg); }
+  77% { transform: translate(-7px, -6px) rotate(-.8deg); }
+  92% { transform: translate(2px, 0) rotate(.3deg); }
+  100% { transform: translate(0, 0) rotate(0); opacity: 1; }
+}
+@keyframes hype-couple-spark {
+  0% { opacity: 0; transform: translate(0, 0) scale(.3); }
+  12% { opacity: 1; }
+  100% { opacity: 0; transform: translate(calc((var(--spark) - 2) * 14px), calc(-28px - var(--spark) * 5px)) rotate(110deg) scale(.2); }
+}
+.hype-passenger { position: relative; width: 120px; height: 90px; display: flex; flex-direction: column; align-items: center; animation: hype-board .5s cubic-bezier(.2, .9, .2, 1.2) both; }
+.hype-person { position: relative; height: 64px; width: 70px; flex: 0 0 64px; transform-origin: bottom center; animation: hype-person-sway 1.5s ease-in-out infinite alternate; animation-delay: var(--person-delay); }
+.hype-face { position: absolute; top: 0; left: 13px; width: 46px; height: 46px; border: 2px solid #fff0c9; border-radius: 12px; background: #18313b; overflow: hidden; box-shadow: 0 2px 0 #0005; z-index: 3; }
+.hype-avatar { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.hype-avatar:not([src]), .hype-avatar[hidden] { display: none; }
+.hype-avatar-fallback { position: absolute; inset: 0; display: grid; place-items: center; font-size: 14px; font-weight: bold; color: #fff0c9; }
+.hype-person-body { position: absolute; width: 32px; height: 26px; left: 20px; top: 38px; border: 2px solid #fff0c9; border-radius: 11px 11px 3px 3px; background: var(--person-color); z-index: 1; }
+.hype-person-body::after { content: ""; position: absolute; top: 2px; bottom: 0; left: 13px; border-left: 2px solid #fff0c9aa; }
+.hype-arm { position: absolute; top: 43px; width: 11px; height: 25px; border: 2px solid #ffe3b4; border-radius: 8px; background: var(--person-color); transform-origin: 50% 18%; z-index: 2; }
+.hype-arm::after { content: ""; position: absolute; bottom: -3px; left: 0; width: 7px; height: 8px; background: #ffdfad; border-radius: 50%; }
+.hype-arm-left { left: 12px; transform: rotate(27deg); }.hype-arm-right { right: 10px; animation: hype-wave .55s ease-in-out infinite alternate; animation-delay: var(--person-delay); }
+.hype-person-flag { display: none; position: absolute; bottom: -14px; left: 3px; width: 2px; height: 29px; background: #ffe6aa; }
+.hype-person-flag::after { content: ""; position: absolute; bottom: 0; left: 0; width: 20px; height: 13px; background: #ff8c74; clip-path: polygon(0 0, 100% 0, 75% 50%, 100% 100%, 0 100%); }
+.hype-passenger[data-pose="flag"] .hype-person-flag { display: block; }
+.hype-passenger[data-pose="flag"] .hype-arm-right { animation-duration: .95s; }
+.hype-passenger[data-pose="cheer"] .hype-arm-left { animation: hype-wave .7s ease-in-out infinite alternate-reverse; }
+.hype-passenger[data-pose="cheer"] .hype-person { animation: hype-cheer .8s ease-in-out infinite alternate; }
+.hype-username { max-width: 117px; min-height: 20px; padding: 2px 5px; border: 1px solid #e7d6af; border-radius: 4px; background: #fff0d6; color: #18313b; font-size: max(14px, calc(14px / var(--train-scale, 1))); font-weight: 900; line-height: 1.1; white-space: nowrap; overflow: hidden; box-shadow: 0 2px 0 #0003; position: relative; z-index: 6; }
+.hype-username-viewport { display: block; max-width: 100%; overflow: hidden; }
+.hype-username-text { display: block; width: max-content; }
+.hype-username-viewport[data-scrolling="true"] .hype-username-text { animation: hype-name-cycle var(--name-duration, 8s) linear infinite; }
+@keyframes hype-name-cycle {
+  0%, 20%, 100% { transform: translateX(0); }
+  50%, 70% { transform: translateX(var(--name-travel)); }
+}
+@keyframes hype-wheel-turn { to { transform: rotate(360deg); } }
+@keyframes hype-chug { to { transform: translateY(-2px) rotate(.15deg); } }
+@keyframes hype-rod { 0%,100% { transform: translate(0, -5px); } 25% { transform: translate(5px, 0); } 50% { transform: translate(0, 5px); } 75% { transform: translate(-5px, 0); } }
+@keyframes hype-puff { from { transform: translate(0, 0) scale(.5); opacity: .85; } to { transform: translate(-120px, -95px) scale(2); opacity: 0; } }
+@keyframes hype-wave { from { transform: rotate(-145deg); } to { transform: rotate(-115deg); } }
+@keyframes hype-person-sway { from { transform: rotate(-4deg); } to { transform: rotate(4deg); } }
+@keyframes hype-cheer { to { transform: translateY(-4px) rotate(3deg); } }
+@keyframes hype-board { from { opacity: 0; transform: translateY(15px) scale(.8); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@media (prefers-reduced-motion: reduce) {
+  .hype-express .hype-person, .hype-express .hype-arm, .hype-express .hype-engine-body, .hype-express .hype-carriage { animation: none; }
+}
+
+html,body{margin:0;background:transparent;color:var(--foreground,#edf2ea);font-family:"Trebuchet MS",Verdana,sans-serif}*{box-sizing:border-box}
+.intro{display:flex;align-items:end;justify-content:space-between;gap:12px;margin:0 0 14px}.eyebrow{font-size:10px;font-weight:bold;letter-spacing:2.5px;color:var(--muted-foreground,#9fb7b1);margin:0 0 6px}h1{font:bold 31px Georgia,serif;letter-spacing:-1px;margin:0;color:var(--foreground,#edf2ea)}.edition{font:11px Georgia,serif;color:var(--muted-foreground,#9fb7b1);text-align:right}
+.stage{height:344px;position:relative;overflow:hidden;border-radius:12px;background:radial-gradient(ellipse at 58% 58%,#254d50,#10252e 75%);padding:16px}.stage:after{content:"";position:absolute;left:0;right:0;bottom:38px;height:1px;background:linear-gradient(90deg,transparent,#c6d6bd55,transparent)}
+.scene-caption{position:absolute;left:20px;top:18px;font-size:10px;letter-spacing:2px;color:#a9c1ba}.scene-size{position:absolute;right:20px;top:18px;font-size:10px;letter-spacing:1px;color:#a9c1ba}
+.stage .hype-express{position:absolute;bottom:45px;left:0}.stage .hype-consist{filter:drop-shadow(0 5px 0 #08181f66) drop-shadow(0 10px 16px #0004)}
+.stage .hype-passenger{animation:none}
+.controls{display:flex;flex-wrap:wrap;gap:8px;margin:13px 0}button{font:700 12px "Trebuchet MS",Verdana,sans-serif;border:1px solid var(--border,#395455);border-radius:7px;background:var(--secondary,#203d44);color:var(--foreground,#fff0c9);padding:9px 12px;cursor:pointer}button:first-child{background:#ed8b6e;border-color:#ed8b6e;color:#142f38}button:hover{filter:brightness(1.12)}button:focus-visible{outline:2px solid #70d6bd;outline-offset:3px}
+.notes{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;padding-top:13px;border-top:1px solid var(--border,#395455)}.notes b{display:block;font-size:12px;margin-bottom:5px}.notes p{font-size:12px;line-height:1.5;color:var(--muted-foreground,#a9c1ba);margin:0}.status{font-size:11px;color:var(--muted-foreground,#a9c1ba);margin:9px 0 0}@media(max-width:460px){h1{font-size:27px}.edition,.scene-size{display:none}.notes{grid-template-columns:1fr;gap:12px}.stage{height:360px}.controls{gap:6px}button{font-size:11px;padding:9px}.notes b{margin-bottom:2px}}
+</style></head><body><div class="intro"><div><p class="eyebrow">A LITTLE CARNIVAL. A LOT OF CHAT.</p><h1>The Hype Express.</h1></div><span class="edition">Animated overlay<br>Design no. 01</span></div>
+<div class="stage" id="stage"><span class="scene-caption">YOUR COMMUNITY, ALONG FOR THE RIDE</span><span class="scene-size">LIVE MOTION</span></div>
+<div class="controls"><button id="run">Run across screen</button><button id="level">+ Level carriage</button><button id="progress">+ 15% progress</button><button id="person">+ Passenger</button><button id="detail">Inspect crew</button><button id="reset">Reset</button></div>
+<div class="notes"><div><b>A proper little locomotive</b><p>Turning brass wheels, a working coupling rod, drifting steam, and a gentle chug.</p></div><div><b>A carriage for every level</b><p>New levels roll in, jolt into place, and throw coupling sparks. A roof gauge tracks level progress.</p></div><div><b>Everyone has a place</b><p>Named avatar characters wave, cheer, and fly flags. Long names cycle so every viewer can be read.</p></div></div><p class="status" id="status" aria-live="polite"></p>
+<script>/** The train is drawn in HTML/SVG so wheels, people, and lettering stay independent. */
+function part(tag, className, parent, text) {
+    const element = document.createElement(tag);
+    element.className = className;
+    if (text !== undefined)
+        element.textContent = text;
+    parent?.appendChild(element);
+    return element;
+}
+function wheel(parent, className = "") {
+    const wheel = part("div", `hype-wheel ${className}`.trim(), parent);
+    part("span", "hype-wheel-spokes", wheel);
+    part("span", "hype-wheel-hub", wheel);
+}
+function createLocomotive() {
+    const engine = part("div", "train-head hype-engine");
+    engine.setAttribute("aria-label", "Hype Express locomotive");
+    const smoke = part("div", "hype-smoke", engine);
+    for (let i = 0; i < 5; i++) {
+        const puff = part("i", "hype-puff", smoke);
+        puff.style.setProperty("--puff", String(i));
+    }
+    const body = part("div", "hype-engine-body", engine);
+    // Static artwork only. Viewer-provided names are always inserted with textContent.
+    body.innerHTML = `<svg viewBox="0 0 350 230" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="hype-boiler" x2="0" y2="1"><stop stop-color="#ff886d"/><stop offset="1" stop-color="#db513f"/></linearGradient>
+      <linearGradient id="hype-cab" x2="0" y2="1"><stop stop-color="#259b94"/><stop offset="1" stop-color="#12635f"/></linearGradient>
+    </defs>
+    <path d="M18 179H313L338 211H10Z" fill="#182e38" stroke="#f9dfa0" stroke-width="4"/>
+    <path d="M270 191h43l24 20h-67z" fill="#e9b05c"/>
+    <path d="M16 56Q16 48 25 48h99v136H16Z" fill="url(#hype-cab)" stroke="#f9dfa0" stroke-width="4"/>
+    <path d="M6 42Q65 16 133 42v14H6Z" fill="#143f43" stroke="#f9dfa0" stroke-width="4"/>
+    <path d="M35 68h66v66H35z" rx="9" fill="#142b38" stroke="#f9dfa0" stroke-width="5"/>
+    <path d="M40 76h22v48H40z" fill="#91dbce" opacity=".45"/><path d="M69 71v60" stroke="#f9dfa0" stroke-width="4"/>
+    <path d="M121 95h130q35 0 35 39t-35 42H121Z" fill="url(#hype-boiler)" stroke="#f9dfa0" stroke-width="4"/>
+    <path d="M140 99v73m90-73v73" stroke="#f5b475" stroke-width="10"/>
+    <path d="M247 100V57h32v47" fill="#213d44" stroke="#f9dfa0" stroke-width="4"/>
+    <path d="M239 49h48v17h-48z" fill="#ebaf5b" stroke="#f9dfa0" stroke-width="3"/>
+    <path d="M168 95V78q15-19 30 0v17" fill="#e9b05c" stroke="#f9dfa0" stroke-width="3"/>
+    <ellipse cx="285" cy="134" rx="10" ry="24" fill="#173e42" stroke="#f9dfa0" stroke-width="4"/>
+    <circle cx="298" cy="123" r="13" fill="#fff4c0" stroke="#e9b05c" stroke-width="5"/>
+    <path d="M308 112l39-19v63l-39-22z" fill="#ffe7a0" opacity=".1"/>
+    <path d="M15 157h108v26H15z" fill="#0e4a4d"/>
+    <circle cx="28" cy="170" r="3" fill="#f9dfa0"/><circle cx="110" cy="170" r="3" fill="#f9dfa0"/>
+    <path d="M20 191h270" stroke="#eeac57" stroke-width="6"/>
+  </svg>`;
+    part("span", "hype-engine-name", body, "HYPE EXPRESS");
+    part("span", "hype-engine-number", body, "01");
+    wheel(engine, "hype-drive-wheel hype-drive-wheel-a");
+    wheel(engine, "hype-drive-wheel hype-drive-wheel-b");
+    wheel(engine, "hype-pilot-wheel");
+    part("span", "hype-coupling-rod", engine);
+    return engine;
+}
+const CARRIAGE_TAGLINES = [
+    "SMALL SPARKS • BIG HYPE",
+    "POWERED BY CHAT",
+    "FULL STEAM • NO BRAKES",
+    "CERTIFIED HYPE CREW",
+    "NEXT STOP • LEGENDARY",
+    "GOOD VIBES • GREAT COMPANY",
+    "BITS, SUBS & BIG ENERGY",
+    "CHAT MADE THIS HAPPEN",
+];
+function createCarriage(level, animateEntry = false) {
+    const element = part("section", `train-cart hype-carriage${animateEntry ? " hype-carriage-entering" : ""}`);
+    element.dataset.level = String(level);
+    element.setAttribute("aria-label", `Hype Train level ${level}`);
+    element.style.setProperty("--car-accent", ["#70d6bd", "#ffc66f", "#ff8f91", "#a9afff", "#8ed7ef"][(level - 1) % 5]);
+    const roof = part("div", "hype-car-roof", element);
+    part("span", "hype-level", roof, `LEVEL ${String(level).padStart(2, "0")}`);
+    const percent = part("span", "hype-progress-percent", roof);
+    percent.hidden = true;
+    const count = part("span", "hype-passenger-count", roof);
+    const progress = part("div", "hype-car-progress", roof);
+    progress.hidden = true;
+    progress.setAttribute("role", "progressbar");
+    progress.setAttribute("aria-label", `Level ${level} progress`);
+    progress.setAttribute("aria-valuemin", "0");
+    progress.setAttribute("aria-valuemax", "100");
+    part("span", "hype-car-progress-fill", progress);
+    const deck = part("div", "hype-passenger-deck", element);
+    const sill = part("div", "hype-car-sill", element);
+    part("span", "hype-car-lettering", sill, CARRIAGE_TAGLINES[(level - 1) % CARRIAGE_TAGLINES.length]);
+    part("span", "hype-car-rivets", sill);
+    const chassis = part("div", "hype-car-chassis", element);
+    wheel(chassis, "hype-car-wheel-a");
+    wheel(chassis, "hype-car-wheel-b");
+    part("span", "hype-coupler", element);
+    const sparks = part("span", "hype-coupling-sparks", element);
+    for (let index = 0; index < 5; index++) {
+        const spark = part("i", "hype-coupling-spark", sparks);
+        spark.style.setProperty("--spark", String(index));
+    }
+    return { element, deck, count, progress, percent };
+}
+function setCarriageProgress(carriage, value) {
+    const progress = Math.min(100, Math.max(0, value));
+    carriage.progress.hidden = false;
+    carriage.percent.hidden = false;
+    carriage.percent.textContent = `${Math.round(progress)}%`;
+    carriage.progress.setAttribute("aria-valuenow", String(Math.round(progress)));
+    carriage.progress.style.setProperty("--level-progress", `${progress}%`);
+}
+/** One observer per train; only overflowing labels get a text animation. */
+function createUsernameCycler() {
+    if (typeof ResizeObserver === "undefined")
+        return;
+    return new ResizeObserver(entries => {
+        for (const { target } of entries) {
+            const viewport = target;
+            const text = viewport.firstElementChild;
+            const distance = Math.max(0, text.scrollWidth - viewport.clientWidth);
+            viewport.dataset.scrolling = distance > 1 ? "true" : "false";
+            viewport.style.setProperty("--name-travel", `${-distance}px`);
+            viewport.style.setProperty("--name-duration", `${Math.max(8, 4 + distance / 12)}s`);
+        }
+    });
+}
+function createPassenger(name, index) {
+    const element = part("div", "hype-passenger");
+    element.dataset.pose = ["wave", "flag", "cheer"][index % 3];
+    element.style.setProperty("--person-color", ["#e97b66", "#2f9b91", "#e0a34d", "#8277bc", "#5b9fc3"][index % 5]);
+    element.style.setProperty("--person-delay", `${-(index % 7) * .23}s`);
+    element.title = name;
+    const person = part("div", "hype-person", element);
+    part("span", "hype-person-body", person);
+    part("span", "hype-arm hype-arm-left", person);
+    const rightArm = part("span", "hype-arm hype-arm-right", person);
+    part("span", "hype-person-flag", rightArm);
+    const face = part("div", "hype-face", person);
+    part("span", "hype-avatar-fallback", face, name.slice(0, 2).toUpperCase());
+    const image = part("img", "hype-avatar", face);
+    image.alt = "";
+    image.decoding = "async";
+    image.addEventListener("error", () => { image.hidden = true; });
+    const nameplate = part("span", "hype-username", element);
+    nameplate.title = name;
+    const nameViewport = part("span", "hype-username-viewport", nameplate);
+    part("span", "hype-username-text", nameViewport, name);
+    return { element, image, nameViewport };
+}
+
+const stage=document.getElementById('stage');const nameCycler=createUsernameCycler();let root,consist,cars=[],people=0,running=false,lastTime,x,inspect=false,percent=55;
+const names=['PixelPilot','LunaLoops','CaptainKappaWithLongName','EmoteScout','CozyComet','GForce','StarSailor','MintyFresh','RaidCaptain','ChatGoblin','NeonNoodle','TurboToast'];
+function avatar(index){const hue=[14,160,38,260,195,310][index%6];const svg='<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80"><rect width="80" height="80" fill="hsl('+hue+',45%,37%)"/><circle cx="27" cy="31" r="5" fill="#fff0c9"/><circle cx="53" cy="31" r="5" fill="#fff0c9"/><path d="M25 51q15 15 30 0" fill="none" stroke="#fff0c9" stroke-width="5" stroke-linecap="round"/></svg>';return 'data:image/svg+xml,'+encodeURIComponent(svg)}
+function update(){document.getElementById('status').textContent=cars.length+' levels · '+people+' passengers · Sample avatars. Your stream uses Twitch avatars.';}
+function addPerson(){const car=cars[cars.length-1];const index=car.deck.querySelectorAll('.hype-passenger').length;const p=createPassenger(names[people%names.length]+(people>=12?Math.floor(people/12):''),index);p.image.src=avatar(people);car.deck.appendChild(p.element);nameCycler?.observe(p.nameViewport);people++;car.count.textContent=(index+1)+' '+(index?'PASSENGERS':'PASSENGER');update()}
+function addLevel(animateEntry=true){if(cars.length)setCarriageProgress(cars.at(-1),100);const car=createCarriage(cars.length+1,animateEntry);consist.appendChild(car.element);cars.push(car);percent=0;setCarriageProgress(car,percent);update()}
+function reset(){root?.remove();nameCycler?.disconnect();root=part('div','train-wrapper hype-express',stage);consist=part('div','hype-consist',root);consist.appendChild(createLocomotive());cars=[];people=0;addLevel(false);for(let i=0;i<6;i++)addPerson();addLevel(false);for(let i=0;i<4;i++)addPerson();percent=55;setCarriageProgress(cars.at(-1),percent);running=false;inspect=true;x=stage.clientWidth-24;document.getElementById('run').textContent='Run across screen';document.getElementById('detail').textContent=inspect?'Locomotive view':'Inspect crew';update()}
+document.getElementById('run').onclick=()=>{running=!running;inspect=false;document.getElementById('run').textContent=running?'Pause travel':'Run across screen';document.getElementById('detail').textContent='Inspect crew'};
+document.getElementById('level').onclick=()=>{if(cars.length<12){addLevel();addPerson();addPerson()}};document.getElementById('progress').onclick=()=>{percent=Math.min(100,percent+15);setCarriageProgress(cars.at(-1),percent)};document.getElementById('person').onclick=addPerson;document.getElementById('reset').onclick=reset;
+document.getElementById('detail').onclick=()=>{inspect=!inspect;running=false;document.getElementById('run').textContent='Run across screen';document.getElementById('detail').textContent=inspect?'Locomotive view':'Inspect crew'};
+function frame(now){const dt=lastTime?Math.min(64,now-lastTime):0;lastTime=now;const target=cars[cars.length-1].element;const scale=inspect?Math.min(.96,(stage.clientWidth-48)/target.offsetWidth):.76;consist.style.setProperty('--train-scale',scale);if(inspect){const previous=cars.slice(0,-1).reduce((sum,car)=>sum+car.element.offsetWidth+24,0);x=stage.clientWidth/2+(350+24+previous+target.offsetWidth/2)*scale;}else if(running){x+=dt*.115;if(x>stage.clientWidth+consist.scrollWidth*scale+40)x=-30;}else{x=stage.clientWidth-24;}root.style.transform='translate3d('+x+'px,0,0)';requestAnimationFrame(frame)}
+reset();requestAnimationFrame(frame);
+</script></body></html>

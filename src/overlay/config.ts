@@ -17,7 +17,7 @@ const REFERENCE_HEIGHT = 1080;
 
 // Initialize other variables
 let channelsub: boolean; //TODO: Build out the G-Force Sub Requirement
-let hypetrainCache: string[] = [];
+let hypetrainCache: GlobalVars["hypetrainCache"] = [];
 // Checks for SB Actions
 let BotChat: boolean;
 

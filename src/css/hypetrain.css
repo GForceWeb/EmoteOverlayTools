@@ -1,0 +1,116 @@
+/* Hype Express. Dimensions are authored at 1080p and scaled as one illustration. */
+.train-wrapper.hype-express {
+  --hype-ink: #152f39;
+  --hype-cream: #fff0c9;
+  position: fixed;
+  left: 0;
+  bottom: clamp(22px, 6vh, 80px);
+  width: 0;
+  height: 0;
+  z-index: 30;
+  pointer-events: none;
+  font-family: "Trebuchet MS", "Verdana", sans-serif;
+  color: var(--hype-cream);
+  isolation: isolate;
+  will-change: transform;
+}
+.hype-express * { box-sizing: border-box; }
+.hype-consist {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: flex-end;
+  gap: 24px;
+  width: max-content;
+  transform: scale(var(--train-scale, 1));
+  transform-origin: right bottom;
+  filter: drop-shadow(0 5px 0 #0b172a66) drop-shadow(0 8px 14px #0004);
+}
+.hype-engine { position: relative; width: 350px; height: 310px; flex: 0 0 350px; }
+.hype-engine-body { position: absolute; inset: 28px 0 46px; animation: hype-chug .62s ease-in-out infinite alternate; }
+.hype-engine svg { width: 350px; height: 230px; display: block; overflow: visible; }
+.hype-engine-name { position: absolute; top: 143px; left: 137px; width: 126px; text-align: center; color: #fff5d6; font-size: 13px; font-weight: 900; letter-spacing: 1px; text-shadow: 0 2px #922c2b; }
+.hype-engine-number { position: absolute; top: 138px; left: 44px; width: 44px; text-align: center; color: #ffe1a0; font: bold 16px Georgia, serif; letter-spacing: 3px; }
+.hype-wheel { position: absolute; width: 53px; height: 53px; border: 5px solid #173139; border-radius: 50%; background: #e9ad59; box-shadow: 0 0 0 3px #f9dfa0, inset 0 0 0 3px #a36e3a; z-index: 4; }
+.hype-wheel-spokes { position: absolute; inset: 4px; border-radius: 50%; background: repeating-conic-gradient(from 0deg, #244e51 0deg 12deg, transparent 12deg 60deg); animation: hype-wheel-turn 1.28s linear infinite; }
+.hype-wheel-hub { position: absolute; inset: 36%; border-radius: 50%; background: #fff0c9; box-shadow: 0 0 0 3px #b57838; }
+.hype-drive-wheel { width: 76px; height: 76px; bottom: -5px; }
+.hype-drive-wheel .hype-wheel-spokes { animation-duration: 1.85s; }
+.hype-drive-wheel-a { left: 34px; }
+.hype-drive-wheel-b { left: 137px; }
+.hype-pilot-wheel { bottom: -5px; left: 252px; }
+.hype-coupling-rod { position: absolute; width: 108px; height: 9px; bottom: 26px; left: 69px; background: #ffe9b5; border: 2px solid #a57840; border-radius: 8px; z-index: 5; animation: hype-rod 1.85s linear infinite; }
+.hype-smoke { position: absolute; left: 247px; top: 77px; width: 45px; height: 20px; }
+.hype-puff { position: absolute; width: 30px; height: 24px; border-radius: 48%; background: #fff0d9; animation: hype-puff 2.7s ease-out infinite; animation-delay: calc(var(--puff) * -.54s); }
+.hype-carriage { position: relative; flex: 0 0 auto; width: max-content; min-width: 390px; height: 310px; padding-top: 7px; animation: hype-chug .75s ease-in-out infinite alternate; }
+.hype-car-roof { height: 37px; position: relative; display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 0 16px 4px; background: var(--car-accent); color: var(--hype-ink); border: 3px solid var(--hype-cream); border-radius: 16px 16px 3px 3px; box-shadow: inset 0 -4px #152f3920; }
+.hype-progress-percent { margin-left: auto; font-size: 15px; font-weight: 900; font-variant-numeric: tabular-nums; }
+.hype-car-progress { position: absolute; left: 0; right: 0; bottom: 0; height: 5px; overflow: hidden; background: #152f3933; }
+.hype-car-progress[hidden], .hype-progress-percent[hidden] { display: none; }
+.hype-car-progress-fill { display: block; height: 100%; width: var(--level-progress, 0%); background: #153e46; box-shadow: 3px 0 10px #fff6c3; transition: width .85s cubic-bezier(.2,.7,.2,1); }
+.hype-level { font-size: 15px; font-weight: 900; letter-spacing: 2px; white-space: nowrap; }
+.hype-passenger-count { font-size: 11px; font-weight: bold; letter-spacing: 1.5px; white-space: nowrap; }
+.hype-passenger-deck { display: grid; grid-template-rows: repeat(2, 90px); grid-auto-flow: column; grid-auto-columns: 120px; justify-content: center; min-height: 186px; min-width: 390px; padding: 4px 10px 2px; border-left: 5px solid var(--hype-cream); border-right: 5px solid var(--hype-cream); background: linear-gradient(#163844f2, #132b37f5); position: relative; }
+.hype-passenger-deck::after { content: ""; position: absolute; left: 0; right: 0; top: 94px; height: 2px; background: #ffe7b22b; pointer-events: none; }
+.hype-car-sill { position: relative; height: 35px; display: grid; place-items: center; border: 3px solid var(--hype-cream); border-radius: 0 0 9px 9px; background: var(--car-accent); color: var(--hype-ink); }
+.hype-car-lettering { font-size: 9px; font-weight: 900; letter-spacing: 2px; }
+.hype-car-rivets::before, .hype-car-rivets::after { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--hype-ink); position: absolute; top: 12px; }
+.hype-car-rivets::before { left: 9px; }.hype-car-rivets::after { right: 9px; }
+.hype-car-chassis { position: relative; margin: 0 12px; height: 13px; background: #152f39; border-bottom: 3px solid #deb16a; }
+.hype-car-wheel-a { left: 24px; top: -3px; }.hype-car-wheel-b { right: 24px; top: -3px; }
+.hype-coupler { position: absolute; right: -29px; bottom: 39px; width: 30px; height: 9px; border: 2px solid #ffe5af; border-radius: 4px; background: #284650; z-index: -1; }
+.hype-carriage-entering { animation: hype-car-couple 1.25s both, hype-chug .75s 1.25s ease-in-out infinite alternate; }
+.hype-coupling-sparks { position: absolute; right: -19px; bottom: 38px; width: 1px; height: 1px; pointer-events: none; }
+.hype-coupling-spark { position: absolute; width: 5px; height: 5px; border-radius: 1px; background: #ffe6a1; opacity: 0; }
+.hype-carriage-entering .hype-coupling-spark { animation: hype-couple-spark .65s .66s ease-out both; }
+@keyframes hype-car-couple {
+  0% { transform: translate(-190px, -18px) rotate(-6deg); opacity: 0; }
+  15% { opacity: 1; }
+  60% { transform: translate(13px, 0) rotate(1.5deg); }
+  77% { transform: translate(-7px, -6px) rotate(-.8deg); }
+  92% { transform: translate(2px, 0) rotate(.3deg); }
+  100% { transform: translate(0, 0) rotate(0); opacity: 1; }
+}
+@keyframes hype-couple-spark {
+  0% { opacity: 0; transform: translate(0, 0) scale(.3); }
+  12% { opacity: 1; }
+  100% { opacity: 0; transform: translate(calc((var(--spark) - 2) * 14px), calc(-28px - var(--spark) * 5px)) rotate(110deg) scale(.2); }
+}
+.hype-passenger { position: relative; width: 120px; height: 90px; display: flex; flex-direction: column; align-items: center; animation: hype-board .5s cubic-bezier(.2, .9, .2, 1.2) both; }
+.hype-person { position: relative; height: 64px; width: 70px; flex: 0 0 64px; transform-origin: bottom center; animation: hype-person-sway 1.5s ease-in-out infinite alternate; animation-delay: var(--person-delay); }
+.hype-face { position: absolute; top: 0; left: 13px; width: 46px; height: 46px; border: 2px solid #fff0c9; border-radius: 12px; background: #18313b; overflow: hidden; box-shadow: 0 2px 0 #0005; z-index: 3; }
+.hype-avatar { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.hype-avatar:not([src]), .hype-avatar[hidden] { display: none; }
+.hype-avatar-fallback { position: absolute; inset: 0; display: grid; place-items: center; font-size: 14px; font-weight: bold; color: #fff0c9; }
+.hype-person-body { position: absolute; width: 32px; height: 26px; left: 20px; top: 38px; border: 2px solid #fff0c9; border-radius: 11px 11px 3px 3px; background: var(--person-color); z-index: 1; }
+.hype-person-body::after { content: ""; position: absolute; top: 2px; bottom: 0; left: 13px; border-left: 2px solid #fff0c9aa; }
+.hype-arm { position: absolute; top: 43px; width: 11px; height: 25px; border: 2px solid #ffe3b4; border-radius: 8px; background: var(--person-color); transform-origin: 50% 18%; z-index: 2; }
+.hype-arm::after { content: ""; position: absolute; bottom: -3px; left: 0; width: 7px; height: 8px; background: #ffdfad; border-radius: 50%; }
+.hype-arm-left { left: 12px; transform: rotate(27deg); }.hype-arm-right { right: 10px; animation: hype-wave .55s ease-in-out infinite alternate; animation-delay: var(--person-delay); }
+.hype-person-flag { display: none; position: absolute; bottom: -14px; left: 3px; width: 2px; height: 29px; background: #ffe6aa; }
+.hype-person-flag::after { content: ""; position: absolute; bottom: 0; left: 0; width: 20px; height: 13px; background: #ff8c74; clip-path: polygon(0 0, 100% 0, 75% 50%, 100% 100%, 0 100%); }
+.hype-passenger[data-pose="flag"] .hype-person-flag { display: block; }
+.hype-passenger[data-pose="flag"] .hype-arm-right { animation-duration: .95s; }
+.hype-passenger[data-pose="cheer"] .hype-arm-left { animation: hype-wave .7s ease-in-out infinite alternate-reverse; }
+.hype-passenger[data-pose="cheer"] .hype-person { animation: hype-cheer .8s ease-in-out infinite alternate; }
+.hype-username { max-width: 117px; min-height: 20px; padding: 2px 5px; border: 1px solid #e7d6af; border-radius: 4px; background: #fff0d6; color: #18313b; font-size: max(14px, calc(14px / var(--train-scale, 1))); font-weight: 900; line-height: 1.1; white-space: nowrap; overflow: hidden; box-shadow: 0 2px 0 #0003; position: relative; z-index: 6; }
+.hype-username-viewport { display: block; max-width: 100%; overflow: hidden; }
+.hype-username-text { display: block; width: max-content; }
+.hype-username-viewport[data-scrolling="true"] .hype-username-text { animation: hype-name-cycle var(--name-duration, 8s) linear infinite; }
+@keyframes hype-name-cycle {
+  0%, 20%, 100% { transform: translateX(0); }
+  50%, 70% { transform: translateX(var(--name-travel)); }
+}
+@keyframes hype-wheel-turn { to { transform: rotate(360deg); } }
+@keyframes hype-chug { to { transform: translateY(-2px) rotate(.15deg); } }
+@keyframes hype-rod { 0%,100% { transform: translate(0, -5px); } 25% { transform: translate(5px, 0); } 50% { transform: translate(0, 5px); } 75% { transform: translate(-5px, 0); } }
+@keyframes hype-puff { from { transform: translate(0, 0) scale(.5); opacity: .85; } to { transform: translate(-120px, -95px) scale(2); opacity: 0; } }
+@keyframes hype-wave { from { transform: rotate(-145deg); } to { transform: rotate(-115deg); } }
+@keyframes hype-person-sway { from { transform: rotate(-4deg); } to { transform: rotate(4deg); } }
+@keyframes hype-cheer { to { transform: translateY(-4px) rotate(3deg); } }
+@keyframes hype-board { from { opacity: 0; transform: translateY(15px) scale(.8); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@media (prefers-reduced-motion: reduce) {
+  .hype-express .hype-person, .hype-express .hype-arm, .hype-express .hype-engine-body, .hype-express .hype-carriage { animation: none; }
+}
